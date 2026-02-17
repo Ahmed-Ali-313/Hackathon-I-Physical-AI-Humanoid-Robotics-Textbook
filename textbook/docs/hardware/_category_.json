@@ -1,0 +1,8 @@
+{
+  "label": "Hardware Requirements",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "Understand the hardware needed for humanoid robotics development."
+  }
+}

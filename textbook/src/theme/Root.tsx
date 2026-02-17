@@ -1,18 +1,13 @@
 /**
  * Root component wrapper
  *
- * Wraps the entire Docusaurus app with PersonalizationProvider
- * to make personalization context available throughout the app.
+ * Phase 1: Basic textbook without personalization
+ * PersonalizationProvider will be added in Phase 2
  */
 
 import React from 'react';
-import { PersonalizationProvider } from './contexts/PersonalizationContext';
 
 // This component wraps the entire app
 export default function Root({ children }) {
-  return (
-    <PersonalizationProvider>
-      {children}
-    </PersonalizationProvider>
-  );
+  return <>{children}</>;
 }
