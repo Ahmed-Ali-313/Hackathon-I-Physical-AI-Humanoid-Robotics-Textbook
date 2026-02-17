@@ -1,0 +1,94 @@
+/**
+ * PreferenceBanner Styles
+ */
+
+.preferenceBanner {
+  background: linear-gradient(
+    135deg,
+    var(--ifm-color-primary-lightest),
+    var(--ifm-color-secondary-lightest)
+  );
+  border: 1px solid var(--ifm-color-primary-light);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1.5rem 0;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.text {
+  flex: 1;
+}
+
+.text strong {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+  color: var(--ifm-color-primary-darkest);
+}
+
+.text p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ifm-color-secondary-darkest);
+}
+
+.link {
+  padding: 0.5rem 1rem;
+  background-color: var(--ifm-color-primary);
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+
+.link:hover {
+  background-color: var(--ifm-color-primary-dark);
+  color: white;
+  text-decoration: none;
+}
+
+.dismissButton {
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--ifm-color-secondary);
+  font-size: 1.25rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.dismissButton:hover {
+  color: var(--ifm-color-primary);
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .preferenceBanner {
+  background: linear-gradient(
+    135deg,
+    var(--ifm-color-primary-darkest),
+    var(--ifm-color-secondary-darkest)
+  );
+  border-color: var(--ifm-color-primary-dark);
+}
+
+[data-theme='dark'] .text strong {
+  color: var(--ifm-color-primary-lightest);
+}
+
+[data-theme='dark'] .text p {
+  color: var(--ifm-color-secondary-lightest);
+}

@@ -1,0 +1,148 @@
+/**
+ * PersonalizationForm Styles
+ *
+ * CSS module for PersonalizationForm and DropdownField components
+ */
+
+.form {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--ifm-color-primary);
+}
+
+.sectionDescription {
+  font-size: 0.95rem;
+  color: var(--ifm-color-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.fieldGroup {
+  margin-bottom: 1.5rem;
+}
+
+.label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--ifm-font-color-base);
+}
+
+.required {
+  color: var(--ifm-color-danger);
+  margin-left: 0.25rem;
+}
+
+.select {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 4px;
+  background-color: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+  transition: border-color 0.2s;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 0 0 2px var(--ifm-color-primary-lightest);
+}
+
+.select.error {
+  border-color: var(--ifm-color-danger);
+}
+
+.otherInput {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 4px;
+  background-color: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+  margin-top: 0.5rem;
+  transition: border-color 0.2s;
+}
+
+.otherInput:focus {
+  outline: none;
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 0 0 2px var(--ifm-color-primary-lightest);
+}
+
+.helperText {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--ifm-color-secondary);
+  margin-top: 0.25rem;
+}
+
+.errorText {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--ifm-color-danger);
+  margin-top: 0.25rem;
+}
+
+.errorMessage {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: var(--ifm-color-danger-lightest);
+  border: 1px solid var(--ifm-color-danger-light);
+  border-radius: 4px;
+  color: var(--ifm-color-danger-darkest);
+}
+
+.successMessage {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: var(--ifm-color-success-lightest);
+  border: 1px solid var(--ifm-color-success-light);
+  border-radius: 4px;
+  color: var(--ifm-color-success-darkest);
+}
+
+.submitButton {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background-color: var(--ifm-color-primary);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: var(--ifm-color-primary-dark);
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .select,
+[data-theme='dark'] .otherInput {
+  border-color: var(--ifm-color-emphasis-500);
+}
+
+[data-theme='dark'] .select:focus,
+[data-theme='dark'] .otherInput:focus {
+  border-color: var(--ifm-color-primary-light);
+}

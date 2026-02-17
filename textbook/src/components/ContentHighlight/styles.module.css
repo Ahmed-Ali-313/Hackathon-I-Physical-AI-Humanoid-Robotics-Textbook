@@ -1,0 +1,47 @@
+/**
+ * ContentHighlight Styles
+ */
+
+.highlighted {
+  position: relative;
+  border: 2px solid var(--ifm-color-primary-light);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  background: linear-gradient(
+    to right,
+    var(--ifm-color-primary-lightest),
+    transparent
+  );
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--ifm-color-primary);
+  color: white;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.badgeIcon {
+  font-size: 1rem;
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .highlighted {
+  border-color: var(--ifm-color-primary-dark);
+  background: linear-gradient(
+    to right,
+    var(--ifm-color-primary-darkest),
+    transparent
+  );
+}
+
+[data-theme='dark'] .badge {
+  background-color: var(--ifm-color-primary-dark);
+}

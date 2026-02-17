@@ -1,0 +1,40 @@
+/**
+ * ViewToggle Styles
+ */
+
+.viewToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ifm-font-color-base);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.viewToggle:hover {
+  background-color: var(--ifm-color-emphasis-100);
+  border-color: var(--ifm-color-primary);
+}
+
+.viewToggle:active {
+  transform: scale(0.98);
+}
+
+.icon {
+  font-size: 1rem;
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .viewToggle {
+  border-color: var(--ifm-color-emphasis-500);
+}
+
+[data-theme='dark'] .viewToggle:hover {
+  background-color: var(--ifm-color-emphasis-200);
+}

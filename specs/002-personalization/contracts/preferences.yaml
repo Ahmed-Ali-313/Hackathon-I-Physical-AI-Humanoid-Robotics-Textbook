@@ -1,0 +1,470 @@
+openapi: 3.0.3
+info:
+  title: Personalization API
+  description: API for managing user personalization preferences
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development server
+  - url: https://api.example.com/v1
+    description: Production server
+
+security:
+  - BearerAuth: []
+
+paths:
+  /preferences:
+    get:
+      summary: Get user's personalization preferences
+      description: Retrieves the authenticated user's personalization profile
+      operationId: getPreferences
+      tags:
+        - Preferences
+      responses:
+        '200':
+          description: Preferences retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalizationProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: User has no personalization profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create personalization preferences
+      description: Creates initial personalization profile during signup
+      operationId: createPreferences
+      tags:
+        - Preferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreferenceInput'
+      responses:
+        '201':
+          description: Preferences created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalizationProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Preferences already exist for this user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update personalization preferences
+      description: Updates existing personalization profile
+      operationId: updatePreferences
+      tags:
+        - Preferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreferenceInput'
+      responses:
+        '200':
+          description: Preferences updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalizationProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: User has no personalization profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Clear personalization preferences
+      description: Removes all personalization preferences (sets to null)
+      operationId: clearPreferences
+      tags:
+        - Preferences
+      responses:
+        '204':
+          description: Preferences cleared successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: User has no personalization profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /preferences/history:
+    get:
+      summary: Get preference change history
+      description: Retrieves audit log of preference changes for the authenticated user
+      operationId: getPreferenceHistory
+      tags:
+        - Preferences
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of history entries to return
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          description: Number of entries to skip for pagination
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: History retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PreferenceHistoryEntry'
+                  total:
+                    type: integer
+                    description: Total number of history entries
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /content/metadata:
+    get:
+      summary: Get content metadata for personalization
+      description: Retrieves content metadata tags for matching with user preferences
+      operationId: getContentMetadata
+      tags:
+        - Content
+      parameters:
+        - name: content_ids
+          in: query
+          description: Comma-separated list of content IDs to retrieve
+          schema:
+            type: string
+          example: "nvidia-isaac-sim-intro,ros2-topics-services"
+      responses:
+        '200':
+          description: Metadata retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContentMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /content/recommendations:
+    get:
+      summary: Get personalized content recommendations
+      description: Returns list of content IDs recommended for the authenticated user based on their preferences
+      operationId: getRecommendations
+      tags:
+        - Content
+      responses:
+        '200':
+          description: Recommendations retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recommended_content_ids:
+                    type: array
+                    items:
+                      type: string
+                    description: List of content IDs matching user preferences
+                  match_reasons:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        hardware_match:
+                          type: array
+                          items:
+                            type: string
+                        software_match:
+                          type: object
+                          additionalProperties:
+                            type: string
+                    description: Explanation of why each content ID was recommended
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: User has no personalization preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from Better-Auth
+
+  schemas:
+    PersonalizationProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Profile unique identifier
+        user_id:
+          type: string
+          format: uuid
+          description: Associated user ID
+        workstation_type:
+          type: string
+          enum: [none, standard, rtx_12gb, rtx_24gb, other]
+          nullable: true
+          description: User's workstation configuration
+        edge_kit_available:
+          type: string
+          enum: [none, jetson_orin, realsense, both, other]
+          nullable: true
+          description: Available edge computing hardware
+        robot_tier_access:
+          type: string
+          enum: [none, quadruped, humanoid, both, other]
+          nullable: true
+          description: Robot hardware access level
+        ros2_level:
+          type: string
+          enum: [none, beginner, intermediate, advanced, expert]
+          nullable: true
+          description: ROS 2 experience level
+        gazebo_level:
+          type: string
+          enum: [none, beginner, intermediate, advanced, expert]
+          nullable: true
+          description: Gazebo experience level
+        unity_level:
+          type: string
+          enum: [none, beginner, intermediate, advanced, expert]
+          nullable: true
+          description: Unity experience level
+        isaac_level:
+          type: string
+          enum: [none, beginner, intermediate, advanced, expert]
+          nullable: true
+          description: NVIDIA Isaac experience level
+        vla_level:
+          type: string
+          enum: [none, beginner, intermediate, advanced, expert]
+          nullable: true
+          description: VLA experience level
+        is_personalized:
+          type: boolean
+          description: Whether user has completed personalization
+        created_at:
+          type: string
+          format: date-time
+          description: Profile creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+      required:
+        - id
+        - user_id
+        - is_personalized
+        - created_at
+        - updated_at
+
+    PreferenceInput:
+      type: object
+      properties:
+        workstation_type:
+          type: string
+          enum: [none, standard, rtx_12gb, rtx_24gb, other]
+          nullable: true
+        edge_kit_available:
+          type: string
+          enum: [none, jetson_orin, realsense, both, other]
+          nullable: true
+        robot_tier_access:
+          type: string
+          enum: [none, quadruped, humanoid, both, other]
+          nullable: true
+        ros2_level:
+          type: string
+          enum: [none, beginner, intermediate, advanced, expert]
+          nullable: true
+        gazebo_level:
+          type: string
+          enum: [none, beginner, intermediate, advanced, expert]
+          nullable: true
+        unity_level:
+          type: string
+          enum: [none, beginner, intermediate, advanced, expert]
+          nullable: true
+        isaac_level:
+          type: string
+          enum: [none, beginner, intermediate, advanced, expert]
+          nullable: true
+        vla_level:
+          type: string
+          enum: [none, beginner, intermediate, advanced, expert]
+          nullable: true
+      description: At least one field should be provided
+
+    ContentMetadata:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Metadata unique identifier
+        content_id:
+          type: string
+          description: Content section identifier
+        content_path:
+          type: string
+          description: File path relative to docs/ directory
+        title:
+          type: string
+          description: Content section title
+        hardware_tags:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Required hardware configurations
+          example: ["rtx_12gb", "jetson_orin"]
+        software_requirements:
+          type: object
+          nullable: true
+          additionalProperties:
+            type: string
+            enum: [none, beginner, intermediate, advanced, expert]
+          description: Required software experience levels
+          example:
+            ros2_level: intermediate
+            isaac_level: beginner
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - content_id
+        - content_path
+        - title
+        - created_at
+        - updated_at
+
+    PreferenceHistoryEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        profile_id:
+          type: string
+          format: uuid
+        field_name:
+          type: string
+          description: Name of changed field
+        old_value:
+          type: string
+          nullable: true
+          description: Previous value
+        new_value:
+          type: string
+          nullable: true
+          description: New value
+        changed_at:
+          type: string
+          format: date-time
+        change_source:
+          type: string
+          enum: [signup, profile_update, admin, system]
+          description: How change was made
+      required:
+        - id
+        - user_id
+        - profile_id
+        - field_name
+        - changed_at
+        - change_source
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        detail:
+          type: string
+          description: Detailed error information
+        code:
+          type: string
+          description: Error code for client handling
+      required:
+        - error
+
+  responses:
+    Unauthorized:
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Unauthorized"
+            detail: "Invalid or missing authentication token"
+            code: "AUTH_REQUIRED"
+
+    BadRequest:
+      description: Invalid request data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Bad Request"
+            detail: "Invalid enum value for workstation_type"
+            code: "VALIDATION_ERROR"
