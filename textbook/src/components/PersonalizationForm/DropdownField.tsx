@@ -70,7 +70,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
   };
 
   // Determine select value
-  const selectValue = showOtherInput ? 'other' : value;
+  const selectValue = showOtherInput ? 'other' : (value || '');
 
   return (
     <div className={styles.fieldGroup}>

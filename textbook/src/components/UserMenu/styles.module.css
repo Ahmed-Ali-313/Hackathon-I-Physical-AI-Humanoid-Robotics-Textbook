@@ -1,0 +1,145 @@
+.authButtons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.loginButton,
+.signupButton {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.loginButton {
+  color: var(--ifm-color-primary);
+  border: 1px solid var(--ifm-color-primary);
+}
+
+.loginButton:hover {
+  background-color: var(--ifm-color-primary-lightest);
+  text-decoration: none;
+}
+
+.signupButton {
+  background-color: var(--ifm-color-primary);
+  color: white;
+  border: 1px solid var(--ifm-color-primary);
+}
+
+.signupButton:hover {
+  background-color: var(--ifm-color-primary-dark);
+  text-decoration: none;
+}
+
+.userMenu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.userButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.2s ease;
+}
+
+.userButton:hover {
+  opacity: 0.8;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ifm-color-primary) 0%, var(--ifm-color-primary-dark) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+  border: 2px solid var(--ifm-color-primary-lightest);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.userInfo {
+  padding: 0.75rem 1rem;
+  background: var(--ifm-color-emphasis-100);
+}
+
+.userEmail {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ifm-color-emphasis-800);
+  word-break: break-word;
+}
+
+.divider {
+  height: 1px;
+  background: var(--ifm-color-emphasis-300);
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: none;
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.menuItem:hover {
+  background-color: var(--ifm-color-emphasis-200);
+  text-decoration: none;
+  color: var(--ifm-color-emphasis-900);
+}
+
+.icon {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+/* Dark mode support */
+[data-theme='dark'] .avatar {
+  border-color: var(--ifm-color-emphasis-300);
+}
+
+[data-theme='dark'] .dropdown {
+  background: var(--ifm-background-surface-color);
+  border-color: var(--ifm-color-emphasis-400);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .userInfo {
+  background: var(--ifm-color-emphasis-200);
+}
+
+[data-theme='dark'] .menuItem:hover {
+  background-color: var(--ifm-color-emphasis-300);
+}

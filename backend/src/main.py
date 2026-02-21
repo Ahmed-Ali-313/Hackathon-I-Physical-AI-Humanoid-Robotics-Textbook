@@ -24,14 +24,20 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configure CORS
-cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+# Configure CORS - MUST be first middleware
+# Allow both port 3000 and 3001 for local development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # Health check endpoint
@@ -50,4 +56,7 @@ async def root():
 
 # Register API routers
 from src.api import api_router
+from src.api.auth import router as auth_router
+
 app.include_router(api_router)
+app.include_router(auth_router)

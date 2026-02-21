@@ -34,9 +34,12 @@ Students arrive at the textbook landing page and are introduced to the course co
 **Acceptance Scenarios**:
 
 1. **Given** a student visits the textbook URL, **When** the landing page loads, **Then** they see an attractive hero section with the course title "Physical AI & Humanoid Robotics", a compelling course description, and a prominent call-to-action button labeled "Begin Your Journey"
-2. **Given** a student is on the landing page, **When** they read the "About This Course" section, **Then** they see a clear overview of the 4 modules (ROS 2, Gazebo/Unity, NVIDIA Isaac, VLA) and hardware requirements covered
-3. **Given** a student clicks the "Begin Your Journey" button, **When** the action completes, **Then** they are taken to the main textbook interface with the table of contents visible
-4. **Given** a student is on the landing page, **When** they scroll down, **Then** they see visual highlights of what they'll learn (module previews, key topics)
+2. **Given** a student is on the landing page, **When** they view the hero section, **Then** they see ONLY the "Begin Your Journey" button without any login/signup components in the middle of the page
+3. **Given** a student is on the landing page, **When** they look at the top right corner of the navbar, **Then** they see "Login" and "Sign Up" buttons styled to match the home page theme colors
+4. **Given** a student is on the landing page, **When** they scroll down below the hero section, **Then** they see 4 module cards (ROS 2, Digital Twin, NVIDIA Isaac, VLA) with professional icons and descriptions
+5. **Given** a student hovers over any module card, **When** the cursor is over the card, **Then** the card has a glowing/hover effect to indicate interactivity
+6. **Given** a student looks at the top left corner, **When** they view the site logo, **Then** they see a professional book icon beside the title "Physical AI & Humanoid Robotics"
+7. **Given** a student clicks the "Begin Your Journey" button, **When** the action completes, **Then** they are taken to the intro page with content about Physical AI & Humanoid Robotics (not Docusaurus documentation)
 
 ---
 

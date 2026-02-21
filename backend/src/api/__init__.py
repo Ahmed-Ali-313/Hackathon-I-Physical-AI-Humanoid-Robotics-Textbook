@@ -2,7 +2,7 @@
 API Router Setup
 
 This module provides the base APIRouter configuration for all API endpoints.
-Individual routers (preferences, content) will be registered here.
+Individual routers (preferences, content, auth) will be registered here.
 """
 
 from fastapi import APIRouter

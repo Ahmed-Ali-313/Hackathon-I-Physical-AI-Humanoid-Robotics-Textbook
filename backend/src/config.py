@@ -1,17 +1,18 @@
 from pydantic_settings import BaseSettings
 from typing import List
+import os
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables"""
 
     # Database
-    database_url: str
+    database_url: str = "sqlite+aiosqlite:///./app.db"
 
-    # Authentication
-    jwt_secret_key: str
+    # Authentication - use same defaults as auth_service.py
+    jwt_secret_key: str = os.getenv("JWT_SECRET", "your-secret-key-change-in-production")
     jwt_algorithm: str = "HS256"
-    jwt_expiration_minutes: int = 60
+    jwt_expiration_minutes: int = 60 * 24 * 7  # 7 days
 
     # API Configuration
     api_host: str = "0.0.0.0"

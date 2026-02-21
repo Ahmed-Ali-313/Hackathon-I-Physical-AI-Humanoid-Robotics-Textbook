@@ -39,6 +39,8 @@ NVIDIA Isaac Sim is a robotics simulation platform built on Omniverse, providing
 docker pull nvcr.io/nvidia/isaac-sim:2023.1.1
 ```
 
+</ContentHighlight>
+
 ### First Launch
 
 ```python
@@ -199,9 +201,75 @@ for i in range(100):
 
 ## ROS 2 Integration
 
+<ContentHighlight
+  hardware={["jetson_orin"]}
+  software={{ros2_level: "intermediate", isaac_level: "intermediate"}}
+  fallbackMessage="This section requires ROS 2 knowledge and Isaac Sim experience. Review the ROS 2 module first if you're new to ROS.">
+
+### Isaac ROS Bridge
+
+```python
+from omni.isaac.core.utils.extensions import enable_extension
+
+# Enable ROS 2 bridge
+enable_extension("omni.isaac.ros2_bridge")
+
+# Import ROS 2 components
+from omni.isaac.core.utils.nucleus import get_assets_root_path
+from omni.isaac.ros2_bridge import ROS2Bridge
+
+# Create ROS 2 bridge
+bridge = ROS2Bridge()
+
+# Publish joint states
+bridge.create_joint_state_publisher(
+    prim_path="/World/Humanoid",
+    topic_name="/joint_states"
+)
+
+# Subscribe to joint commands
+bridge.create_joint_command_subscriber(
+    prim_path="/World/Humanoid",
+    topic_name="/joint_commands"
+)
+```
+
+</ContentHighlight>
 
 ## Parallel Simulation
 
+<ContentHighlight
+  hardware={["rtx_4090", "rtx_a6000"]}
+  software={{isaac_level: "advanced"}}
+  fallbackMessage="Parallel simulation requires high-end GPU hardware and advanced Isaac Sim knowledge. Start with single-environment simulations first.">
+
+### Multi-Environment Training
+
+```python
+from omni.isaac.cloner import GridCloner
+
+# Create cloner for parallel environments
+cloner = GridCloner(spacing=2.0)
+
+# Clone robot 64 times
+num_envs = 64
+target_paths = cloner.generate_paths("/World/Humanoid", num_envs)
+cloner.clone(
+    source_prim_path="/World/Humanoid",
+    prim_paths=target_paths
+)
+
+# Run parallel simulation
+for i in range(1000):
+    # Apply different actions to each environment
+    for env_id in range(num_envs):
+        action = policy.get_action(env_id)
+        apply_action(env_id, action)
+
+    world.step(render=True)
+```
+
+</ContentHighlight>
 
 ## Performance Optimization
 

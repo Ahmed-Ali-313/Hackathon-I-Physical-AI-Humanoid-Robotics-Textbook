@@ -1,57 +1,75 @@
 import type {ReactNode} from 'react';
 import clsx from 'clsx';
 import Heading from '@theme/Heading';
+import Link from '@docusaurus/Link';
 import styles from './styles.module.css';
 
-type FeatureItem = {
+type ModuleItem = {
   title: string;
-  Svg: React.ComponentType<React.ComponentProps<'svg'>>;
+  icon: string;
   description: ReactNode;
+  link: string;
 };
 
-const FeatureList: FeatureItem[] = [
+const ModuleList: ModuleItem[] = [
   {
-    title: 'Easy to Use',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    title: 'Module 1: ROS 2',
+    icon: '🤖',
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Master the Robot Operating System 2 - the nervous system of modern robots.
+        Learn middleware architecture, nodes, topics, services, and URDF modeling.
       </>
     ),
+    link: '/docs/module-1-ros2/middleware',
   },
   {
-    title: 'Focus on What Matters',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    title: 'Module 2: Digital Twin',
+    icon: '🎮',
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Build photorealistic simulations with Gazebo and Unity.
+        Master physics engines, sensor simulation, and virtual testing environments.
       </>
     ),
+    link: '/docs/module-2-digital-twin/physics-simulation',
   },
   {
-    title: 'Powered by React',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: 'Module 3: NVIDIA Isaac',
+    icon: '⚡',
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Harness GPU-accelerated robotics with NVIDIA Isaac Sim and Isaac ROS.
+        Learn hardware-accelerated perception and navigation planning.
       </>
     ),
+    link: '/docs/module-3-isaac/isaac-sim',
+  },
+  {
+    title: 'Module 4: VLA Models',
+    icon: '🧠',
+    description: (
+      <>
+        Integrate Vision-Language-Action models for intelligent robot control.
+        Build cognitive systems with GPT-4, Whisper, and multi-step planning.
+      </>
+    ),
+    link: '/docs/module-4-vla/llm-robotics',
   },
 ];
 
-function Feature({title, Svg, description}: FeatureItem) {
+function Module({title, icon, description, link}: ModuleItem) {
   return (
-    <div className={clsx('col col--4')}>
-      <div className="text--center">
-        <Svg className={styles.featureSvg} role="img" />
-      </div>
-      <div className="text--center padding-horiz--md">
-        <Heading as="h3">{title}</Heading>
-        <p>{description}</p>
-      </div>
+    <div className={clsx('col col--3')}>
+      <Link to={link} className={styles.moduleCard}>
+        <div className="text--center">
+          <div className={styles.moduleIcon}>{icon}</div>
+        </div>
+        <div className="text--center padding-horiz--md">
+          <Heading as="h3">{title}</Heading>
+          <p>{description}</p>
+        </div>
+      </Link>
     </div>
   );
 }
@@ -60,9 +78,13 @@ export default function HomepageFeatures(): ReactNode {
   return (
     <section className={styles.features}>
       <div className="container">
+        <div className="text--center margin-bottom--lg">
+          <Heading as="h2">Course Modules</Heading>
+          <p>Explore our comprehensive curriculum covering the full robotics stack</p>
+        </div>
         <div className="row">
-          {FeatureList.map((props, idx) => (
-            <Feature key={idx} {...props} />
+          {ModuleList.map((props, idx) => (
+            <Module key={idx} {...props} />
           ))}
         </div>
       </div>

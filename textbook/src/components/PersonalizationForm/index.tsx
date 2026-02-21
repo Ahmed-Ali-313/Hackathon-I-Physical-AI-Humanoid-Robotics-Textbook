@@ -25,10 +25,27 @@ const PersonalizationForm: React.FC<PersonalizationFormProps> = ({
   onSuccess,
   onError,
 }) => {
-  const [formData, setFormData] = useState<Partial<PreferenceInput>>(initialValues);
+  // Initialize form data from initialValues
+  // In edit mode, use initialValues as-is (even if some fields are null/undefined)
+  // In create mode, start with empty object
+  const [formData, setFormData] = useState<Partial<PreferenceInput>>(() => {
+    if (mode === 'edit' && initialValues && Object.keys(initialValues).length > 0) {
+      // In edit mode, always use initialValues to preserve existing preferences
+      return initialValues;
+    }
+    return {};
+  });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Update formData when initialValues change (important for edit mode)
+  useEffect(() => {
+    if (mode === 'edit' && initialValues && Object.keys(initialValues).length > 0) {
+      setFormData(initialValues);
+    }
+  }, [mode, initialValues]);
 
   // Hardware options
   const workstationOptions = [
@@ -98,12 +115,27 @@ const PersonalizationForm: React.FC<PersonalizationFormProps> = ({
       }
 
       // Call API
+      let result;
       if (mode === 'create') {
-        await createPreferences(formData as PreferenceInput);
+        result = await createPreferences(formData as PreferenceInput);
         setSuccessMessage('Preferences saved successfully!');
       } else {
-        await updatePreferences(formData as PreferenceInput);
+        result = await updatePreferences(formData as PreferenceInput);
         setSuccessMessage('Preferences updated successfully!');
+      }
+
+      // Update form data with the returned values
+      if (result) {
+        setFormData({
+          workstation_type: result.workstation_type,
+          edge_kit_available: result.edge_kit_available,
+          robot_tier_access: result.robot_tier_access,
+          ros2_level: result.ros2_level,
+          gazebo_level: result.gazebo_level,
+          unity_level: result.unity_level,
+          isaac_level: result.isaac_level,
+          vla_level: result.vla_level,
+        });
       }
 
       if (onSuccess) {

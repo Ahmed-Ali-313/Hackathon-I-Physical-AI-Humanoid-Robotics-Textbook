@@ -4,7 +4,9 @@
  * Handles all API calls related to user personalization preferences
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = typeof window !== 'undefined' && (window as any).API_BASE_URL
+  ? (window as any).API_BASE_URL
+  : 'http://localhost:8001/api/v1';
 
 export interface PersonalizationProfile {
   id: string;
@@ -37,8 +39,11 @@ export interface PreferenceInput {
  * Get authentication token from storage
  */
 const getAuthToken = (): string | null => {
-  // TODO: Implement Better-Auth token retrieval
-  return localStorage.getItem('auth_token');
+  const token = localStorage.getItem('auth_token');
+  if (!token) {
+    console.warn('No auth token found in localStorage');
+  }
+  return token;
 };
 
 /**
@@ -48,40 +53,67 @@ export const createPreferences = async (
   preferences: PreferenceInput
 ): Promise<PersonalizationProfile> => {
   const token = getAuthToken();
+
+  if (!token) {
+    throw new Error('Not authenticated. Please log in again.');
+  }
+
   const response = await fetch(`${API_BASE_URL}/preferences`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
+      'Authorization': `Bearer ${token}`,
     },
     body: JSON.stringify(preferences),
   });
 
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error('[createPreferences] Failed:', response.status, errorText);
+
+    // If preferences already exist, try updating instead
+    if (response.status === 409) {
+      return updatePreferences(preferences);
+    }
+
     throw new Error(`Failed to create preferences: ${response.statusText}`);
   }
 
-  return response.json();
+  const data = await response.json();
+  return data;
 };
 
 /**
  * Get user's personalization preferences
  */
-export const getPreferences = async (): Promise<PersonalizationProfile> => {
+export const getPreferences = async (): Promise<PersonalizationProfile | null> => {
   const token = getAuthToken();
+
+  if (!token) {
+    return null;
+  }
+
   const response = await fetch(`${API_BASE_URL}/preferences`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
+      'Authorization': `Bearer ${token}`,
     },
   });
 
+  if (response.status === 404) {
+    // User has no preferences yet
+    return null;
+  }
+
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error('[getPreferences] Failed:', response.status, errorText);
     throw new Error(`Failed to get preferences: ${response.statusText}`);
   }
 
-  return response.json();
+  const data = await response.json();
+  return data;
 };
 
 /**
@@ -91,16 +123,23 @@ export const updatePreferences = async (
   preferences: PreferenceInput
 ): Promise<PersonalizationProfile> => {
   const token = getAuthToken();
+
+  if (!token) {
+    throw new Error('Not authenticated. Please log in again.');
+  }
+
   const response = await fetch(`${API_BASE_URL}/preferences`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
+      'Authorization': `Bearer ${token}`,
     },
     body: JSON.stringify(preferences),
   });
 
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error('[updatePreferences] Failed:', response.status, errorText);
     throw new Error(`Failed to update preferences: ${response.statusText}`);
   }
 

@@ -5,7 +5,36 @@
   width: 100%;
 }
 
-.featureSvg {
-  height: 200px;
-  width: 200px;
+.moduleCard {
+  display: block;
+  padding: 2rem;
+  border-radius: 12px;
+  background: var(--ifm-card-background-color);
+  border: 2px solid var(--ifm-color-emphasis-200);
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+}
+
+.moduleCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 123, 255, 0.3);
+  border-color: var(--ifm-color-primary);
+  text-decoration: none;
+  color: inherit;
+}
+
+[data-theme='dark'] .moduleCard:hover {
+  box-shadow: 0 12px 24px rgba(100, 181, 246, 0.4);
+}
+
+.moduleIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.moduleCard:hover .moduleIcon {
+  transform: scale(1.2);
 }

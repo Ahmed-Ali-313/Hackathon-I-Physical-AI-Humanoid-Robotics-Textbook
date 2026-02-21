@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { PersonalizationProfile } from '../services/personalizationApi';
 
 /**
@@ -75,32 +75,41 @@ export const PersonalizationProvider: React.FC<PersonalizationProviderProps> = (
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * Fetch user preferences
+   * Fetch user preferences (memoized to prevent infinite loops)
    */
-  const refetchPreferences = async () => {
+  const refetchPreferences = useCallback(async () => {
+    // Check if user is authenticated
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      setPreferences(null);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
-      // TODO: Implement actual API call when authentication is ready
-      // const prefs = await getPreferences();
-      // setPreferences(prefs);
+      const { getPreferences } = await import('../services/personalizationApi');
+      const prefs = await getPreferences();
 
-      // For now, just clear loading state
+      // Set preferences even if null (user has no preferences yet)
+      setPreferences(prefs);
       setIsLoading(false);
     } catch (err) {
+      console.error('[PersonalizationContext] Failed to load preferences:', err);
       setError(err instanceof Error ? err.message : 'Failed to load preferences');
+      setPreferences(null);
       setIsLoading(false);
     }
-  };
+  }, []); // Empty dependency array - function doesn't depend on any props or state
 
   /**
    * Load preferences on mount (if user is authenticated)
    */
   useEffect(() => {
-    // TODO: Check if user is authenticated before fetching
-    // refetchPreferences();
-  }, []);
+    refetchPreferences();
+  }, [refetchPreferences]);
 
   /**
    * Save view mode to localStorage for persistence

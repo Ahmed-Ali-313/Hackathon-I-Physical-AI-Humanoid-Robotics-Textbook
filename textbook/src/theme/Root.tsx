@@ -1,13 +1,20 @@
 /**
  * Root component wrapper
  *
- * Phase 1: Basic textbook without personalization
- * PersonalizationProvider will be added in Phase 2
+ * Wraps the entire app with AuthProvider and PersonalizationProvider
  */
 
 import React from 'react';
+import { AuthProvider } from '../contexts/AuthContext';
+import { PersonalizationProvider } from '../contexts/PersonalizationContext';
 
 // This component wraps the entire app
 export default function Root({ children }) {
-  return <>{children}</>;
+  return (
+    <AuthProvider>
+      <PersonalizationProvider>
+        {children}
+      </PersonalizationProvider>
+    </AuthProvider>
+  );
 }

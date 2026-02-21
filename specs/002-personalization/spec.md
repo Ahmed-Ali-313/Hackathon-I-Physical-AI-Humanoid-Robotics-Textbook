@@ -1,9 +1,27 @@
-# Feature Specification: User Personalization System
+# Feature Specification: User Preference Collection System
 
 **Feature Branch**: `002-personalization`
 **Created**: 2026-02-17
-**Status**: Draft
+**Updated**: 2026-02-20
+**Status**: Simplified - Display features removed
 **Input**: User description: "User personalization during signup with database-stored preferences for content customization"
+
+## Important Note
+
+**2026-02-20 Update**: The personalized content display features (ContentHighlight, ViewToggle, PreferenceBanner) have been removed from this implementation. The system now focuses on:
+- User authentication (signup/login)
+- Preference collection during signup
+- Preference storage in database
+- Preference viewing and updating in profile page
+
+**2026-02-21 Update**: Profile page requirements clarified:
+- Profile page MUST display all saved preferences when user navigates to it after signup/login
+- Profile page MUST pre-fill the preference form with existing values from database
+- Profile page MUST show an "Update Preferences" button (not "Save Preferences") when editing existing preferences
+- Profile page MUST allow users to modify any preference field and save updates
+- Profile page MUST reload and display updated preferences immediately after successful update
+
+The backend APIs and database models remain intact for future implementation of personalized content display if needed.
 
 ## Clarifications
 
@@ -62,10 +80,11 @@ An authenticated user can update their hardware and software background preferen
 
 **Acceptance Scenarios**:
 
-1. **Given** an authenticated user, **When** they navigate to their profile settings, **Then** they see their current personalization preferences with options to edit each field
-2. **Given** a user updates their hardware preference from "No hardware" to "Jetson Orin Nano", **When** they save changes and view a chapter, **Then** edge computing content is now highlighted as relevant
-3. **Given** a user updates their software experience from "Beginner" to "Intermediate" for ROS 2, **When** they revisit previously read chapters, **Then** the personalized recommendations adjust to show more advanced content
-4. **Given** a user wants to reset personalization, **When** they click "Clear all preferences" in settings, **Then** the system removes their preferences and shows full content without recommendations
+1. **Given** an authenticated user with saved preferences, **When** they navigate to their profile page, **Then** they see their current personalization preferences pre-filled in the form with all 8 fields (workstation_type, edge_kit_available, robot_tier_access, ros2_level, gazebo_level, unity_level, isaac_level, vla_level) displaying their saved values
+2. **Given** an authenticated user viewing their profile, **When** they see the preference form, **Then** the submit button displays "Update Preferences" (not "Save Preferences") to indicate they are editing existing data
+3. **Given** a user updates their hardware preference from "none" to "jetson_orin", **When** they click "Update Preferences" and the save succeeds, **Then** the form reloads with the new value displayed and shows a success message
+4. **Given** a user updates their software experience from "beginner" to "intermediate" for ROS 2, **When** they save changes, **Then** the updated value is immediately visible in the form without requiring page refresh
+5. **Given** a user wants to reset personalization, **When** they click "Clear all preferences" in settings, **Then** the system removes their preferences and shows an empty form to create new preferences
 
 ---
 

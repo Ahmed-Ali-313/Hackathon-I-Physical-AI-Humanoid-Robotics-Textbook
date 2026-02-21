@@ -32,6 +32,33 @@
   font-size: 1rem;
 }
 
+/* Fallback message styles */
+.fallback {
+  margin: 1.5rem 0;
+}
+
+.fallbackBanner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: var(--ifm-color-warning-contrast-background);
+  border-left: 4px solid var(--ifm-color-warning);
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.fallbackIcon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.fallbackContent {
+  opacity: 0.7;
+}
+
 /* Dark mode adjustments */
 [data-theme='dark'] .highlighted {
   border-color: var(--ifm-color-primary-dark);
@@ -44,4 +71,9 @@
 
 [data-theme='dark'] .badge {
   background-color: var(--ifm-color-primary-dark);
+}
+
+[data-theme='dark'] .fallbackBanner {
+  background-color: rgba(255, 196, 0, 0.1);
+  color: var(--ifm-color-emphasis-600);
 }

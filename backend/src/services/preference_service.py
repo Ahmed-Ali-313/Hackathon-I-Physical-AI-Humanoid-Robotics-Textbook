@@ -171,7 +171,7 @@ async def update_preferences(
 
     Args:
         db: Database session
-        user_id: User UUID
+        user_id: User UUID (as string from JWT)
         preferences: Dictionary of preference fields to update
         change_source: Source of the change (default: 'profile_page')
 
@@ -182,9 +182,14 @@ async def update_preferences(
         ValueError: If user has no preferences or invalid enum values
     """
     from src.models.preference_history import PreferenceHistory
+    import uuid
 
-    # Get existing profile
-    profile = await get_preferences(db, user_id)
+    # Get existing profile - MUST query fresh from DB for updates, not from cache
+    result = await db.execute(
+        select(PersonalizationProfile).where(PersonalizationProfile.user_id == user_id)
+    )
+    profile = result.scalar_one_or_none()
+
     if not profile:
         raise ValueError(f"User {user_id} has no preferences to update")
 
@@ -221,9 +226,12 @@ async def update_preferences(
     await db.refresh(profile)
 
     # Create audit log entries for changed fields
+    # Convert user_id string to UUID
+    user_uuid = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
+
     for change in changes:
         history_entry = PreferenceHistory(
-            user_id=user_id,
+            user_id=user_uuid,
             profile_id=profile.id,
             field_name=change["field_name"],
             old_value=change["old_value"],
@@ -234,7 +242,7 @@ async def update_preferences(
 
     await db.commit()
 
-    # Invalidate cache
+    # Invalidate cache after successful update
     _preference_cache.invalidate(f"user:{user_id}")
 
     return profile
@@ -251,7 +259,7 @@ async def clear_preferences(
 
     Args:
         db: Database session
-        user_id: User UUID
+        user_id: User UUID (as string from JWT)
         change_source: Source of the change (default: 'profile_page')
 
     Returns:
@@ -261,9 +269,14 @@ async def clear_preferences(
         ValueError: If user has no preferences
     """
     from src.models.preference_history import PreferenceHistory
+    import uuid
 
-    # Get existing profile
-    profile = await get_preferences(db, user_id)
+    # Get existing profile - MUST query fresh from DB, not from cache
+    result = await db.execute(
+        select(PersonalizationProfile).where(PersonalizationProfile.user_id == user_id)
+    )
+    profile = result.scalar_one_or_none()
+
     if not profile:
         raise ValueError(f"User {user_id} has no preferences to clear")
 
@@ -297,9 +310,12 @@ async def clear_preferences(
     await db.refresh(profile)
 
     # Create audit log entries
+    # Convert user_id string to UUID
+    user_uuid = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
+
     for change in changes:
         history_entry = PreferenceHistory(
-            user_id=user_id,
+            user_id=user_uuid,
             profile_id=profile.id,
             field_name=change["field_name"],
             old_value=change["old_value"],

@@ -5,34 +5,39 @@
  * Includes clear all preferences functionality with confirmation.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import BrowserOnly from '@docusaurus/BrowserOnly';
 import Layout from '@theme/Layout';
 import PersonalizationForm from '../components/PersonalizationForm';
 import { usePersonalizationContext } from '../contexts/PersonalizationContext';
-import { getPreferences, clearPreferences } from '../services/personalizationApi';
+import { clearPreferences } from '../services/personalizationApi';
+import { useAuth } from '../contexts/AuthContext';
 
-const ProfilePage: React.FC = () => {
-  const { preferences, setPreferences, refetchPreferences } = usePersonalizationContext();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const ProfilePageContent: React.FC = () => {
+  const { user } = useAuth();
+  const { preferences, refetchPreferences, isLoading } = usePersonalizationContext();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
+  const [isRefetching, setIsRefetching] = useState(true);
 
+  // Refetch preferences when component mounts to ensure fresh data
   useEffect(() => {
-    const loadPreferences = async () => {
-      try {
-        setIsLoading(true);
-        const prefs = await getPreferences();
-        setPreferences(prefs);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load preferences');
-      } finally {
-        setIsLoading(false);
+    const fetchPrefs = async () => {
+      if (user) {
+        setIsRefetching(true);
+        await refetchPreferences();
+        setIsRefetching(false);
       }
     };
+    fetchPrefs();
+  }, [user, refetchPreferences]);
 
-    loadPreferences();
-  }, [setPreferences]);
+  // Check if user has preferences - must have id and at least one preference field set
+  const hasPreferences = !!(
+    preferences &&
+    preferences.id &&
+    preferences.is_personalized
+  );
 
   const handleUpdateSuccess = async () => {
     // Refetch preferences to update context
@@ -61,7 +66,17 @@ const ProfilePage: React.FC = () => {
     setShowClearConfirm(false);
   };
 
-  if (isLoading) {
+  if (!user) {
+    return (
+      <Layout title="Profile">
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <p>Please log in to view your profile.</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (isLoading || isRefetching) {
     return (
       <Layout title="Profile">
         <div style={{ padding: '2rem', textAlign: 'center' }}>
@@ -71,29 +86,25 @@ const ProfilePage: React.FC = () => {
     );
   }
 
-  if (error) {
-    return (
-      <Layout title="Profile">
-        <div style={{ padding: '2rem', textAlign: 'center' }}>
-          <p style={{ color: 'var(--ifm-color-danger)' }}>{error}</p>
-        </div>
-      </Layout>
-    );
-  }
-
   return (
     <Layout title="Profile">
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
         <h1>Your Profile</h1>
+        {user?.email && (
+          <p style={{ marginBottom: '0.5rem', color: 'var(--ifm-color-secondary)' }}>
+            Email: <strong>{user.email}</strong>
+          </p>
+        )}
         <p style={{ marginBottom: '2rem', color: 'var(--ifm-color-secondary)' }}>
-          {preferences
+          {hasPreferences
             ? 'Update your personalization preferences to customize your learning experience.'
             : 'Set up your preferences to get personalized content recommendations.'}
         </p>
 
-        {preferences ? (
+        {hasPreferences && preferences ? (
           <>
             <PersonalizationForm
+              key={preferences.id} // Force remount when preferences change
               mode="edit"
               initialValues={{
                 workstation_type: preferences.workstation_type,
@@ -193,6 +204,14 @@ const ProfilePage: React.FC = () => {
         )}
       </div>
     </Layout>
+  );
+};
+
+const ProfilePage: React.FC = () => {
+  return (
+    <BrowserOnly fallback={<div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>}>
+      {() => <ProfilePageContent />}
+    </BrowserOnly>
   );
 };
 
