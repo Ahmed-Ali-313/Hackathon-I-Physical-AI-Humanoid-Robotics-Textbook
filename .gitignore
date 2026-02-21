@@ -13,6 +13,24 @@ textbook/build/
 textbook/dist/
 textbook/node_modules/
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
 # Environment variables
 .env
 .env.local
@@ -35,11 +53,13 @@ logs/
 # Testing
 coverage/
 .nyc_output/
+*.sh
 
 # Temporary files
 *.tmp
 *.temp
 .cache/
+*.backup
 
 # OS files
 Thumbs.db
