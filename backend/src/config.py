@@ -26,6 +26,32 @@ class Settings(BaseSettings):
     # Environment
     environment: str = "development"
 
+    # RAG Chatbot Configuration (Phase 3)
+    llm_provider: str = "gemini"  # "gemini" or "openai"
+    gemini_api_key: str = ""
+    openai_api_key: str = ""
+
+    # Qdrant Vector Database
+    qdrant_url: str = ""
+    qdrant_api_key: str = ""
+    qdrant_collection_name: str = "textbook_chunks"
+
+    # RAG Configuration
+    rag_confidence_threshold: float = 0.7
+    rag_top_k_results: int = 5
+    rag_chunk_size: int = 1000
+    rag_chunk_overlap: int = 100
+
+    # Conversation Configuration
+    max_conversations_per_user: int = 50
+    max_messages_per_conversation: int = 500
+    conversation_retention_months: int = 12
+    session_expiry_minutes: int = 30
+
+    # Message Limits
+    max_user_message_length: int = 500
+    max_ai_message_length: int = 2000
+
     class Config:
         env_file = ".env"
         case_sensitive = False

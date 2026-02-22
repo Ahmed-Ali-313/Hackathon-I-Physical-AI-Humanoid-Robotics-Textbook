@@ -1,0 +1,81 @@
+/**
+ * SourceLink styles.
+ */
+
+.sourceLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background-color: var(--ifm-color-primary-lightest);
+  color: var(--ifm-color-primary-darkest);
+  border: 1px solid var(--ifm-color-primary-light);
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.sourceLink:hover {
+  background-color: var(--ifm-color-primary-lighter);
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary-darkest);
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sourceLink:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.sourceLink:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.text {
+  line-height: 1;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Dark mode */
+[data-theme='dark'] .sourceLink {
+  background-color: var(--ifm-color-primary-darkest);
+  color: var(--ifm-color-primary-lightest);
+  border-color: var(--ifm-color-primary-dark);
+}
+
+[data-theme='dark'] .sourceLink:hover {
+  background-color: var(--ifm-color-primary-darker);
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary-lightest);
+}
+
+/* Accessibility - High contrast mode */
+@media (prefers-contrast: high) {
+  .sourceLink {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .sourceLink {
+    transition: none;
+  }
+
+  .sourceLink:hover {
+    transform: none;
+  }
+}

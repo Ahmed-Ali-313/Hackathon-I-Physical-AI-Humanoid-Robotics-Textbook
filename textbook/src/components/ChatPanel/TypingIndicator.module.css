@@ -1,0 +1,50 @@
+/**
+ * TypingIndicator styles.
+ */
+
+.typingIndicator {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.75rem 1rem;
+}
+
+.dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--ifm-color-emphasis-500);
+  animation: bounce 1.4s infinite ease-in-out;
+}
+
+.dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Dark mode */
+[data-theme='dark'] .dot {
+  background-color: var(--ifm-color-emphasis-600);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .dot {
+    animation: none;
+    opacity: 1;
+  }
+}

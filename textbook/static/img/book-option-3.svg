@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Book with Bookmark -->
+  <defs>
+    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6d28d9;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Book cover -->
+  <rect x="22" y="18" width="56" height="64" rx="3" fill="url(#grad3)" stroke="#6d28d9" stroke-width="2"/>
+
+  <!-- Bookmark -->
+  <path d="M 50 18 L 50 45 L 55 40 L 60 45 L 60 18 Z" fill="#fbbf24" stroke="#f59e0b" stroke-width="1"/>
+
+  <!-- Book spine -->
+  <rect x="22" y="18" width="6" height="64" fill="#6d28d9" opacity="0.4"/>
+
+  <!-- Pages -->
+  <rect x="26" y="22" width="48" height="56" fill="#fefce8" opacity="0.95"/>
+
+  <!-- Circuit pattern (tech theme) -->
+  <circle cx="50" cy="55" r="8" fill="none" stroke="#8b5cf6" stroke-width="1.5"/>
+  <circle cx="50" cy="55" r="2" fill="#8b5cf6"/>
+  <line x1="50" y1="47" x2="50" y2="43" stroke="#8b5cf6" stroke-width="1.5"/>
+  <line x1="58" y1="55" x2="62" y2="55" stroke="#8b5cf6" stroke-width="1.5"/>
+  <line x1="42" y1="55" x2="38" y2="55" stroke="#8b5cf6" stroke-width="1.5"/>
+  <circle cx="50" cy="43" r="2" fill="#8b5cf6"/>
+  <circle cx="62" cy="55" r="2" fill="#8b5cf6"/>
+  <circle cx="38" cy="55" r="2" fill="#8b5cf6"/>
+</svg>

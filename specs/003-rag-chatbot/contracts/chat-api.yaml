@@ -1,0 +1,471 @@
+openapi: 3.0.3
+info:
+  title: RAG Chatbot API
+  description: API for textbook-grounded chatbot with conversation management
+  version: 1.0.0
+  contact:
+    name: AI-Native Textbook Team
+
+servers:
+  - url: http://localhost:8001/api/v1
+    description: Local development
+  - url: https://api.example.com/api/v1
+    description: Production (TBD)
+
+tags:
+  - name: chat
+    description: Chat message and conversation operations
+  - name: health
+    description: Health check endpoints
+
+paths:
+  /chat/conversations:
+    get:
+      tags: [chat]
+      summary: List user's conversations
+      description: Retrieve all conversations for the authenticated user, sorted by most recent activity
+      operationId: listConversations
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of conversations to return
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 50
+        - name: offset
+          in: query
+          description: Number of conversations to skip (pagination)
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Conversation'
+                  total:
+                    type: integer
+                    description: Total number of conversations
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags: [chat]
+      summary: Create new conversation
+      description: Start a new conversation thread
+      operationId: createConversation
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Conversation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          description: Too many conversations (max 50 per user)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /chat/conversations/{conversation_id}:
+    get:
+      tags: [chat]
+      summary: Get conversation details
+      description: Retrieve a specific conversation with its metadata
+      operationId: getConversation
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+      responses:
+        '200':
+          description: Conversation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      tags: [chat]
+      summary: Delete conversation
+      description: Delete a conversation and all its messages
+      operationId: deleteConversation
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+      responses:
+        '204':
+          description: Conversation deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /chat/conversations/{conversation_id}/messages:
+    get:
+      tags: [chat]
+      summary: Get conversation messages
+      description: Retrieve all messages in a conversation, ordered chronologically
+      operationId: getMessages
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+        - name: limit
+          in: query
+          description: Maximum number of messages to return
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 500
+        - name: offset
+          in: query
+          description: Number of messages to skip (pagination)
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChatMessage'
+                  total:
+                    type: integer
+                    description: Total number of messages in conversation
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags: [chat]
+      summary: Send message
+      description: Send a user message and receive AI response with source attribution
+      operationId: sendMessage
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  description: User's question
+                  minLength: 1
+                  maxLength: 500
+                  example: "What is VSLAM?"
+                selected_text:
+                  type: string
+                  description: Text selected by user (for "Ask about selection" mode)
+                  nullable: true
+                  maxLength: 2000
+                selected_text_metadata:
+                  type: object
+                  description: Metadata about selected text (chapter, section, URL)
+                  nullable: true
+                  properties:
+                    chapter_name:
+                      type: string
+                    section_number:
+                      type: string
+                    url:
+                      type: string
+      responses:
+        '200':
+          description: Message sent and AI response generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_message:
+                    $ref: '#/components/schemas/ChatMessage'
+                  ai_response:
+                    $ref: '#/components/schemas/ChatMessage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          description: Too many messages (max 500 per conversation)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          description: Chatbot service temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /health:
+    get:
+      tags: [health]
+      summary: Health check
+      description: Check if the API is running
+      operationId: healthCheck
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  timestamp:
+                    type: string
+                    format: date-time
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from Better-Auth authentication
+
+  parameters:
+    ConversationId:
+      name: conversation_id
+      in: path
+      required: true
+      description: UUID of the conversation
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique conversation identifier
+        user_id:
+          type: string
+          format: uuid
+          description: Owner of the conversation
+        title:
+          type: string
+          maxLength: 100
+          description: Auto-generated title (first 50 chars of first question)
+          example: "What is VSLAM and how does it work in Isaac..."
+        created_at:
+          type: string
+          format: date-time
+          description: When conversation was created
+        updated_at:
+          type: string
+          format: date-time
+          description: Last modification time
+        last_message_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of most recent message
+        message_count:
+          type: integer
+          minimum: 0
+          maximum: 500
+          description: Total number of messages in conversation
+      required:
+        - id
+        - user_id
+        - title
+        - created_at
+        - updated_at
+        - message_count
+
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique message identifier
+        conversation_id:
+          type: string
+          format: uuid
+          description: Parent conversation
+        user_id:
+          type: string
+          format: uuid
+          description: User who owns this conversation
+        content:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Message text (question or answer)
+        sender_type:
+          type: string
+          enum: [user, ai]
+          description: Who sent the message
+        created_at:
+          type: string
+          format: date-time
+          description: When message was created
+        confidence_score:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          nullable: true
+          description: RAG confidence score (only for AI messages)
+        source_references:
+          type: array
+          nullable: true
+          description: Source attribution (only for AI messages)
+          items:
+            $ref: '#/components/schemas/SourceReference'
+      required:
+        - id
+        - conversation_id
+        - user_id
+        - content
+        - sender_type
+        - created_at
+
+    SourceReference:
+      type: object
+      properties:
+        chapter_name:
+          type: string
+          description: Human-readable chapter name
+          example: "Module 3: NVIDIA Isaac"
+        section_number:
+          type: string
+          description: Section identifier
+          example: "3.2"
+        url:
+          type: string
+          format: uri
+          description: Relative URL to textbook section
+          example: "/docs/module-3-isaac/isaac-sim#section-3-2"
+        relevance_score:
+          type: number
+          format: float
+          minimum: 0.7
+          maximum: 1.0
+          description: Qdrant similarity score
+      required:
+        - chapter_name
+        - section_number
+        - url
+        - relevance_score
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error type
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          nullable: true
+          description: Additional error details
+      required:
+        - error
+        - message
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "validation_error"
+            message: "Message content exceeds 500 characters"
+
+    Unauthorized:
+      description: Authentication required or token expired
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "unauthorized"
+            message: "Your session has expired. Please log in again"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "not_found"
+            message: "Conversation not found"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "internal_error"
+            message: "An unexpected error occurred. Please try again"

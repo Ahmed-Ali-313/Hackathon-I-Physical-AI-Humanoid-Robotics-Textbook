@@ -1,0 +1,120 @@
+/**
+ * MessageList styles.
+ */
+
+.messageList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Empty state */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.emptyText {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: var(--ifm-font-color-base);
+}
+
+.emptyHint {
+  font-size: 0.875rem;
+  margin: 0;
+  max-width: 300px;
+}
+
+/* Message */
+.message {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.messageIcon {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  border-radius: 50%;
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+.messageContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.messageText {
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+/* User message */
+.userMessage .messageText {
+  background-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary-contrast-foreground, #fff);
+  margin-left: auto;
+}
+
+/* Assistant message */
+.assistantMessage .messageText {
+  background-color: var(--ifm-color-emphasis-100);
+  color: var(--ifm-font-color-base);
+}
+
+/* Sources */
+.sources {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.sourcesLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-700);
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sourcesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Confidence */
+.confidence {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+/* Dark mode */
+[data-theme='dark'] .assistantMessage .messageText {
+  background-color: var(--ifm-color-emphasis-200);
+}
+
+[data-theme='dark'] .messageIcon {
+  background-color: var(--ifm-color-emphasis-200);
+}
