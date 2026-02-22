@@ -57,6 +57,8 @@ async def root():
 # Register API routers
 from src.api import api_router
 from src.api.auth import router as auth_router
+from src.api.chat import router as chat_router
 
 app.include_router(api_router)
 app.include_router(auth_router)
+app.include_router(chat_router)  # Chat router already has /api/chat prefix

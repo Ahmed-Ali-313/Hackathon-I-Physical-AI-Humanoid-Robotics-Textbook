@@ -63,7 +63,7 @@ class EmbeddingService:
 
     async def _generate_gemini_embedding(self, text: str) -> List[float]:
         """
-        Generate embedding using Gemini text-embedding-004.
+        Generate embedding using Gemini embedding-001.
 
         Args:
             text: Text to embed
@@ -73,7 +73,7 @@ class EmbeddingService:
         """
         try:
             result = genai.embed_content(
-                model="models/text-embedding-004",
+                model="models/embedding-001",
                 content=text,
                 task_type="retrieval_document",
             )

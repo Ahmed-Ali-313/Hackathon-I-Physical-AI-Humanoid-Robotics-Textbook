@@ -5,6 +5,7 @@ Manages agent initialization, tool registration, and conversation flow.
 Supports dual model configuration (Gemini primary, OpenAI secondary).
 """
 
+import os
 from typing import List, Dict, Any, Optional
 from src.config import settings
 
@@ -55,7 +56,8 @@ class AgentService:
             Model name string
         """
         if self.provider == "gemini":
-            return "gemini-1.5-flash"
+            # Use Gemini 2.0 Flash (experimental) for faster responses
+            return os.getenv("GEMINI_MODEL", "gemini-2.0-flash-exp")
         else:
             return "gpt-4o-mini"
 
