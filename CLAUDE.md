@@ -438,3 +438,10 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+
+## Active Technologies
+- Python 3.11+ + FastAPI, OpenAI SDK (openai), Qdrant Client, Pydantic (004-openai-only)
+- Qdrant Cloud (vector embeddings), Neon Postgres (chat history, sessions) (004-openai-only)
+
+## Recent Changes
+- 004-openai-only: Added Python 3.11+ + FastAPI, OpenAI SDK (openai), Qdrant Client, Pydantic
