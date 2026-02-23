@@ -13,9 +13,9 @@ from src.services.agent_service import AgentService
 def mock_config():
     """Mock configuration."""
     with patch('src.services.agent_service.settings') as mock_settings:
-        mock_settings.llm_provider = "gemini"
-        mock_settings.gemini_api_key = "test-key"
-        mock_settings.openai_api_key = ""
+        # OpenAI-only configuration
+        mock_settings.openai_api_key = "test-openai-key"
+        
         yield mock_settings
 
 
@@ -71,7 +71,7 @@ async def test_rag_flow_with_sufficient_context(mock_config, mock_tools):
     """Test RAG flow when vector search returns sufficient context (>0.7 threshold)."""
     mock_vector_search, mock_retrieve_context = mock_tools
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     # This will be implemented in T026
@@ -88,7 +88,7 @@ async def test_rag_flow_calls_vector_search_tool(mock_config, mock_tools):
     """Test RAG flow calls vector_search_tool with user question."""
     mock_vector_search, mock_retrieve_context = mock_tools
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     await service.generate_response("What is VSLAM?")
@@ -103,7 +103,7 @@ async def test_rag_flow_calls_retrieve_context_tool(mock_config, mock_tools):
     """Test RAG flow calls retrieve_context_tool with search results."""
     mock_vector_search, mock_retrieve_context = mock_tools
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     await service.generate_response("What is VSLAM?")
@@ -127,7 +127,7 @@ async def test_rag_flow_with_insufficient_context(mock_config, mock_tools):
         "num_sources": 0,
     })
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     response = await service.generate_response("What is quantum robotics?")
@@ -142,7 +142,7 @@ async def test_rag_flow_skips_vector_search_with_selected_text(mock_config, mock
     """Test RAG flow skips vector_search_tool when selected_text is provided."""
     mock_vector_search, mock_retrieve_context = mock_tools
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     selected_text = "VSLAM is a technique for simultaneous localization and mapping."
@@ -167,7 +167,7 @@ async def test_rag_flow_uses_selected_text_as_context(mock_config, mock_tools):
     """Test RAG flow uses selected_text directly as context (selection mode)."""
     mock_vector_search, mock_retrieve_context = mock_tools
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     selected_text = "VSLAM is a technique for simultaneous localization and mapping."
@@ -186,7 +186,7 @@ async def test_rag_flow_returns_confidence_score(mock_config, mock_tools):
     """Test RAG flow returns confidence score from vector search."""
     mock_vector_search, mock_retrieve_context = mock_tools
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     response = await service.generate_response("What is VSLAM?")
@@ -201,7 +201,7 @@ async def test_rag_flow_returns_source_references(mock_config, mock_tools):
     """Test RAG flow returns source references for attribution."""
     mock_vector_search, mock_retrieve_context = mock_tools
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     response = await service.generate_response("What is VSLAM?")
@@ -219,7 +219,7 @@ async def test_rag_flow_handles_tool_execution_error(mock_config, mock_tools):
     # Mock tool failure
     mock_vector_search.execute = AsyncMock(side_effect=Exception("Qdrant connection failed"))
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     # Should handle error gracefully
@@ -239,7 +239,7 @@ async def test_rag_flow_respects_confidence_threshold(mock_config, mock_tools):
         # Results below 0.7 should be filtered by vector service
     ])
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     response = await service.generate_response("What is VSLAM?")
@@ -260,7 +260,7 @@ async def test_rag_flow_limits_sources_to_five(mock_config, mock_tools):
     ]
     mock_vector_search.execute = AsyncMock(return_value=mock_results)
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     response = await service.generate_response("What is VSLAM?")

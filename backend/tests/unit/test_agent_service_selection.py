@@ -13,9 +13,9 @@ from src.services.agent_service import AgentService
 def mock_config():
     """Mock configuration."""
     with patch('src.services.agent_service.settings') as mock_settings:
-        mock_settings.llm_provider = "gemini"
-        mock_settings.gemini_api_key = "test-key"
-        mock_settings.openai_api_key = ""
+        # OpenAI-only configuration
+        mock_settings.openai_api_key = "test-openai-key"
+        
         yield mock_settings
 
 
@@ -45,7 +45,7 @@ async def test_selection_mode_skips_vector_search(mock_config, mock_tools):
     """Test that selection mode skips vector search tool."""
     mock_vector_search, mock_retrieve_context = mock_tools
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     await service.generate_response(
@@ -62,7 +62,7 @@ async def test_selection_mode_uses_selected_text_as_context(mock_config, mock_to
     """Test that selection mode uses selected text directly as context."""
     mock_vector_search, mock_retrieve_context = mock_tools
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     selected_text = "VSLAM is a technique for simultaneous localization and mapping."
@@ -83,7 +83,7 @@ async def test_selection_mode_confidence_is_1_0(mock_config, mock_tools):
     """Test that selection mode returns confidence score of 1.0."""
     mock_vector_search, mock_retrieve_context = mock_tools
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     response = await service.generate_response(
@@ -99,7 +99,7 @@ async def test_selection_mode_with_metadata(mock_config, mock_tools):
     """Test selection mode with metadata (chapter, url)."""
     mock_vector_search, mock_retrieve_context = mock_tools
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     metadata = {
@@ -125,7 +125,7 @@ async def test_selection_mode_without_metadata(mock_config, mock_tools):
     """Test selection mode without metadata uses defaults."""
     mock_vector_search, mock_retrieve_context = mock_tools
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     response = await service.generate_response(
@@ -150,7 +150,7 @@ async def test_selection_mode_empty_selected_text_falls_back_to_rag(mock_config,
         "has_context": False,
     })
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     response = await service.generate_response(
@@ -174,7 +174,7 @@ async def test_selection_mode_whitespace_only_falls_back_to_rag(mock_config, moc
         "has_context": False,
     })
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     response = await service.generate_response(
@@ -191,7 +191,7 @@ async def test_selection_mode_returns_source_references(mock_config, mock_tools)
     """Test that selection mode returns source references."""
     mock_vector_search, mock_retrieve_context = mock_tools
 
-    service = AgentService(provider="gemini")
+    service = AgentService()
     service.register_tools([mock_vector_search, mock_retrieve_context])
 
     response = await service.generate_response(
