@@ -1,26 +1,24 @@
 <!--
 Sync Impact Report:
-Version: 1.2.0 → 2.0.0 (MAJOR)
-Rationale: Added RAG Chatbot Architecture section with mandatory tech stack constraints and dual API configuration
-Modified Principles: None renamed
-Added Sections:
-  - Principle X: RAG Chatbot Architecture (5 subsections: A-E)
-    - A. Strict RAG Grounding (MANDATORY)
-    - B. Source Attribution (MANDATORY)
-    - C. Selection-Based Context (REQUIRED)
-    - D. Uncertainty Handling (MANDATORY)
-    - E. Tone and Pedagogy (REQUIRED)
-  - Tech Stack Requirements (expanded with dual API configuration)
-    - Gemini API as primary (active by default)
-    - OpenAI API as secondary (commented, ready to switch)
-Removed Sections: None
+Version: 2.0.0 → 3.0.0 (MAJOR)
+Rationale: Migrated from dual API configuration to OpenAI-only for simplified architecture
+Modified Principles: Principle X (RAG Chatbot Architecture)
+Updated Sections:
+  - Tech Stack Requirements: Removed dual API configuration, now OpenAI-only
+  - Principle X subsection E: Updated to specify OpenAI API exclusively
+Removed Sections:
+  - Dual API Configuration requirement
+  - Gemini API references
+  - LLM_PROVIDER configuration
 Templates Requiring Updates:
-  - ✅ .specify/templates/spec-template.md (RAG features must reference constitution)
-  - ✅ .specify/templates/plan-template.md (chatbot plans must validate against tech stack)
-  - ⚠ .specify/templates/tasks-template.md (pending - add RAG-specific task categories)
-Follow-up TODOs:
-  - Implement dual API configuration in backend code
-  - Add environment variable documentation for GEMINI_API_KEY and OPENAI_API_KEY
+  - ✅ .specify/templates/spec-template.md (RAG features reference OpenAI-only)
+  - ✅ .specify/templates/plan-template.md (chatbot plans validate against OpenAI stack)
+  - ✅ .specify/templates/tasks-template.md (RAG tasks use OpenAI)
+Migration Complete:
+  - ✅ Removed google-generativeai dependency
+  - ✅ Updated all services to OpenAI-only
+  - ✅ Updated all tests to OpenAI-only
+  - ✅ Simplified environment variables (OPENAI_API_KEY only)
 -->
 
 # AI-Native Textbook Constitution
@@ -247,30 +245,16 @@ The chatbot MUST maintain an academic yet encouraging tone suitable for technica
 - **Qdrant Cloud (Free Tier)**: Document embeddings (768-dim vectors), metadata (chapter, section, page)
 
 **AI/LLM**:
-- **Dual API Configuration (MANDATORY)**: The chatbot MUST support both Gemini and OpenAI APIs with easy switching
-  - **Primary (Active)**: Google Gemini API (gemini-1.5-flash or gemini-1.5-pro)
-    - Use for chat completion and response generation
-    - Cost-effective with generous free tier
-    - Active by default in code
-  - **Secondary (Commented)**: OpenAI API (gpt-4o-mini or gpt-4o)
-    - Commented out but ready to activate
-    - Fallback option for production or specific use cases
-    - Same interface/abstraction as Gemini
-- **Embeddings**: Google Generative AI embeddings (text-embedding-004) or OpenAI text-embedding-3-small
+- **OpenAI API (MANDATORY)**: The chatbot uses OpenAI API exclusively for simplified architecture
+  - **Model**: gpt-4o-mini for chat completion and response generation
+  - **Embeddings**: text-embedding-3-small (768-dimensional vectors)
+  - **Configuration**: Single environment variable (OPENAI_API_KEY)
 - **Implementation Pattern**:
   ```python
-  # Active: Gemini configuration
-  LLM_PROVIDER = "gemini"  # or "openai"
-  GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
-  # Commented: OpenAI configuration (ready to switch)
-  # LLM_PROVIDER = "openai"
-  # OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+  # OpenAI-only configuration
+  OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
   ```
-- **Switching Requirement**: Developers must be able to switch between APIs by:
-  1. Commenting/uncommenting configuration lines
-  2. Changing environment variables
-  3. No code changes beyond configuration
+- **Rationale**: Simplified configuration, reduced complexity, single API to maintain
 
 **Authentication**:
 - **Better-Auth**: JWT token generation and validation
@@ -426,4 +410,4 @@ This constitution supersedes all other development practices and guidelines.
 
 ---
 
-**Version**: 2.0.0 | **Ratified**: 2026-02-16 | **Last Amended**: 2026-02-22
+**Version**: 3.0.0 | **Ratified**: 2026-02-16 | **Last Amended**: 2026-02-23
