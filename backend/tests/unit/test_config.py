@@ -15,7 +15,6 @@ def test_default_config_values():
     settings = Settings()
 
     # RAG defaults
-    assert settings.llm_provider == "gemini"
     assert settings.rag_confidence_threshold == 0.7
     assert settings.rag_top_k_results == 5
     assert settings.rag_chunk_size == 1000
@@ -38,8 +37,6 @@ def test_default_config_values():
 def test_config_loads_from_environment():
     """Test that configuration loads from environment variables."""
     with patch.dict(os.environ, {
-        "LLM_PROVIDER": "openai",
-        "GEMINI_API_KEY": "test-gemini-key",
         "OPENAI_API_KEY": "test-openai-key",
         "QDRANT_URL": "https://test.qdrant.io",
         "QDRANT_API_KEY": "test-qdrant-key",
@@ -48,8 +45,6 @@ def test_config_loads_from_environment():
     }):
         settings = Settings()
 
-        assert settings.llm_provider == "openai"
-        assert settings.gemini_api_key == "test-gemini-key"
         assert settings.openai_api_key == "test-openai-key"
         assert settings.qdrant_url == "https://test.qdrant.io"
         assert settings.qdrant_api_key == "test-qdrant-key"
@@ -60,13 +55,11 @@ def test_config_loads_from_environment():
 def test_config_case_insensitive():
     """Test that environment variables are case-insensitive."""
     with patch.dict(os.environ, {
-        "llm_provider": "openai",
-        "GEMINI_API_KEY": "test-key",
+        "openai_api_key": "test-key",
     }):
         settings = Settings()
 
-        assert settings.llm_provider == "openai"
-        assert settings.gemini_api_key == "test-key"
+        assert settings.openai_api_key == "test-key"
 
 
 def test_cors_origins_list_property():
