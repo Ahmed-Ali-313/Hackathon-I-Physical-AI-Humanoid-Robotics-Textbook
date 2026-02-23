@@ -2,14 +2,13 @@
 Embedding service for generating text embeddings.
 
 Supports dual providers:
-- Gemini text-embedding-004 (primary, free tier)
+- Gemini text-embedding-004 via OpenAI-compatible endpoint (primary, free tier)
 - OpenAI text-embedding-3-small (secondary, fallback)
 
 Both generate 768-dimensional embeddings for semantic search.
 """
 
 from typing import List
-import google.generativeai as genai
 from openai import OpenAI
 from src.config import settings
 
@@ -29,12 +28,18 @@ class EmbeddingService:
         if self.provider == "gemini":
             if not settings.gemini_api_key:
                 raise ValueError("GEMINI_API_KEY not configured")
-            genai.configure(api_key=settings.gemini_api_key)
+            # Use Gemini through OpenAI-compatible endpoint
+            self.client = OpenAI(
+                api_key=settings.gemini_api_key,
+                base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+            )
+            self.model = "models/gemini-embedding-001"
 
         elif self.provider == "openai":
             if not settings.openai_api_key:
                 raise ValueError("OPENAI_API_KEY not configured")
-            self.openai_client = OpenAI(api_key=settings.openai_api_key)
+            self.client = OpenAI(api_key=settings.openai_api_key)
+            self.model = "text-embedding-3-small"
 
         else:
             raise ValueError(f"Invalid provider: {self.provider}. Must be 'gemini' or 'openai'")
@@ -56,48 +61,15 @@ class EmbeddingService:
         if not text or not text.strip():
             raise ValueError("Text cannot be empty")
 
-        if self.provider == "gemini":
-            return await self._generate_gemini_embedding(text)
-        else:
-            return await self._generate_openai_embedding(text)
-
-    async def _generate_gemini_embedding(self, text: str) -> List[float]:
-        """
-        Generate embedding using Gemini embedding-001.
-
-        Args:
-            text: Text to embed
-
-        Returns:
-            768-dimensional embedding vector
-        """
         try:
-            result = genai.embed_content(
-                model="models/embedding-001",
-                content=text,
-                task_type="retrieval_document",
-            )
-            return result['embedding']
-        except Exception as e:
-            raise Exception(f"Gemini embedding generation failed: {e}")
-
-    async def _generate_openai_embedding(self, text: str) -> List[float]:
-        """
-        Generate embedding using OpenAI text-embedding-3-small.
-
-        Args:
-            text: Text to embed
-
-        Returns:
-            768-dimensional embedding vector
-        """
-        try:
-            response = self.openai_client.embeddings.create(
-                model="text-embedding-3-small",
+            response = self.client.embeddings.create(
+                model=self.model,
                 input=text,
-                dimensions=768,
+                dimensions=768 if self.provider == "openai" else None
             )
             return response.data[0].embedding
+        except Exception as e:
+            raise Exception(f"{self.provider.title()} embedding generation failed: {e}")
         except Exception as e:
             raise Exception(f"OpenAI embedding generation failed: {e}")
 

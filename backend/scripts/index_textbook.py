@@ -33,7 +33,6 @@ sys.path.insert(0, str(backend_src))
 from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct
 from dotenv import load_dotenv
-import google.generativeai as genai
 from openai import OpenAI
 
 # Load environment variables
@@ -119,13 +118,16 @@ def generate_embedding(text: str, provider: str = LLM_PROVIDER) -> List[float]:
     """Generate embedding for text using specified provider."""
 
     if provider == "gemini":
-        genai.configure(api_key=GEMINI_API_KEY)
-        result = genai.embed_content(
-            model="models/embedding-001",
-            content=text,
-            task_type="retrieval_document",
+        # Use Gemini through OpenAI-compatible endpoint
+        client = OpenAI(
+            api_key=GEMINI_API_KEY,
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
         )
-        return result['embedding']
+        response = client.embeddings.create(
+            model="models/gemini-embedding-001",
+            input=text
+        )
+        return response.data[0].embedding
 
     elif provider == "openai":
         client = OpenAI(api_key=OPENAI_API_KEY)
@@ -250,8 +252,8 @@ def index_textbook():
                 # Generate embedding
                 embedding = generate_embedding(chunk)
 
-                # Create point
-                point_id = f"{metadata['module']}-{metadata['chapter']}-{j}"
+                # Create point with integer ID (Qdrant requires int or UUID)
+                point_id = total_chunks  # Use counter as integer ID
                 point = PointStruct(
                     id=point_id,
                     vector=embedding,
@@ -274,8 +276,8 @@ def index_textbook():
                     print(f"   ✓ Uploaded {len(points)} points")
                     points = []
 
-                # Rate limiting
-                time.sleep(0.1)
+                # Rate limiting: 2 seconds to avoid quota
+                time.sleep(2)
 
             except Exception as e:
                 print(f"   ⚠️  Error processing chunk {j}: {e}")
