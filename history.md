@@ -1,3 +1,201 @@
+## 2026-02-23 - OpenAI-Only API Migration: Specification, Planning, and ADR
+
+### Session Summary
+Initiated migration from dual API provider (Gemini/OpenAI) to OpenAI-only for the RAG chatbot. Completed full specification, implementation planning, and architectural decision documentation. This migration simplifies configuration from 3 environment variables to 1, removes ~500 lines of provider-switching code, and requires constitution amendment from v2.0.0 to v3.0.0.
+
+### Work Completed
+
+**Pre-Work: Embedding API Migration (Commit)**
+- ✅ Committed previous session's work: Migrated Gemini embeddings to OpenAI-compatible endpoint
+- ✅ Commit: `91f786c` - "Migrate Gemini embeddings to OpenAI-compatible endpoint"
+- ✅ Changes: Refactored embedding_service.py and index_textbook.py to use OpenAI client with Gemini base URL
+
+**Phase 1: Specification (`/sp.specify`)**
+- ✅ Created feature branch: `004-openai-only`
+- ✅ Generated feature specification with 3 prioritized user stories:
+  - P1: Simplified API Configuration (single env var)
+  - P2: Clean Codebase (remove all Gemini code)
+  - P3: Updated Documentation (reflect OpenAI-only setup)
+- ✅ Defined 11 functional requirements (FR-001 to FR-011)
+- ✅ Established 7 measurable success criteria
+- ✅ Created quality checklist: All 14 items passed
+- ✅ PHR: `0001-migrate-to-openai-only-api-spec.spec.prompt.md`
+
+**Phase 2: Implementation Planning (`/sp.plan`)**
+- ✅ Identified constitution violation: Conflicts with v2.0.0 dual API mandate
+- ✅ Justified violation: User-requested simplification, dual API adds unnecessary complexity
+- ✅ Phase 0 - Research: Documented 4 key decisions
+  - Q1: OpenAI API best practices (text-embedding-3-small, gpt-4o-mini)
+  - Q2: Migration strategy (clean removal, no backward compatibility)
+  - Q3: Vector embedding compatibility (may need re-indexing)
+  - Q4: Error handling without fallback (explicit error messages)
+- ✅ Phase 1 - Design: Created 4 planning artifacts
+  - data-model.md: No schema changes, only config changes
+  - contracts/api-contracts.md: All endpoints unchanged (internal only)
+  - quickstart.md: 10-step migration guide with rollback plan
+  - Updated agent context (CLAUDE.md)
+- ✅ Constitution check: Violation justified, requires amendment to v3.0.0
+- ✅ PHR: `0002-openai-only-api-migration-plan.plan.prompt.md`
+
+**Phase 3: Architecture Decision Record (`/sp.adr`)**
+- ✅ Created ADR-0007: "Migrate from Dual API to OpenAI-Only LLM Provider"
+- ✅ Documented decision cluster: LLM stack, configuration, migration strategy
+- ✅ Analyzed consequences: 7 positive, 6 negative
+- ✅ Evaluated 4 alternatives: Status quo, deprecation, feature flag, Gemini-only
+- ✅ Relationship: SUPERSEDES ADR-0002 (LLM and Vector Database Stack)
+- ✅ PHR: `0003-document-openai-only-migration-adr.misc.prompt.md`
+
+**Phase 4: Task Breakdown (`/sp.tasks`)**
+- ✅ Generated comprehensive task breakdown with 40 tasks
+- ✅ Organized by user story for independent implementation and testing
+- ✅ Phase 1 (Setup): 4 tasks - Pre-migration verification
+- ✅ Phase 2 (US1): 9 tasks - Simplified API Configuration (MVP)
+- ✅ Phase 3 (US2): 10 tasks - Clean Codebase
+- ✅ Phase 4 (US3): 10 tasks - Updated Documentation (includes constitution amendment)
+- ✅ Phase 5 (Polish): 7 tasks (4 required + 3 conditional for re-indexing)
+- ✅ Identified 15 parallel execution opportunities
+- ✅ MVP scope: 13 tasks (Phase 1 + Phase 2)
+- ✅ PHR: `0004-openai-only-migration-task-breakdown.tasks.prompt.md`
+
+### Files Created
+
+**Specification:**
+- `specs/004-openai-only/spec.md` - Feature requirements and user stories
+- `specs/004-openai-only/checklists/requirements.md` - Quality validation checklist
+
+**Planning:**
+- `specs/004-openai-only/plan.md` - Implementation plan with constitution check
+- `specs/004-openai-only/research.md` - Research findings and decisions
+- `specs/004-openai-only/data-model.md` - Data model analysis (no changes)
+- `specs/004-openai-only/contracts/api-contracts.md` - API contracts (unchanged)
+- `specs/004-openai-only/quickstart.md` - Migration guide (10 steps)
+
+**Architecture:**
+- `history/adr/0007-migrate-from-dual-api-to-openai-only-llm-provider.md` - ADR
+
+**History:**
+- `history/prompts/004-openai-only/0001-migrate-to-openai-only-api-spec.spec.prompt.md` - Spec PHR
+- `history/prompts/004-openai-only/0002-openai-only-api-migration-plan.plan.prompt.md` - Plan PHR
+- `history/prompts/004-openai-only/0003-document-openai-only-migration-adr.misc.prompt.md` - ADR PHR
+
+### Git Activity
+
+**Branch:** `004-openai-only` (created from `003-rag-chatbot`)
+
+**Commits (1):**
+1. `91f786c` - Migrate Gemini embeddings to OpenAI-compatible endpoint (from previous session)
+
+**Pending Commits:**
+- Specification, planning, and ADR artifacts (ready to commit)
+
+### Technical Scope
+
+**Affected Components:**
+- `backend/src/config.py` - Remove GEMINI_API_KEY, LLM_PROVIDER
+- `backend/src/services/embedding_service.py` - OpenAI-only implementation
+- `backend/src/services/agent_service.py` - OpenAI-only implementation
+- `backend/scripts/index_textbook.py` - Remove Gemini embedding generation
+- `backend/requirements.txt` - Remove google-generativeai
+- `backend/tests/` - Update 20+ tests to OpenAI-only
+- `.specify/memory/constitution.md` - Update to v3.0.0 (MAJOR)
+- Documentation files (README.md, .env.example)
+
+**Estimated Changes:**
+- ~500 lines of code removed (provider-switching logic)
+- ~200 lines of code modified (service refactoring)
+- ~100 lines of tests updated
+- Configuration simplified: 3 env vars → 1 env var
+
+### Constitution Impact
+
+**Current:** Constitution v2.0.0
+- Principle V: Mandates dual API configuration (Gemini primary, OpenAI secondary)
+- Principle X: Specifies dual provider support with switching capability
+
+**Required Amendment:** Constitution v3.0.0 (MAJOR version bump)
+- Remove dual API requirement from Principle V
+- Update Principle X to specify OpenAI-only
+- Document rationale: Simplification, reduced complexity, single provider sufficient
+
+**ADR Relationship:**
+- ADR-0007 SUPERSEDES ADR-0002 (LLM and Vector Database Stack)
+
+### Current Status
+
+**Feature 004-openai-only Progress:**
+- ✅ Specification: Complete (3 user stories, 11 requirements, 7 success criteria)
+- ✅ Planning: Complete (research, design, contracts, quickstart)
+- ✅ ADR: Complete (ADR-0007 created and documented)
+- ⏳ Tasks: Pending (next: `/sp.tasks`)
+- ⏳ Implementation: Pending
+- ⏳ Constitution Amendment: Pending
+
+**Overall Project Progress:**
+- Phase 1-2: Complete (Authentication, Personalization)
+- Phase 3-4: 56/115 tasks (49%) - RAG Chatbot on branch `003-rag-chatbot`
+- Phase 5-8: Not started
+- **New:** Feature 004-openai-only on separate branch (migration work)
+
+### Impact
+
+**For Development:**
+- Simplified configuration reduces setup errors
+- Single API provider easier to maintain and debug
+- Clearer error messages without fallback confusion
+- Faster development without dual provider testing
+
+**For Codebase:**
+- ~500 lines of complexity removed
+- Cleaner service implementations
+- Reduced dependencies (remove google-generativeai)
+- Better alignment between documentation and implementation
+
+**For Architecture:**
+- Constitution amendment required (v2.0.0 → v3.0.0)
+- ADR-0007 provides permanent record of decision rationale
+- Supersedes previous dual API decision (ADR-0002)
+
+### Next Steps
+
+**Immediate (Feature 004-openai-only):**
+1. Run `/sp.tasks` to generate implementation task breakdown
+2. Include constitution amendment task in task list
+3. Review and approve tasks before implementation
+4. Execute implementation (`/sp.implement`)
+5. Update constitution.md to v3.0.0
+6. Test migration with OpenAI credentials
+7. Commit and create PR
+
+**After Migration:**
+- Merge `004-openai-only` into `003-rag-chatbot`
+- Continue Phase 3-4 RAG chatbot work with simplified API
+- Complete remaining 59 tasks (51%)
+
+### Risks and Mitigation
+
+**Risk 1: Qdrant Re-indexing Required**
+- If embeddings were created with Gemini, re-indexing needed (~10-15 minutes)
+- Mitigation: Check collection metadata first, document in quickstart
+
+**Risk 2: Single Point of Failure**
+- No fallback if OpenAI API unavailable
+- Mitigation: Explicit error messages, acceptable for hackathon project
+
+**Risk 3: Constitution Amendment Complexity**
+- MAJOR version change requires careful documentation
+- Mitigation: ADR-0007 provides full justification and rationale
+
+### Notes
+
+- This migration was user-requested to simplify the system
+- Dual API configuration was mandated by constitution but never used in practice
+- OpenAI chosen over Gemini for better documentation and maturity
+- All planning artifacts follow SDD methodology (spec → plan → ADR → tasks)
+- 3 PHRs created documenting the full workflow
+- Ready to proceed to task breakdown phase
+
+---
+
 ## 2026-02-22 - Documentation Enhancement and Configuration Cleanup
 
 ### Session Summary
