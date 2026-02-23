@@ -1,11 +1,8 @@
 """
-Embedding service for generating text embeddings.
+Embedding service for generating text embeddings using OpenAI.
 
-Supports dual providers:
-- Gemini text-embedding-004 via OpenAI-compatible endpoint (primary, free tier)
-- OpenAI text-embedding-3-small (secondary, fallback)
-
-Both generate 768-dimensional embeddings for semantic search.
+Uses text-embedding-3-small model to generate 768-dimensional embeddings
+for semantic search in the RAG chatbot.
 """
 
 from typing import List
@@ -14,35 +11,20 @@ from src.config import settings
 
 
 class EmbeddingService:
-    """Service for generating text embeddings using Gemini or OpenAI."""
+    """Service for generating text embeddings using OpenAI."""
 
-    def __init__(self, provider: str = None):
+    def __init__(self):
         """
-        Initialize embedding service.
+        Initialize embedding service with OpenAI.
 
-        Args:
-            provider: "gemini" or "openai". If None, uses settings.llm_provider
+        Raises:
+            ValueError: If OPENAI_API_KEY is not configured
         """
-        self.provider = provider or settings.llm_provider
+        if not settings.openai_api_key:
+            raise ValueError("OPENAI_API_KEY not configured")
 
-        if self.provider == "gemini":
-            if not settings.gemini_api_key:
-                raise ValueError("GEMINI_API_KEY not configured")
-            # Use Gemini through OpenAI-compatible endpoint
-            self.client = OpenAI(
-                api_key=settings.gemini_api_key,
-                base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
-            )
-            self.model = "models/gemini-embedding-001"
-
-        elif self.provider == "openai":
-            if not settings.openai_api_key:
-                raise ValueError("OPENAI_API_KEY not configured")
-            self.client = OpenAI(api_key=settings.openai_api_key)
-            self.model = "text-embedding-3-small"
-
-        else:
-            raise ValueError(f"Invalid provider: {self.provider}. Must be 'gemini' or 'openai'")
+        self.client = OpenAI(api_key=settings.openai_api_key)
+        self.model = "text-embedding-3-small"
 
     async def generate_embedding(self, text: str) -> List[float]:
         """
@@ -65,11 +47,9 @@ class EmbeddingService:
             response = self.client.embeddings.create(
                 model=self.model,
                 input=text,
-                dimensions=768 if self.provider == "openai" else None
+                dimensions=768
             )
             return response.data[0].embedding
-        except Exception as e:
-            raise Exception(f"{self.provider.title()} embedding generation failed: {e}")
         except Exception as e:
             raise Exception(f"OpenAI embedding generation failed: {e}")
 
@@ -101,7 +81,7 @@ class EmbeddingService:
         Get embedding dimension.
 
         Returns:
-            768 (both Gemini and OpenAI use 768 dimensions)
+            768 (OpenAI text-embedding-3-small dimension)
         """
         return 768
 

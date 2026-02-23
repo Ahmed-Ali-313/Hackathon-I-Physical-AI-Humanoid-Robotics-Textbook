@@ -2,10 +2,9 @@
 Agent service using OpenAI Agents SDK for RAG orchestration.
 
 Manages agent initialization, tool registration, and conversation flow.
-Supports dual model configuration (Gemini primary, OpenAI secondary).
+Uses OpenAI gpt-4o-mini model for chat responses.
 """
 
-import os
 from typing import List, Dict, Any, Optional
 from src.config import settings
 
@@ -14,52 +13,27 @@ class AgentService:
     """
     Service for managing OpenAI Agents SDK agent.
 
-    Handles agent initialization with configurable models, tool registration,
+    Handles agent initialization with OpenAI models, tool registration,
     and RAG orchestration for textbook Q&A.
     """
 
-    def __init__(self, provider: str = None):
+    def __init__(self):
         """
-        Initialize agent service.
-
-        Args:
-            provider: "gemini" or "openai". If None, uses settings.llm_provider
+        Initialize agent service with OpenAI.
 
         Raises:
-            ValueError: If provider is invalid or API keys are missing
+            ValueError: If OPENAI_API_KEY is not configured
         """
-        self.provider = provider or settings.llm_provider
-
-        if self.provider not in ["gemini", "openai"]:
-            raise ValueError(f"Invalid provider: {self.provider}. Must be 'gemini' or 'openai'")
-
-        # Validate API keys
-        if self.provider == "gemini" and not settings.gemini_api_key:
-            raise ValueError("GEMINI_API_KEY not configured")
-
-        if self.provider == "openai" and not settings.openai_api_key:
+        if not settings.openai_api_key:
             raise ValueError("OPENAI_API_KEY not configured")
 
         # Agent configuration
-        self.model_name = self._get_model_name()
+        self.model_name = "gpt-4o-mini"
         self.agent = None
         self.tools = []
 
         # System prompt for tone and pedagogy (FR-027 to FR-030)
         self.system_prompt = self._build_system_prompt()
-
-    def _get_model_name(self) -> str:
-        """
-        Get model name based on provider.
-
-        Returns:
-            Model name string
-        """
-        if self.provider == "gemini":
-            # Use Gemini 2.0 Flash (experimental) for faster responses
-            return os.getenv("GEMINI_MODEL", "gemini-2.0-flash-exp")
-        else:
-            return "gpt-4o-mini"
 
     def _build_system_prompt(self) -> str:
         """
@@ -173,15 +147,12 @@ Remember: Your goal is to help students learn effectively by providing accurate,
 
     def _get_api_key(self) -> str:
         """
-        Get API key for current provider.
+        Get OpenAI API key.
 
         Returns:
             API key string
         """
-        if self.provider == "gemini":
-            return settings.gemini_api_key
-        else:
-            return settings.openai_api_key
+        return settings.openai_api_key
 
     async def generate_response(
         self,
@@ -425,7 +396,7 @@ Remember: Your goal is to help students learn effectively by providing accurate,
             Dictionary with provider and model name
         """
         return {
-            "provider": self.provider,
+            "provider": "openai",
             "model": self.model_name,
         }
 

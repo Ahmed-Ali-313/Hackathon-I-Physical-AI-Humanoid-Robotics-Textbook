@@ -26,10 +26,7 @@ class Settings(BaseSettings):
     # Environment
     environment: str = "development"
 
-    # RAG Chatbot Configuration (Phase 3)
-    llm_provider: str = "gemini"  # "gemini" or "openai"
-    gemini_api_key: str = ""
-    gemini_model: str = "gemini-1.5-flash"  # Model name for Gemini
+    # RAG Chatbot Configuration (OpenAI-only)
     openai_api_key: str = ""
 
     # Qdrant Vector Database

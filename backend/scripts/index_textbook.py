@@ -12,9 +12,7 @@ Environment Variables:
     QDRANT_URL: Qdrant server URL
     QDRANT_API_KEY: Qdrant API key
     QDRANT_COLLECTION_NAME: Collection name (default: textbook_chunks)
-    LLM_PROVIDER: "gemini" or "openai" (default: gemini)
-    GEMINI_API_KEY: Gemini API key (if using Gemini)
-    OPENAI_API_KEY: OpenAI API key (if using OpenAI)
+    OPENAI_API_KEY: OpenAI API key
     RAG_CHUNK_SIZE: Chunk size in tokens (default: 1000)
     RAG_CHUNK_OVERLAP: Overlap in tokens (default: 100)
 """
@@ -42,8 +40,6 @@ load_dotenv()
 QDRANT_URL = os.getenv("QDRANT_URL")
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
 COLLECTION_NAME = os.getenv("QDRANT_COLLECTION_NAME", "textbook_chunks")
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini").lower()
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 CHUNK_SIZE = int(os.getenv("RAG_CHUNK_SIZE", "1000"))
 CHUNK_OVERLAP = int(os.getenv("RAG_CHUNK_OVERLAP", "100"))
@@ -58,16 +54,8 @@ def validate_environment():
         print("❌ Error: QDRANT_URL and QDRANT_API_KEY must be set")
         sys.exit(1)
 
-    if LLM_PROVIDER == "gemini" and not GEMINI_API_KEY:
-        print("❌ Error: GEMINI_API_KEY must be set when using Gemini provider")
-        sys.exit(1)
-
-    if LLM_PROVIDER == "openai" and not OPENAI_API_KEY:
-        print("❌ Error: OPENAI_API_KEY must be set when using OpenAI provider")
-        sys.exit(1)
-
-    if LLM_PROVIDER not in ["gemini", "openai"]:
-        print(f"❌ Error: Invalid LLM_PROVIDER '{LLM_PROVIDER}'. Must be 'gemini' or 'openai'")
+    if not OPENAI_API_KEY:
+        print("❌ Error: OPENAI_API_KEY must be set")
         sys.exit(1)
 
 
@@ -114,32 +102,15 @@ def chunk_text(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVE
     return chunks
 
 
-def generate_embedding(text: str, provider: str = LLM_PROVIDER) -> List[float]:
-    """Generate embedding for text using specified provider."""
-
-    if provider == "gemini":
-        # Use Gemini through OpenAI-compatible endpoint
-        client = OpenAI(
-            api_key=GEMINI_API_KEY,
-            base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
-        )
-        response = client.embeddings.create(
-            model="models/gemini-embedding-001",
-            input=text
-        )
-        return response.data[0].embedding
-
-    elif provider == "openai":
-        client = OpenAI(api_key=OPENAI_API_KEY)
-        response = client.embeddings.create(
-            model="text-embedding-3-small",
-            input=text,
-            dimensions=768,
-        )
-        return response.data[0].embedding
-
-    else:
-        raise ValueError(f"Invalid provider: {provider}")
+def generate_embedding(text: str) -> List[float]:
+    """Generate embedding for text using OpenAI."""
+    client = OpenAI(api_key=OPENAI_API_KEY)
+    response = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=text,
+        dimensions=768,
+    )
+    return response.data[0].embedding
 
 
 def extract_metadata_from_path(file_path: Path) -> Dict[str, str]:
@@ -193,7 +164,7 @@ def index_textbook():
     """Index all textbook chapters into Qdrant."""
 
     print("🚀 Starting textbook indexing...")
-    print(f"   Provider: {LLM_PROVIDER}")
+    print(f"   Provider: OpenAI (text-embedding-3-small)")
     print(f"   Chunk size: {CHUNK_SIZE} tokens")
     print(f"   Overlap: {CHUNK_OVERLAP} tokens")
     print(f"   Collection: {COLLECTION_NAME}")
