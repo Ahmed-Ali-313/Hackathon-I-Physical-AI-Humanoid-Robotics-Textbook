@@ -27,26 +27,46 @@ Systematically debugged and fixed the vector search issue where chatbot was retu
 - Default threshold of 0.7 was filtering out ALL valid results
 - This is normal for semantic search - 0.3-0.4 indicates good relevance
 
-**Step 5: Fix Applied**
+**Step 5: Fix Applied (Config Layer)**
 - Updated RAG_CONFIDENCE_THRESHOLD: 0.7 → 0.3
 - Files modified: backend/src/config.py, backend/.env.example
 - Commit: `92c300c` - Fix RAG vector search threshold
 
-**Step 6: Verification**
-- Query "What is ROS2 middleware?" returned 5 results
-- Top result confidence: 0.6286 (excellent match)
-- Confidence range: 0.3793 - 0.6286
-- Full RAG pipeline tested and working
+**Step 6: Initial Testing - Still Failing**
+- Tested chatbot endpoint with "What is ROS2 middleware?"
+- Result: Still returning "I don't have information" ❌
+- Realized: threshold was hardcoded in multiple places
+
+**Step 7: Found Second Hardcoded Threshold**
+- agent_service.py line 276: hardcoded confidence_threshold=0.7
+- This was overriding the config fix
+- Fix: Removed hardcoded parameter, let it use config default
+- Commit: `a8d11d4` - Remove hardcoded threshold from agent service
+
+**Step 8: Found Third Hardcoded Threshold**
+- vector_search_tool.py line 31: default parameter confidence_threshold=0.7
+- vector_search_tool.py line 92: tool definition default=0.7
+- This was the final place overriding the config
+- Fix: Changed default to None to use config value
+- Commit: `1b2ab7f` - Remove hardcoded threshold from VectorSearchTool
+
+**Step 9: Final Verification - SUCCESS**
+- Query "What is ROS2 middleware?" → 5 sources, confidence 0.44 ✅
+- Query "How do I use Isaac Sim?" → 5 sources, confidence 0.46 ✅
+- Chatbot returning relevant textbook content with source attribution
+- Full RAG pipeline working end-to-end
 
 ### Work Completed
 
 - ✅ Systematic debugging of vector search issue
-- ✅ Identified root cause: threshold too high (0.7)
-- ✅ Updated threshold to 0.3 in config.py
-- ✅ Updated threshold to 0.3 in .env.example
+- ✅ Identified root cause: threshold hardcoded in 3 places
+- ✅ Fixed config.py: threshold 0.7 → 0.3
+- ✅ Fixed .env.example: threshold 0.7 → 0.3
+- ✅ Fixed agent_service.py: removed hardcoded 0.7
+- ✅ Fixed vector_search_tool.py: changed default to None
 - ✅ Tested with multiple queries
-- ✅ Verified full RAG pipeline working
-- ✅ Committed fix with detailed documentation
+- ✅ Verified full RAG pipeline working end-to-end
+- ✅ Created 3 commits with detailed documentation
 
 ### Files Modified
 
@@ -54,17 +74,24 @@ Systematically debugged and fixed the vector search issue where chatbot was retu
 - backend/src/config.py - Default threshold 0.7 → 0.3
 - backend/.env.example - Example threshold 0.7 → 0.3
 
+**Services (1 file):**
+- backend/src/services/agent_service.py - Removed hardcoded threshold parameter
+
+**Tools (1 file):**
+- backend/src/tools/vector_search_tool.py - Changed default from 0.7 to None
+
 ### Test Results
 
 **Before Fix (threshold=0.7):**
 - Query: "What is ROS2?" → 0 results
 - Chatbot response: "I don't have information about this"
 
-**After Fix (threshold=0.3):**
-- Query: "What is ROS2?" → 5 results
+**After Complete Fix (threshold=0.3, all hardcoded values removed):**
+- Query: "What is ROS2?" → 5 results (vector service test)
 - Top match: middleware chapter (confidence: 0.3853)
-- Query: "What is ROS2 middleware?" → 5 results
-- Top match: middleware chapter (confidence: 0.6286)
+- Query: "What is ROS2 middleware?" → 5 sources, avg confidence 0.44 (chatbot API)
+- Query: "How do I use Isaac Sim?" → 5 sources, avg confidence 0.46 (chatbot API)
+- All queries returning relevant content with proper source attribution
 
 ### Technical Details
 
@@ -92,8 +119,10 @@ Systematically debugged and fixed the vector search issue where chatbot was retu
 
 ### Git Activity
 
-**Commit:**
+**Commits (3):**
 - `92c300c` - Fix RAG vector search by lowering confidence threshold from 0.7 to 0.3
+- `a8d11d4` - Remove hardcoded confidence threshold from agent service
+- `1b2ab7f` - Remove hardcoded confidence threshold from VectorSearchTool
 
 ### Next Steps
 
