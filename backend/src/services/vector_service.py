@@ -73,10 +73,10 @@ class VectorService:
                 if conditions:
                     query_filter = Filter(must=conditions)
 
-            # Perform search
-            search_results = self.client.search(
+            # Perform search using query_points (Qdrant v1.17.0+)
+            search_response = self.client.query_points(
                 collection_name=self.collection_name,
-                query_vector=query_vector,
+                query=query_vector,  # Changed from query_vector to query
                 limit=top_k,
                 query_filter=query_filter,
                 score_threshold=confidence_threshold,
@@ -84,7 +84,7 @@ class VectorService:
 
             # Format results
             results = []
-            for point in search_results:
+            for point in search_response.points:
                 result = {
                     "id": point.id,
                     "content": point.payload.get("content", ""),
