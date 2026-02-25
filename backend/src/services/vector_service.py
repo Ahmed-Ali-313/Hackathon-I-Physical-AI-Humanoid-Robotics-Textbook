@@ -76,13 +76,14 @@ class VectorService:
             # Perform search using query_points (Qdrant v1.17.0+)
             search_response = self.client.query_points(
                 collection_name=self.collection_name,
-                query=query_vector,  # Changed from query_vector to query
+                query=query_vector,
                 limit=top_k,
                 query_filter=query_filter,
                 score_threshold=confidence_threshold,
+                with_payload=True,  # Include payload in results
             )
 
-            # Format results
+            # Format results - query_points returns QueryResponse with .points attribute
             results = []
             for point in search_response.points:
                 result = {
