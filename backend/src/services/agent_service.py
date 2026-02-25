@@ -7,6 +7,9 @@ Uses OpenAI gpt-4o-mini model for chat responses.
 
 from typing import List, Dict, Any, Optional
 from src.config import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class AgentService:
@@ -204,8 +207,21 @@ Remember: Your goal is to help students learn effectively by providing accurate,
                 retrieve_context_tool=retrieve_context_tool,
             )
 
+        except ConnectionError as e:
+            logger.error(f"Qdrant connection error: {str(e)}")
+            raise ConnectionError("Unable to connect to the search service. Please check your connection and try again.")
+
+        except TimeoutError as e:
+            logger.error(f"Request timeout: {str(e)}")
+            raise TimeoutError("The request took too long to complete. Please try again.")
+
+        except ValueError as e:
+            logger.error(f"Invalid input: {str(e)}")
+            raise ValueError(f"Invalid input: {str(e)}")
+
         except Exception as e:
-            raise Exception(f"Response generation failed: {e}")
+            logger.error(f"Response generation failed: {str(e)}", exc_info=True)
+            raise Exception(f"An unexpected error occurred while generating response: {str(e)}")
 
     async def _generate_response_with_selection(
         self,

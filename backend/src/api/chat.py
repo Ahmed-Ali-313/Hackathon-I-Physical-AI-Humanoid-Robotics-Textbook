@@ -8,10 +8,15 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import SQLAlchemyError
 from src.database import get_db
 from src.services.chat_service import ChatService
 from src.services.agent_service import agent_service
 from src.tools.tool_registry import tool_registry
+from src.middleware.error_handler import handle_validation_error
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # Request/Response models

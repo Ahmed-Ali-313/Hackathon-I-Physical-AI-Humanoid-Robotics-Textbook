@@ -56,13 +56,51 @@ function getAuthHeaders(): HeadersInit {
 }
 
 /**
- * Handle API errors.
+ * Handle API errors and return user-friendly messages.
  */
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
-    throw new Error(error.detail || `HTTP ${response.status}: ${response.statusText}`);
+
+    // Extract error details
+    const errorMessage = error.detail || `HTTP ${response.status}: ${response.statusText}`;
+    const errorType = error.error_type || 'unknown_error';
+
+    // Map to user-friendly messages
+    if (response.status === 401) {
+      throw new Error('Your session has expired. Please log in again.');
+    }
+
+    if (response.status === 403) {
+      throw new Error("You don't have permission to access this resource.");
+    }
+
+    if (response.status === 404) {
+      throw new Error('The requested resource was not found.');
+    }
+
+    if (response.status === 503) {
+      if (errorType === 'database_error') {
+        throw new Error('The database is temporarily unavailable. Please try again in a few moments.');
+      }
+      if (errorType === 'search_service_error') {
+        throw new Error('The search service is temporarily unavailable. Please try again in a few moments.');
+      }
+      throw new Error('The service is temporarily unavailable. Please try again in a few moments.');
+    }
+
+    if (response.status === 504) {
+      throw new Error('The request took too long to complete. Please try again.');
+    }
+
+    if (response.status >= 500) {
+      throw new Error('An unexpected error occurred. Please try again later.');
+    }
+
+    // Return the error message from backend
+    throw new Error(errorMessage);
   }
+
   return response.json();
 }
 

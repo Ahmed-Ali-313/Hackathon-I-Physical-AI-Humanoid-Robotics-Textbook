@@ -12,13 +12,37 @@ import { useChat } from '../../hooks/useChat';
 import ConversationSidebar from './ConversationSidebar';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
+import ErrorMessage from './ErrorMessage';
 import styles from './styles.module.css';
 
 export default function ChatPanel(): JSX.Element | null {
-  const { isPanelOpen, setIsPanelOpen, currentConversation, error } = useChatContext();
+  const { isPanelOpen, setIsPanelOpen, currentConversation, error, setError } = useChatContext();
   const { selectedText, metadata, clearSelection } = useTextSelection();
-  const { loadConversations } = useChat();
+  const { loadConversations, sendMessage } = useChat();
   const panelRef = useRef<HTMLDivElement>(null);
+
+  // Extract error type from error message if present
+  const getErrorType = (errorMsg: string | null): string | undefined => {
+    if (!errorMsg) return undefined;
+
+    if (errorMsg.includes('session has expired')) return 'authentication_expired';
+    if (errorMsg.includes('connection')) return 'connection_error';
+    if (errorMsg.includes('timeout') || errorMsg.includes('too long')) return 'timeout_error';
+    if (errorMsg.includes('database')) return 'database_error';
+    if (errorMsg.includes('search service')) return 'search_service_error';
+
+    return 'internal_error';
+  };
+
+  const handleRetry = async () => {
+    setError(null);
+    // Retry last action - for now just reload conversations
+    await loadConversations();
+  };
+
+  const handleDismissError = () => {
+    setError(null);
+  };
 
   // Load conversations when panel opens
   useEffect(() => {
@@ -125,10 +149,12 @@ export default function ChatPanel(): JSX.Element | null {
 
         {/* Error message */}
         {error && (
-          <div className={styles.errorBanner} role="alert">
-            <span className={styles.errorIcon}>⚠️</span>
-            <span className={styles.errorText}>{error}</span>
-          </div>
+          <ErrorMessage
+            message={error}
+            errorType={getErrorType(error)}
+            onRetry={handleRetry}
+            onDismiss={handleDismissError}
+          />
         )}
 
         {/* Content */}

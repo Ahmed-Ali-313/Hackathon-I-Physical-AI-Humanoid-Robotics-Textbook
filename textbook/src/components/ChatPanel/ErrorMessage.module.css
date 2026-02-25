@@ -1,0 +1,148 @@
+/**
+ * ErrorMessage styles.
+ */
+
+.errorContainer {
+  padding: 1rem;
+  background-color: var(--ifm-color-danger-contrast-background);
+  border: 1px solid var(--ifm-color-danger);
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.errorContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.errorIcon {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.errorText {
+  flex: 1;
+  min-width: 0;
+}
+
+.errorMessage {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ifm-color-danger-darkest);
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.errorType {
+  font-size: 0.75rem;
+  color: var(--ifm-color-danger-dark);
+  text-transform: capitalize;
+}
+
+.errorActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.actionButton {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  background-color: var(--ifm-color-danger);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.actionButton:hover {
+  background-color: var(--ifm-color-danger-dark);
+  color: white;
+  text-decoration: none;
+}
+
+.actionButton:focus {
+  outline: 2px solid var(--ifm-color-danger);
+  outline-offset: 2px;
+}
+
+.dismissButton {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--ifm-color-danger-dark);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dismissButton:hover {
+  background-color: var(--ifm-color-danger-contrast-background);
+  color: var(--ifm-color-danger-darkest);
+}
+
+.dismissButton:focus {
+  outline: 2px solid var(--ifm-color-danger);
+  outline-offset: 2px;
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .errorContainer {
+  background-color: rgba(255, 86, 86, 0.1);
+  border-color: var(--ifm-color-danger-dark);
+}
+
+[data-theme='dark'] .errorMessage {
+  color: var(--ifm-color-danger-lightest);
+}
+
+[data-theme='dark'] .errorType {
+  color: var(--ifm-color-danger-light);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .errorContainer {
+    padding: 0.75rem;
+  }
+
+  .errorMessage {
+    font-size: 0.8125rem;
+  }
+
+  .errorType {
+    font-size: 0.6875rem;
+  }
+
+  .actionButton {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Accessibility - High contrast mode */
+@media (prefers-contrast: high) {
+  .errorContainer {
+    border-width: 2px;
+  }
+
+  .actionButton {
+    border: 2px solid currentColor;
+  }
+}
