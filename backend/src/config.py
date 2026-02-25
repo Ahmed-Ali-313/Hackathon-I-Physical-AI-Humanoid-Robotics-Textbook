@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     qdrant_collection_name: str = "textbook_chunks"
 
     # RAG Configuration
-    rag_confidence_threshold: float = 0.7
+    rag_confidence_threshold: float = 0.3
     rag_top_k_results: int = 5
     rag_chunk_size: int = 1000
     rag_chunk_overlap: int = 100
