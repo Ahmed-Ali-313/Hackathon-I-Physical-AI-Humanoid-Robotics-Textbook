@@ -1,3 +1,122 @@
+## 2026-02-25 - Phase 5: Chat History Across Sessions Implementation
+
+### Session Summary
+Implemented Phase 5 (User Story 3) of RAG Chatbot: conversation history management with sidebar UI. Students can now view all previous conversations, switch between them, create new conversations, and delete old ones. History persists across browser sessions. E2E tests written and included.
+
+### Work Completed
+
+**Frontend Components (4 files):**
+- ✅ Created ConversationSidebar component with conversation list UI
+- ✅ Created ConversationSidebar styles (theme-matched, mobile responsive)
+- ✅ Updated ChatPanel to integrate sidebar (two-column layout)
+- ✅ Updated ChatPanel styles (wider panel: 700px, flex layout)
+
+**Features Delivered:**
+- ✅ Conversation list in sidebar (title, message count, last updated)
+- ✅ "New" button to create conversations
+- ✅ Click to switch between conversations
+- ✅ Delete button for each conversation (with confirmation)
+- ✅ Empty state when no conversations exist
+- ✅ Auto-load conversations when panel opens
+- ✅ Relative time display (e.g., "5m ago", "2h ago", "3d ago")
+- ✅ Active conversation highlighting
+- ✅ Mobile responsive (sidebar adapts to small screens)
+
+**E2E Tests (1 file):**
+- ✅ T067: Ask questions, logout, login, verify history preserved
+- ✅ T068: Manual test scenario (3 questions, close browser, reopen)
+- ✅ Switch between conversations loads correct messages
+- ✅ Delete conversation removes it from list
+
+**Backend (Already Complete):**
+- ✅ GET /api/chat/conversations - List conversations with pagination
+- ✅ GET /api/chat/conversations/{id}/messages - Get messages
+- ✅ DELETE /api/chat/conversations/{id} - Delete conversation
+- ✅ ChatService methods: get_user_conversations(), get_conversation_messages()
+
+### Files Modified
+
+**Created (3 files):**
+- textbook/src/components/ChatPanel/ConversationSidebar.tsx
+- textbook/src/components/ChatPanel/ConversationSidebar.module.css
+- textbook/tests/e2e/chat-history.spec.ts
+
+**Modified (2 files):**
+- textbook/src/components/ChatPanel/index.tsx
+- textbook/src/components/ChatPanel/styles.module.css
+
+### Technical Details
+
+**ConversationSidebar Features:**
+- Displays conversations ordered by updated_at (most recent first)
+- Shows title (auto-generated from first question, max 50 chars)
+- Shows message count and relative time
+- Hover effects and active state styling
+- Delete button appears on hover
+- Loading state and empty state
+- Uses Docusaurus CSS variables for theme matching
+
+**ChatPanel Layout:**
+- Two-column flex layout: sidebar (250px) + main area (flex: 1)
+- Sidebar has border-right separator
+- Main area contains message list + input
+- Mobile: sidebar collapses to full width on small screens
+- Panel width increased from 400px to 700px to accommodate sidebar
+
+**Time Formatting:**
+- <1 min: "Just now"
+- <60 min: "Xm ago"
+- <24 hours: "Xh ago"
+- <7 days: "Xd ago"
+- ≥7 days: Full date (e.g., "2/25/2026")
+
+### Testing Strategy
+
+**E2E Tests Cover:**
+1. Create multiple conversations
+2. Switch between conversations
+3. Verify messages load correctly per conversation
+4. Close and reopen panel - conversations persist
+5. Reload page (simulate logout/login) - history preserved
+6. Delete conversation - removed from list
+7. Empty state when no conversations
+
+**Manual Testing:**
+1. Open chat, ask question
+2. Create new conversation
+3. Ask different question
+4. Switch between conversations
+5. Close browser, reopen
+6. Verify all conversations and messages preserved
+
+### Current Status
+
+**Phase 5 Complete: 10/10 tasks (100%)**
+- T059-T061: Backend conversation retrieval ✅
+- T062-T066: Frontend sidebar UI ✅
+- T067-T068: E2E tests ✅
+
+**RAG Chatbot Progress: 66/115 tasks (57%)**
+- Phase 1: Setup ✅
+- Phase 2: Foundational ✅
+- Phase 3: User Story 1 (Ask Questions) ✅
+- Phase 4: User Story 2 (Selection Mode) ✅
+- Phase 5: User Story 3 (Chat History) ✅
+- Phase 6: User Story 4 (Error Handling) - Next
+- Phase 7: User Story 5 (Theme Matching) - Pending
+- Phase 8: Polish & Production - Pending
+
+### Next Steps
+
+**Phase 6: Error Handling (11 tasks)**
+- Implement user-friendly error messages
+- Add error handling middleware
+- Create ErrorMessage component
+- Handle authentication errors, network errors, service unavailable
+- Write E2E tests for error scenarios
+
+---
+
 ## 2026-02-25 - Vector Search Fix: Confidence Threshold Adjustment
 
 ### Session Summary

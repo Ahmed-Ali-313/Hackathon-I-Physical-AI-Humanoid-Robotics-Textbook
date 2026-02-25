@@ -1,6 +1,4 @@
-#!/bin/sh
-'''exec' "/mnt/e/ai  native book'/backend/venv/bin/python3" "$0" "$@"
-' '''
+#!/mnt/e/ai-native-book/backend/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

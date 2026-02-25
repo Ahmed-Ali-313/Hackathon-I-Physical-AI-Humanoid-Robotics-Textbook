@@ -8,6 +8,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useChatContext } from '../../contexts/ChatContext';
 import { useTextSelection } from '../../hooks/useTextSelection';
+import { useChat } from '../../hooks/useChat';
+import ConversationSidebar from './ConversationSidebar';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import styles from './styles.module.css';
@@ -15,7 +17,15 @@ import styles from './styles.module.css';
 export default function ChatPanel(): JSX.Element | null {
   const { isPanelOpen, setIsPanelOpen, currentConversation, error } = useChatContext();
   const { selectedText, metadata, clearSelection } = useTextSelection();
+  const { loadConversations } = useChat();
   const panelRef = useRef<HTMLDivElement>(null);
+
+  // Load conversations when panel opens
+  useEffect(() => {
+    if (isPanelOpen) {
+      loadConversations();
+    }
+  }, [isPanelOpen, loadConversations]);
 
   // Close panel on Escape key
   useEffect(() => {
@@ -123,14 +133,20 @@ export default function ChatPanel(): JSX.Element | null {
 
         {/* Content */}
         <div className={styles.content}>
-          {/* Message list */}
-          <div className={styles.messageArea}>
-            <MessageList />
-          </div>
+          {/* Conversation sidebar */}
+          <ConversationSidebar />
 
-          {/* Input area */}
-          <div className={styles.inputArea}>
-            <MessageInput selectedText={selectedText} selectedTextMetadata={metadata} />
+          {/* Main chat area */}
+          <div className={styles.mainArea}>
+            {/* Message list */}
+            <div className={styles.messageArea}>
+              <MessageList />
+            </div>
+
+            {/* Input area */}
+            <div className={styles.inputArea}>
+              <MessageInput selectedText={selectedText} selectedTextMetadata={metadata} />
+            </div>
           </div>
         </div>
       </div>
