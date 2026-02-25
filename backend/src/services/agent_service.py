@@ -269,11 +269,10 @@ Remember: Your goal is to help students learn effectively by providing accurate,
         Returns:
             Response dictionary
         """
-        # Step 1: Search Qdrant for relevant chunks (0.7 threshold, top-5)
+        # Step 1: Search Qdrant for relevant chunks (uses config threshold, top-5)
         search_results = await vector_search_tool.execute(
             query=question,
             top_k=5,
-            confidence_threshold=0.7,
         )
 
         # Step 2: Retrieve and format context
