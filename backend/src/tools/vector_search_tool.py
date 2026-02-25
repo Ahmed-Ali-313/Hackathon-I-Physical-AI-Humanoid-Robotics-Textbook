@@ -28,7 +28,7 @@ class VectorSearchTool:
         self,
         query: str,
         top_k: int = 5,
-        confidence_threshold: float = 0.7,
+        confidence_threshold: float = None,
     ) -> List[Dict[str, Any]]:
         """
         Execute vector search for query.
@@ -36,7 +36,7 @@ class VectorSearchTool:
         Args:
             query: User's question
             top_k: Number of results to return (default: 5)
-            confidence_threshold: Minimum confidence score (default: 0.7)
+            confidence_threshold: Minimum confidence score (default: uses config value)
 
         Returns:
             List of search results with content, metadata, and confidence scores
@@ -52,7 +52,7 @@ class VectorSearchTool:
             # Generate embedding for query
             query_embedding = await self.embedding_service.generate_embedding(query)
 
-            # Search Qdrant
+            # Search Qdrant (uses config threshold if not specified)
             results = await self.vector_service.search(
                 query_vector=query_embedding,
                 top_k=top_k,
@@ -88,8 +88,8 @@ class VectorSearchTool:
                     },
                     "confidence_threshold": {
                         "type": "number",
-                        "description": "Minimum confidence score (0.0-1.0, default: 0.7)",
-                        "default": 0.7,
+                        "description": "Minimum confidence score (0.0-1.0, default: uses config)",
+                        "default": None,
                     },
                 },
                 "required": ["query"],
