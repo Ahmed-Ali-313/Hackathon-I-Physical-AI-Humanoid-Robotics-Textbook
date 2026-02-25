@@ -186,6 +186,10 @@ Remember: Your goal is to help students learn effectively by providing accurate,
         if not question or not question.strip():
             raise ValueError("Question cannot be empty")
 
+        # Log request
+        logger.info(f"Generating response for question: {question[:100]}...")
+        logger.debug(f"Selection mode: {bool(selected_text)}")
+
         try:
             # Get tools from registry
             vector_search_tool = self._get_tool("vector_search")
@@ -193,19 +197,28 @@ Remember: Your goal is to help students learn effectively by providing accurate,
 
             # Selection mode: Use selected text as context (FR-014, FR-015)
             if selected_text and selected_text.strip():
-                return await self._generate_response_with_selection(
+                logger.info("Using selection mode")
+                response = await self._generate_response_with_selection(
                     question=question,
                     selected_text=selected_text,
                     selected_text_metadata=selected_text_metadata,
                     retrieve_context_tool=retrieve_context_tool,
                 )
+                logger.info(f"Selection mode response generated (confidence: {response['confidence_score']:.2f})")
+                return response
 
             # Normal mode: RAG with vector search
-            return await self._generate_response_with_rag(
+            logger.info("Using RAG mode with vector search")
+            response = await self._generate_response_with_rag(
                 question=question,
                 vector_search_tool=vector_search_tool,
                 retrieve_context_tool=retrieve_context_tool,
             )
+            logger.info(
+                f"RAG response generated (confidence: {response['confidence_score']:.2f}, "
+                f"sources: {len(response['source_references'])})"
+            )
+            return response
 
         except ConnectionError as e:
             logger.error(f"Qdrant connection error: {str(e)}")
