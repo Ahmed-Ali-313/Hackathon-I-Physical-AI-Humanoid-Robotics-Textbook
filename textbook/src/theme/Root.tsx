@@ -4,12 +4,14 @@
  * Wraps the entire app with AuthProvider, PersonalizationProvider, and ChatProvider
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { AuthProvider } from '../contexts/AuthContext';
 import { PersonalizationProvider } from '../contexts/PersonalizationContext';
 import { ChatProvider } from '../contexts/ChatContext';
 import ChatButton from '../components/ChatButton';
-import ChatPanel from '../components/ChatPanel';
+
+// T089: Lazy load ChatPanel for better performance (code splitting)
+const ChatPanel = lazy(() => import('../components/ChatPanel'));
 
 // This component wraps the entire app
 export default function Root({ children }) {
@@ -19,7 +21,9 @@ export default function Root({ children }) {
         <ChatProvider>
           {children}
           <ChatButton />
-          <ChatPanel />
+          <Suspense fallback={<div />}>
+            <ChatPanel />
+          </Suspense>
         </ChatProvider>
       </PersonalizationProvider>
     </AuthProvider>

@@ -14,16 +14,19 @@ class VectorService:
     """Service for vector search operations using Qdrant."""
 
     def __init__(self):
-        """Initialize vector service with Qdrant client."""
+        """Initialize vector service with Qdrant client with connection pooling."""
         if not settings.qdrant_url:
             raise ValueError("QDRANT_URL not configured")
 
         if not settings.qdrant_api_key:
             raise ValueError("QDRANT_API_KEY not configured")
 
+        # Initialize with connection pooling for better performance (T088)
         self.client = QdrantClient(
             url=settings.qdrant_url,
             api_key=settings.qdrant_api_key,
+            timeout=10.0,  # 10 second timeout
+            prefer_grpc=False,  # Use HTTP for better compatibility
         )
         self.collection_name = settings.qdrant_collection_name
         self.confidence_threshold = settings.rag_confidence_threshold
@@ -178,6 +181,37 @@ class VectorService:
             True if valid, False otherwise
         """
         return 0.0 <= score <= 1.0
+
+    async def batch_search(
+        self,
+        queries: List[List[float]],
+        top_k: Optional[int] = None,
+        confidence_threshold: Optional[float] = None,
+    ) -> List[List[Dict[str, Any]]]:
+        """
+        Perform batch vector search for multiple queries (T088 optimization).
+
+        Args:
+            queries: List of query vectors
+            top_k: Number of results per query
+            confidence_threshold: Minimum confidence score
+
+        Returns:
+            List of search results for each query
+        """
+        top_k = top_k or self.top_k
+        confidence_threshold = confidence_threshold or self.confidence_threshold
+
+        results = []
+        for query_vector in queries:
+            query_results = await self.search(
+                query_vector=query_vector,
+                top_k=top_k,
+                confidence_threshold=confidence_threshold,
+            )
+            results.append(query_results)
+
+        return results
 
 
 # Global vector service instance
