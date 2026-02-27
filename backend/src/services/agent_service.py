@@ -38,6 +38,11 @@ class AgentService:
         # System prompt for tone and pedagogy (FR-027 to FR-030)
         self.system_prompt = self._build_system_prompt()
 
+        # Initialize OpenAI client immediately (warm-up for faster first response)
+        import openai
+        self.openai_client = openai.OpenAI(api_key=settings.openai_api_key)
+        logger.info("OpenAI client initialized and ready")
+
     def _build_system_prompt(self) -> str:
         """
         Build system prompt for agent with tone and pedagogy guidelines.
@@ -553,11 +558,6 @@ Remember: Your goal is to help students learn effectively by providing accurate,
         Returns:
             Generated response string
         """
-        import openai
-
-        # Initialize OpenAI client
-        client = openai.OpenAI(api_key=self._get_api_key())
-
         # Build user prompt with context
         if is_selection:
             user_prompt = f"""Question: {question}
@@ -575,8 +575,8 @@ Textbook Context:
 Please answer the question based on the textbook content above. Provide a COMPLETE answer."""
 
         try:
-            # Call OpenAI API
-            response = client.chat.completions.create(
+            # Call OpenAI API using pre-initialized client
+            response = self.openai_client.chat.completions.create(
                 model=self.model_name,
                 messages=[
                     {"role": "system", "content": self.system_prompt},
@@ -605,11 +605,6 @@ Please answer the question based on the textbook content above. Provide a COMPLE
         Yields:
             Chunks of the response as they are generated
         """
-        import openai
-
-        # Initialize OpenAI client
-        client = openai.OpenAI(api_key=self._get_api_key())
-
         # Build user prompt with context
         if is_selection:
             user_prompt = f"""Question: {question}
@@ -627,8 +622,8 @@ Textbook Context:
 Please answer the question based on the textbook content above. Provide a COMPLETE answer."""
 
         try:
-            # Call OpenAI API with streaming
-            stream = client.chat.completions.create(
+            # Call OpenAI API with streaming using pre-initialized client
+            stream = self.openai_client.chat.completions.create(
                 model=self.model_name,
                 messages=[
                     {"role": "system", "content": self.system_prompt},
