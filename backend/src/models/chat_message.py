@@ -5,7 +5,7 @@ Represents user questions and AI responses with source attribution.
 """
 
 from sqlalchemy import Column, String, Text, DateTime, ForeignKey, CheckConstraint, Numeric
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from src.database import Base
@@ -14,8 +14,8 @@ import json
 
 
 def generate_uuid():
-    """Generate UUID as string for compatibility."""
-    return str(uuid.uuid4())
+    """Generate UUID for PostgreSQL."""
+    return uuid.uuid4()
 
 
 class ChatMessage(Base):
@@ -29,10 +29,10 @@ class ChatMessage(Base):
     __tablename__ = "chat_messages"
 
     # Primary key
-    id = Column(String, primary_key=True, default=generate_uuid)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=generate_uuid)
 
     # Foreign keys
-    conversation_id = Column(String, ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False, index=True)
+    conversation_id = Column(UUID(as_uuid=True), ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # Message content
     content = Column(Text, nullable=False)
@@ -40,7 +40,7 @@ class ChatMessage(Base):
 
     # AI response metadata (only for assistant messages)
     confidence_score = Column(Numeric(3, 2), nullable=True)  # 0.00-1.00
-    source_references = Column(Text, nullable=False, default="[]")  # JSON array as text for SQLite compatibility
+    source_references = Column(JSONB, nullable=False, default=list)  # JSONB for PostgreSQL
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
@@ -52,7 +52,7 @@ class ChatMessage(Base):
     __table_args__ = (
         CheckConstraint("sender_type IN ('user', 'assistant')", name="check_sender_type_valid"),
         CheckConstraint("length(content) > 0", name="check_content_not_empty"),
-        CheckConstraint("length(content) <= 2000", name="check_content_max_length"),
+        CheckConstraint("length(content) <= 4000", name="check_content_max_length"),
         CheckConstraint(
             "confidence_score IS NULL OR (confidence_score >= 0.0 AND confidence_score <= 1.0)",
             name="check_confidence_score_range"
@@ -66,8 +66,8 @@ class ChatMessage(Base):
     def to_dict(self):
         """Convert message to dictionary."""
         return {
-            "id": self.id,
-            "conversation_id": self.conversation_id,
+            "id": str(self.id),
+            "conversation_id": str(self.conversation_id),
             "content": self.content,
             "sender_type": self.sender_type,
             "confidence_score": float(self.confidence_score) if self.confidence_score else None,
@@ -85,6 +85,11 @@ class ChatMessage(Base):
         if not self.source_references:
             return []
 
+        # JSONB column returns list directly
+        if isinstance(self.source_references, list):
+            return self.source_references
+
+        # Fallback for string (shouldn't happen with JSONB)
         try:
             return json.loads(self.source_references)
         except (json.JSONDecodeError, TypeError):
@@ -108,7 +113,8 @@ class ChatMessage(Base):
             if "url" not in ref:
                 raise ValueError("Each source reference must have a 'url' field")
 
-        self.source_references = json.dumps(references)
+        # JSONB column accepts list directly
+        self.source_references = references
 
     @staticmethod
     def create_user_message(conversation_id: str, content: str):
@@ -150,8 +156,8 @@ class ChatMessage(Base):
         Returns:
             ChatMessage instance
         """
-        if len(content) > 2000:
-            raise ValueError("Assistant message cannot exceed 2000 characters")
+        if len(content) > 4000:
+            raise ValueError("Assistant message cannot exceed 4000 characters")
 
         if not (0.0 <= confidence_score <= 1.0):
             raise ValueError("Confidence score must be between 0.0 and 1.0")

@@ -225,22 +225,23 @@ async def update_preferences(
     await db.commit()
     await db.refresh(profile)
 
+    # TODO: Re-enable audit logging after schema migration
     # Create audit log entries for changed fields
     # Convert user_id string to UUID
-    user_uuid = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
-
-    for change in changes:
-        history_entry = PreferenceHistory(
-            user_id=user_uuid,
-            profile_id=profile.id,
-            field_name=change["field_name"],
-            old_value=change["old_value"],
-            new_value=change["new_value"],
-            change_source=change_source
-        )
-        db.add(history_entry)
-
-    await db.commit()
+    # user_uuid = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
+    #
+    # for change in changes:
+    #     history_entry = PreferenceHistory(
+    #         user_id=user_uuid,
+    #         profile_id=profile.id,
+    #         field_name=change["field_name"],
+    #         old_value=change["old_value"],
+    #         new_value=change["new_value"],
+    #         change_source=change_source
+    #     )
+    #     db.add(history_entry)
+    #
+    # await db.commit()
 
     # Invalidate cache after successful update
     _preference_cache.invalidate(f"user:{user_id}")
@@ -309,22 +310,23 @@ async def clear_preferences(
     await db.commit()
     await db.refresh(profile)
 
+    # TODO: Re-enable audit logging after schema migration
     # Create audit log entries
     # Convert user_id string to UUID
-    user_uuid = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
-
-    for change in changes:
-        history_entry = PreferenceHistory(
-            user_id=user_uuid,
-            profile_id=profile.id,
-            field_name=change["field_name"],
-            old_value=change["old_value"],
-            new_value=change["new_value"],
-            change_source=change_source
-        )
-        db.add(history_entry)
-
-    await db.commit()
+    # user_uuid = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
+    #
+    # for change in changes:
+    #     history_entry = PreferenceHistory(
+    #         user_id=user_uuid,
+    #         profile_id=profile.id,
+    #         field_name=change["field_name"],
+    #         old_value=change["old_value"],
+    #         new_value=change["new_value"],
+    #         change_source=change_source
+    #     )
+    #     db.add(history_entry)
+    #
+    # await db.commit()
 
     # Invalidate cache
     _preference_cache.invalidate(f"user:{user_id}")

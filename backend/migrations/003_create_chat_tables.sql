@@ -3,19 +3,18 @@
 -- Description: Conversations, chat messages, and chat sessions for RAG chatbot
 
 -- Conversations table: Groups messages, auto-generated title, 12-month retention
+-- Note: max_conversations_per_user (50) enforced in application code
 CREATE TABLE IF NOT EXISTS conversations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     title VARCHAR(100) NOT NULL,
     message_count INTEGER DEFAULT 0 CHECK (message_count >= 0),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT max_conversations_per_user CHECK (
-        (SELECT COUNT(*) FROM conversations WHERE user_id = conversations.user_id) <= 50
-    )
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Chat messages table: User questions and AI responses with source attribution
+-- Note: max_messages_per_conversation (500) enforced in application code
 CREATE TABLE IF NOT EXISTS chat_messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
@@ -23,10 +22,7 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     sender_type VARCHAR(10) NOT NULL CHECK (sender_type IN ('user', 'assistant')),
     confidence_score DECIMAL(3, 2) CHECK (confidence_score >= 0.0 AND confidence_score <= 1.0),
     source_references JSONB DEFAULT '[]'::jsonb,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT max_messages_per_conversation CHECK (
-        (SELECT COUNT(*) FROM chat_messages WHERE conversation_id = chat_messages.conversation_id) <= 500
-    )
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Chat sessions table: Tracks active sessions, 30-minute expiry

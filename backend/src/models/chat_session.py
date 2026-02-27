@@ -5,6 +5,7 @@ Represents active user sessions with 30-minute expiry.
 """
 
 from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from src.database import Base
@@ -13,8 +14,8 @@ from datetime import datetime, timedelta
 
 
 def generate_uuid():
-    """Generate UUID as string for compatibility."""
-    return str(uuid.uuid4())
+    """Generate UUID for PostgreSQL."""
+    return uuid.uuid4()
 
 
 class ChatSession(Base):
@@ -28,11 +29,11 @@ class ChatSession(Base):
     __tablename__ = "chat_sessions"
 
     # Primary key
-    id = Column(String, primary_key=True, default=generate_uuid)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=generate_uuid)
 
     # Foreign keys
-    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    conversation_id = Column(String, ForeignKey("conversations.id", ondelete="SET NULL"), nullable=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    conversation_id = Column(UUID(as_uuid=True), ForeignKey("conversations.id", ondelete="SET NULL"), nullable=True)
 
     # Session state
     is_active = Column(Boolean, default=True, nullable=False, index=True)

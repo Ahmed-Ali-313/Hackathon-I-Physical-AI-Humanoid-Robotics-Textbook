@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useChatContext } from '../../contexts/ChatContext';
 import TypingIndicator from './TypingIndicator';
 import SourceLink from '../SourceLink';
@@ -49,7 +50,13 @@ export default function MessageList(): JSX.Element {
 
           {/* Message content */}
           <div className={styles.messageContent}>
-            <div className={styles.messageText}>{message.content}</div>
+            <div className={styles.messageText}>
+              {message.sender_type === 'assistant' ? (
+                <ReactMarkdown>{message.content}</ReactMarkdown>
+              ) : (
+                message.content
+              )}
+            </div>
 
             {/* Source references (for assistant messages) */}
             {message.sender_type === 'assistant' && message.source_references && message.source_references.length > 0 && (

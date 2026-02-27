@@ -24,18 +24,26 @@ const MIN_SELECTION_LENGTH = 10;
 export function useTextSelection(): UseTextSelectionReturn {
   const [selectedText, setSelectedText] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<TextSelectionMetadata | null>(null);
+  const [isSelectionLocked, setIsSelectionLocked] = useState(false);
 
   const clearSelection = useCallback(() => {
     setSelectedText(null);
     setMetadata(null);
+    setIsSelectionLocked(false);
   }, []);
 
   useEffect(() => {
     const handleSelectionChange = () => {
+      // If selection is locked (user already captured it), don't update
+      if (isSelectionLocked) {
+        return;
+      }
+
       const selection = window.getSelection();
 
       if (!selection || selection.rangeCount === 0) {
-        clearSelection();
+        // Don't clear if we already have a selection stored
+        // This prevents clearing when user clicks elsewhere
         return;
       }
 
@@ -43,7 +51,10 @@ export function useTextSelection(): UseTextSelectionReturn {
 
       // Ignore short selections
       if (!text || text.length < MIN_SELECTION_LENGTH) {
-        clearSelection();
+        // Only clear if we don't have a previous selection
+        if (!selectedText) {
+          clearSelection();
+        }
         return;
       }
 
@@ -83,6 +94,7 @@ export function useTextSelection(): UseTextSelectionReturn {
 
       setSelectedText(text);
       setMetadata(Object.keys(extractedMetadata).length > 0 ? extractedMetadata : null);
+      setIsSelectionLocked(true); // Lock the selection once captured
     };
 
     // Listen for selection changes
@@ -91,7 +103,7 @@ export function useTextSelection(): UseTextSelectionReturn {
     return () => {
       document.removeEventListener('selectionchange', handleSelectionChange);
     };
-  }, [clearSelection]);
+  }, [clearSelection, selectedText, isSelectionLocked]);
 
   return {
     selectedText,

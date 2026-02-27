@@ -5,6 +5,7 @@ Represents a conversation thread with auto-generated title and message tracking.
 """
 
 from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, CheckConstraint
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from src.models.user import User
@@ -13,8 +14,8 @@ import uuid
 
 
 def generate_uuid():
-    """Generate UUID as string for compatibility."""
-    return str(uuid.uuid4())
+    """Generate UUID for PostgreSQL."""
+    return uuid.uuid4()
 
 
 class Conversation(Base):
@@ -28,10 +29,10 @@ class Conversation(Base):
     __tablename__ = "conversations"
 
     # Primary key
-    id = Column(String, primary_key=True, default=generate_uuid)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=generate_uuid)
 
     # Foreign keys
-    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # Conversation metadata
     title = Column(String(100), nullable=False)
@@ -58,8 +59,8 @@ class Conversation(Base):
     def to_dict(self):
         """Convert conversation to dictionary."""
         return {
-            "id": self.id,
-            "user_id": self.user_id,
+            "id": str(self.id),
+            "user_id": str(self.user_id),
             "title": self.title,
             "message_count": self.message_count,
             "created_at": self.created_at.isoformat() if self.created_at else None,

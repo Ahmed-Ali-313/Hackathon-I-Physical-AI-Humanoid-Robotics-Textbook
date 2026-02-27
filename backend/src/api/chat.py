@@ -344,7 +344,6 @@ async def send_message_stream(
     conversation_id: str,
     request: SendMessageRequest,
     current_user: dict = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
 ):
     """
     Send a message to a conversation with streaming response.
@@ -353,7 +352,6 @@ async def send_message_stream(
         conversation_id: Conversation ID
         request: Message request
         current_user: Authenticated user
-        chat_service: Chat service instance
 
     Returns:
         Server-Sent Events stream of the AI response
@@ -363,103 +361,117 @@ async def send_message_stream(
         403: Unauthorized access to conversation
         400: Invalid message content
     """
-    # Verify conversation exists and user has access
-    conversation = await chat_service.get_conversation(
-        conversation_id=conversation_id,
-        user_id=current_user["id"],
-    )
+    # Verify conversation exists and user has access (use temporary session)
+    from src.database import AsyncSessionLocal
 
-    if not conversation:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Conversation not found",
+    async with AsyncSessionLocal() as verify_db:
+        verify_service = ChatService(verify_db)
+        conversation = await verify_service.get_conversation(
+            conversation_id=conversation_id,
+            user_id=current_user["id"],
         )
 
-    # Verify user owns the conversation
-    if conversation.user_id != current_user["id"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Unauthorized access to conversation",
-        )
+        if not conversation:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Conversation not found",
+            )
+
+        # Verify user owns the conversation
+        if conversation.user_id != current_user["id"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Unauthorized access to conversation",
+            )
 
     async def generate_stream():
         """Generate SSE stream for the response."""
-        try:
-            # Save user message first
-            user_message = await chat_service._save_user_message(
-                conversation=conversation,
-                content=request.content,
-            )
+        # Create a new database session for the entire streaming duration
+        async with AsyncSessionLocal() as stream_db:
+            try:
+                chat_service = ChatService(stream_db)
 
-            # Send user message event
-            yield f"data: {json.dumps({'type': 'user_message', 'message': user_message.to_dict()})}\n\n"
+                # Get conversation again in this session
+                conversation = await chat_service.get_conversation(
+                    conversation_id=conversation_id,
+                    user_id=current_user["id"],
+                )
 
-            # Get context for RAG
-            from src.tools.vector_search_tool import VectorSearchTool
-            from src.tools.retrieve_context_tool import RetrieveContextTool
+                # Save user message first
+                user_message = await chat_service._save_user_message(
+                    conversation=conversation,
+                    content=request.content,
+                )
 
-            vector_search_tool = VectorSearchTool()
-            retrieve_context_tool = RetrieveContextTool()
+                # Send user message event
+                yield f"data: {json.dumps({'type': 'user_message', 'message': user_message.to_dict()})}\n\n"
 
-            # Determine mode and get context
-            if request.selected_text and request.selected_text.strip():
-                # Selection mode
-                metadata = request.selected_text_metadata or {}
-                mock_search_result = [{
-                    "content": request.selected_text,
-                    "confidence": 1.0,
-                    "metadata": {
-                        "chapter": metadata.get("chapter", "selected"),
-                        "module": metadata.get("module", "selected"),
-                        "section": metadata.get("section", "selected"),
-                        "url": metadata.get("url", ""),
-                    }
-                }]
-                context_data = await retrieve_context_tool.execute(mock_search_result)
-                sources = retrieve_context_tool.format_sources_for_response(context_data["sources"])
-                confidence = 1.0
-            else:
-                # RAG mode
-                search_results = await vector_search_tool.execute(query=request.content, top_k=5)
-                context_data = await retrieve_context_tool.execute(search_results)
+                # Get context for RAG
+                from src.tools.vector_search_tool import VectorSearchTool
+                from src.tools.retrieve_context_tool import RetrieveContextTool
 
-                if not context_data["has_context"]:
-                    # No context found - send uncertainty response
-                    uncertainty_msg = (
-                        "I don't have information about this in the textbook. "
-                        "This topic may not be covered in the current chapters."
-                    )
-                    yield f"data: {json.dumps({'type': 'content', 'chunk': uncertainty_msg})}\n\n"
-                    yield f"data: {json.dumps({'type': 'done', 'confidence': 0.0, 'sources': []})}\n\n"
-                    return
+                vector_search_tool = VectorSearchTool()
+                retrieve_context_tool = RetrieveContextTool()
 
-                sources = retrieve_context_tool.format_sources_for_response(context_data["sources"])
-                confidence = sum(s.get("confidence", 0.0) for s in context_data["sources"]) / len(context_data["sources"])
+                # Determine mode and get context
+                if request.selected_text and request.selected_text.strip():
+                    # Selection mode
+                    metadata = request.selected_text_metadata or {}
+                    mock_search_result = [{
+                        "content": request.selected_text,
+                        "confidence": 1.0,
+                        "metadata": {
+                            "chapter": metadata.get("chapter", "selected"),
+                            "module": metadata.get("module", "selected"),
+                            "section": metadata.get("section", "selected"),
+                            "url": metadata.get("url", ""),
+                        }
+                    }]
+                    context_data = await retrieve_context_tool.execute(mock_search_result)
+                    sources = retrieve_context_tool.format_sources_for_response(context_data["sources"])
+                    confidence = 1.0
+                else:
+                    # RAG mode
+                    search_results = await vector_search_tool.execute(query=request.content, top_k=5)
+                    context_data = await retrieve_context_tool.execute(search_results)
 
-            # Stream the response
-            full_response = ""
-            async for chunk in agent_service._generate_streaming_response(
-                question=request.content,
-                context=context_data["context"],
-                is_selection=bool(request.selected_text),
-            ):
-                full_response += chunk
-                yield f"data: {json.dumps({'type': 'content', 'chunk': chunk})}\n\n"
+                    if not context_data["has_context"]:
+                        # No context found - send uncertainty response
+                        uncertainty_msg = (
+                            "I don't have information about this in the textbook. "
+                            "This topic may not be covered in the current chapters."
+                        )
+                        yield f"data: {json.dumps({'type': 'content', 'chunk': uncertainty_msg})}\n\n"
+                        yield f"data: {json.dumps({'type': 'done', 'confidence': 0.0, 'sources': []})}\n\n"
+                        return
 
-            # Save assistant message
-            assistant_message = await chat_service._save_assistant_message(
-                conversation=conversation,
-                content=full_response,
-                confidence_score=confidence,
-                source_references=sources,
-            )
+                    sources = retrieve_context_tool.format_sources_for_response(context_data["sources"])
+                    confidence = sum(s.get("confidence", 0.0) for s in context_data["sources"]) / len(context_data["sources"])
 
-            # Send completion event
-            yield f"data: {json.dumps({'type': 'done', 'message': assistant_message.to_dict()})}\n\n"
+                # Stream the response
+                full_response = ""
+                async for chunk in agent_service._generate_streaming_response(
+                    question=request.content,
+                    context=context_data["context"],
+                    is_selection=bool(request.selected_text),
+                ):
+                    full_response += chunk
+                    yield f"data: {json.dumps({'type': 'content', 'chunk': chunk})}\n\n"
 
-        except Exception as e:
-            logger.error(f"Streaming error: {str(e)}", exc_info=True)
-            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+                # Save assistant message
+                assistant_message = await chat_service._save_assistant_message(
+                    conversation=conversation,
+                    content=full_response,
+                    confidence_score=confidence,
+                    source_references=sources,
+                )
+
+                # Send completion event
+                yield f"data: {json.dumps({'type': 'done', 'message': assistant_message.to_dict()})}\n\n"
+
+            except Exception as e:
+                logger.error(f"Streaming error: {str(e)}", exc_info=True)
+                yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
 
     return StreamingResponse(
         generate_stream(),
