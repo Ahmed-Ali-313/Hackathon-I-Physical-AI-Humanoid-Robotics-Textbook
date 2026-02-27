@@ -5,7 +5,7 @@
  * Supports selection mode by sending selected text with message.
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useChatContext } from '../../contexts/ChatContext';
 import { useChat } from '../../hooks/useChat';
 import styles from './MessageInput.module.css';
@@ -24,6 +24,21 @@ export default function MessageInput({ selectedText, selectedTextMetadata }: Mes
   const maxLength = 500;
   const remainingChars = maxLength - input.length;
 
+  // Auto-populate input with prompt when text is selected
+  useEffect(() => {
+    if (selectedText && !input) {
+      // Auto-fill with a prompt about the selected text
+      setInput(`Explain this: "${selectedText.substring(0, 100)}${selectedText.length > 100 ? '...' : ''}"`);
+
+      // Focus the textarea
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        // Move cursor to beginning so user can edit the prompt
+        textareaRef.current.setSelectionRange(0, 0);
+      }
+    }
+  }, [selectedText]); // Removed 'input' from dependencies to prevent re-triggering
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -31,19 +46,22 @@ export default function MessageInput({ selectedText, selectedTextMetadata }: Mes
       return;
     }
 
-    // Send message with selected text if available
-    await sendMessage(
-      input.trim(),
-      selectedText || undefined,
-      selectedTextMetadata || undefined
-    );
+    const messageToSend = input.trim();
 
+    // Clear input IMMEDIATELY before sending
     setInput('');
 
     // Reset textarea height
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
+
+    // Send message with selected text if available
+    await sendMessage(
+      messageToSend,
+      selectedText || undefined,
+      selectedTextMetadata || undefined
+    );
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

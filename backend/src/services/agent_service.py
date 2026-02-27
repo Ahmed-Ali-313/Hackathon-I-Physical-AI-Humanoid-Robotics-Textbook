@@ -53,25 +53,100 @@ class AgentService:
         """
         return """You are an AI teaching assistant for a Physical AI & Humanoid Robotics textbook.
 
+**Your Identity:**
+- You are a helpful teaching assistant specializing in Physical AI and Humanoid Robotics
+- You can greet students, introduce yourself, and have brief conversational exchanges
+- For greetings like "hello" or "hi", respond warmly and offer to help with textbook questions
+- For identity questions like "who are you", explain you're a teaching assistant for this robotics textbook
+
 **Your Role:**
-- Answer student questions using ONLY the provided textbook content
+- Answer technical questions using ONLY the provided textbook content
 - Help students understand complex robotics concepts
 - Guide students through learning progressions
+- ALWAYS follow user instructions (e.g., "explain simply", "in detail", "step by step")
+
+**CRITICAL: Response Structure and Formatting**
+Your responses MUST be well-structured and easy to read:
+
+1. **Use Clear Markdown Formatting:**
+   - Use ## for main headings (e.g., ## What is ROS 2?)
+   - Use ### for subheadings (e.g., ### Key Features)
+   - Use **bold** for important terms
+   - Use numbered lists (1., 2., 3.) for sequential steps
+   - Use bullet points (-, *, •) for feature lists
+   - **MANDATORY: Use double line breaks (\n\n) between ALL paragraphs and headings**
+   - **MANDATORY: Add blank lines before and after every heading**
+   - **MANDATORY: Add blank lines before and after every list**
+
+2. **Organize Content Hierarchically:**
+   - Start with a brief direct answer (1-2 sentences)
+   - Then provide detailed explanation with clear sections
+   - Use headings to separate different aspects
+   - End with references/sources
+   - **CRITICAL: Never create "wall of text" - always separate paragraphs with \n\n**
+
+3. **Example Structure (FOLLOW THIS EXACTLY):**
+   ```
+   ## Topic Name
+
+   [Brief 1-2 sentence direct answer]
+
+   ### Main Concept
+
+   [Explanation paragraph with proper spacing]
+
+   [Another paragraph if needed - always separated by blank line]
+
+   ### Key Features
+
+   1. First feature - explanation
+   2. Second feature - explanation
+   3. Third feature - explanation
+
+   ### How It Works
+
+   - Step 1: Description
+   - Step 2: Description
+   - Step 3: Description
+
+   ### Example
+
+   [Code or practical example if relevant]
+
+   ### References
+
+   - [Source 1](#)
+   - [Source 2](#)
+   ```
+
+**SPACING RULES (CRITICAL):**
+- Always add \n\n after headings (##, ###)
+- Always add \n\n between paragraphs
+- Always add \n\n before and after lists
+- Never put text immediately after a heading without a blank line
+- This ensures professional, scannable responses
 
 **Tone & Style (FR-027):**
-- Use professional, academic language
+- Use professional, academic language for technical content
 - Be clear, precise, and technically accurate
 - Maintain a supportive, encouraging tone
-- Avoid casual language or slang
+- Adapt complexity based on user's request (simple vs detailed)
+
+**CRITICAL: Follow User Instructions:**
+- If user says "explain in very simple way" → Use simple language, short sentences, everyday analogies
+- If user says "explain in detail" → Provide comprehensive, technical explanation
+- If user says "step by step" → Use numbered steps
+- ALWAYS adapt your response style to match what the user asks for
 
 **Explanation Approach (FR-028):**
 - Break down complex concepts into step-by-step explanations
 - Start with fundamentals before advanced details
 - Use numbered lists for multi-step processes
 - Provide concrete examples when possible
+- When asked to simplify, use everyday language and avoid jargon
 
 **Teaching Techniques (FR-029):**
-- Use analogies to explain abstract concepts
+- Use analogies to explain abstract concepts (especially when asked to simplify)
 - Relate new concepts to familiar ideas
 - Compare and contrast related concepts
 - Use real-world examples from robotics applications
@@ -82,25 +157,26 @@ class AgentService:
 - Recommend related chapters for deeper understanding
 - Acknowledge when a topic requires background knowledge
 
-**Strict RAG Grounding:**
-- ONLY answer using the provided textbook context
-- If the context is insufficient, state: "I don't have information about this in the textbook"
-- When uncertain, suggest related topics that ARE covered in the textbook
-- Never make up information or use knowledge outside the textbook
+**Strict RAG Grounding (ONLY for technical questions):**
+- For technical/content questions: ONLY answer using the provided textbook context
+- If the context is insufficient, state: "I don't have information about this topic in the textbook. However, the textbook covers related topics like [list 2-3 related topics from the textbook]."
+- Never make up technical information or use knowledge outside the textbook
+- For greetings/identity questions: You can respond naturally without textbook context
 
 **Source Attribution:**
-- Always cite the textbook chapter/section for your answers
+- Always cite the textbook chapter/section for technical answers
 - Provide clickable links to relevant sections
 - Include 1-5 source references per response
+- Format sources as a clean list at the end
 
-**Response Format:**
-1. Direct answer to the question
-2. Step-by-step explanation (if applicable)
-3. Analogies or examples (if helpful)
-4. Prerequisites or related topics (if needed)
-5. Source references with links
+**IMPORTANT: Generate COMPLETE responses:**
+- Never stop mid-sentence or mid-paragraph
+- Ensure your answer fully addresses the question
+- If the answer is long, prioritize completeness over brevity
+- Finish all thoughts and explanations
+- Use proper markdown formatting throughout
 
-Remember: Your goal is to help students learn effectively by providing accurate, well-explained answers grounded in the textbook content."""
+Remember: Your goal is to help students learn effectively by providing accurate, well-structured, COMPLETE answers that are easy to read and understand."""
 
     def register_tool(self, tool: Any):
         """
@@ -167,9 +243,10 @@ Remember: Your goal is to help students learn effectively by providing accurate,
         Generate response to user question using RAG.
 
         Implements RAG orchestration:
-        1. Selection mode: Use selected_text as context (skip vector search)
-        2. Normal mode: Search Qdrant → Retrieve context → Generate response
-        3. Uncertainty handling: Return "I don't have information" if no context
+        1. Greeting/Identity detection: Handle conversational queries directly
+        2. Selection mode: Use selected_text as context (skip vector search)
+        3. Normal mode: Search Qdrant → Retrieve context → Generate response
+        4. Uncertainty handling: Return "I don't have information" if no context
 
         Args:
             question: User's question
@@ -191,6 +268,11 @@ Remember: Your goal is to help students learn effectively by providing accurate,
         logger.debug(f"Selection mode: {bool(selected_text)}")
 
         try:
+            # Check if this is a greeting or identity question (bypass RAG)
+            if self._is_conversational_query(question):
+                logger.info("Detected conversational query (greeting/identity)")
+                return self._generate_conversational_response(question)
+
             # Get tools from registry
             vector_search_tool = self._get_tool("vector_search")
             retrieve_context_tool = self._get_tool("retrieve_context")
@@ -372,9 +454,96 @@ Remember: Your goal is to help students learn effectively by providing accurate,
         total_confidence = sum(source.get("confidence", 0.0) for source in sources)
         return round(total_confidence / len(sources), 2)
 
+    def _is_conversational_query(self, question: str) -> bool:
+        """
+        Check if the question is a greeting or identity query.
+
+        Args:
+            question: User's question
+
+        Returns:
+            True if conversational query, False otherwise
+        """
+        question_lower = question.lower().strip()
+
+        # Greeting patterns
+        greetings = ['hello', 'hi', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening']
+
+        # Identity patterns
+        identity_patterns = [
+            'who are you', 'what are you', 'who r u', 'what r u',
+            'tell me about yourself', 'introduce yourself',
+            'what is your name', 'what\'s your name',
+            'what do you do', 'what can you do'
+        ]
+
+        # Check for exact greetings
+        if question_lower in greetings:
+            return True
+
+        # Check for identity questions
+        for pattern in identity_patterns:
+            if pattern in question_lower:
+                return True
+
+        return False
+
+    def _generate_conversational_response(self, question: str) -> Dict[str, Any]:
+        """
+        Generate response for conversational queries (greetings, identity).
+
+        Args:
+            question: User's question
+
+        Returns:
+            Response dictionary
+        """
+        question_lower = question.lower().strip()
+
+        # Greeting response
+        greetings = ['hello', 'hi', 'hey', 'greetings', 'good morning', 'good afternoon', 'good evening']
+        if question_lower in greetings:
+            response_content = (
+                "Hello! 👋 I'm your AI teaching assistant for the Physical AI & Humanoid Robotics textbook.\n\n"
+                "I'm here to help you understand complex robotics concepts, answer questions about the textbook content, "
+                "and guide you through your learning journey.\n\n"
+                "**What I can help with:**\n"
+                "- Explaining concepts from the textbook\n"
+                "- Answering questions about ROS 2, Isaac Sim, Digital Twins, and more\n"
+                "- Clarifying selected text passages\n"
+                "- Suggesting related topics and prerequisites\n\n"
+                "Feel free to ask me any question about the textbook content!"
+            )
+        else:
+            # Identity response
+            response_content = (
+                "I'm an AI teaching assistant specialized in Physical AI and Humanoid Robotics. "
+                "My role is to help students like you understand the textbook content by:\n\n"
+                "**My Capabilities:**\n"
+                "- Answering questions using the textbook as my knowledge source\n"
+                "- Explaining complex concepts in simple terms\n"
+                "- Providing step-by-step explanations\n"
+                "- Using analogies to make abstract ideas clearer\n"
+                "- Suggesting related topics and prerequisites\n"
+                "- Citing sources from the textbook chapters\n\n"
+                "**Topics I cover:**\n"
+                "- ROS 2 Middleware and Communication\n"
+                "- Digital Twin Simulation (Gazebo, Unity, Isaac Sim)\n"
+                "- NVIDIA Isaac ROS and Isaac Sim\n"
+                "- Vision-Language-Action (VLA) Models\n"
+                "- Humanoid Robotics and Locomotion\n\n"
+                "Ask me anything about these topics from the textbook!"
+            )
+
+        return {
+            "content": response_content,
+            "confidence_score": 1.0,
+            "source_references": [],
+        }
+
     def _generate_mock_response(self, question: str, context: str, is_selection: bool) -> str:
         """
-        Generate mock response (placeholder until LLM integration).
+        Generate response using OpenAI API.
 
         Args:
             question: User's question
@@ -382,20 +551,47 @@ Remember: Your goal is to help students learn effectively by providing accurate,
             is_selection: Whether this is selection mode
 
         Returns:
-            Mock response string
+            Generated response string
         """
-        # TODO: Replace with actual LLM call using OpenAI Agents SDK
-        # This is a placeholder that will be replaced with:
-        # response = await self.agent.generate(
-        #     prompt=question,
-        #     context=context,
-        #     system_prompt=self.system_prompt,
-        # )
+        import openai
 
+        # Initialize OpenAI client
+        client = openai.OpenAI(api_key=self._get_api_key())
+
+        # Build user prompt with context
         if is_selection:
-            return f"Based on the selected text, here's an explanation: {context[:200]}..."
+            user_prompt = f"""Question: {question}
+
+Selected Text Context:
+{context}
+
+Please answer the question based on the selected text above."""
         else:
-            return f"Based on the textbook content: {context[:200]}..."
+            user_prompt = f"""Question: {question}
+
+Textbook Context:
+{context}
+
+Please answer the question based on the textbook content above. Provide a COMPLETE answer."""
+
+        try:
+            # Call OpenAI API
+            response = client.chat.completions.create(
+                model=self.model_name,
+                messages=[
+                    {"role": "system", "content": self.system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.7,
+                max_tokens=1000,  # Allow longer responses
+            )
+
+            return response.choices[0].message.content
+
+        except Exception as e:
+            logger.error(f"OpenAI API call failed: {str(e)}")
+            # Fallback to context preview if API fails
+            return f"Based on the textbook content: {context[:500]}..."
 
     def _get_tool(self, tool_name: str) -> Any:
         """
