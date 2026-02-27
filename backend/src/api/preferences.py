@@ -34,7 +34,7 @@ router = APIRouter()
 class PreferenceInput(BaseModel):
     """Input schema for creating/updating preferences"""
     workstation_type: Optional[str] = Field(None, description="Type of workstation")
-    edge_kit_available: Optional[str] = Field(None, description="Available edge computing kit")
+    edge_kit_available: Optional[str] = Field(None, description="Available edge computing kit (none, jetson_nano, jetson_orin, raspberry_pi)")
     robot_tier_access: Optional[str] = Field(None, description="Robot hardware tier access")
     ros2_level: Optional[str] = Field(None, description="ROS2 experience level")
     gazebo_level: Optional[str] = Field(None, description="Gazebo experience level")

@@ -6,6 +6,7 @@ Provides REST API for chat conversations and messages.
 
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
@@ -15,6 +16,7 @@ from src.services.agent_service import agent_service
 from src.tools.tool_registry import tool_registry
 from src.middleware.error_handler import handle_validation_error
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -72,8 +74,10 @@ async def get_current_user():
     For now, returns mock user for testing.
     """
     # This will be replaced with actual JWT validation
+    # Using a fixed UUID for testing purposes
+    import uuid
     return {
-        "id": "test-user-id",
+        "id": uuid.UUID("00000000-0000-0000-0000-000000000001"),
         "email": "test@example.com",
     }
 
@@ -333,3 +337,136 @@ async def send_message(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to send message: {str(e)}",
         )
+
+
+@router.post("/conversations/{conversation_id}/messages/stream")
+async def send_message_stream(
+    conversation_id: str,
+    request: SendMessageRequest,
+    current_user: dict = Depends(get_current_user),
+    chat_service: ChatService = Depends(get_chat_service),
+):
+    """
+    Send a message to a conversation with streaming response.
+
+    Args:
+        conversation_id: Conversation ID
+        request: Message request
+        current_user: Authenticated user
+        chat_service: Chat service instance
+
+    Returns:
+        Server-Sent Events stream of the AI response
+
+    Raises:
+        404: Conversation not found
+        403: Unauthorized access to conversation
+        400: Invalid message content
+    """
+    # Verify conversation exists and user has access
+    conversation = await chat_service.get_conversation(
+        conversation_id=conversation_id,
+        user_id=current_user["id"],
+    )
+
+    if not conversation:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Conversation not found",
+        )
+
+    # Verify user owns the conversation
+    if conversation.user_id != current_user["id"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Unauthorized access to conversation",
+        )
+
+    async def generate_stream():
+        """Generate SSE stream for the response."""
+        try:
+            # Save user message first
+            user_message = await chat_service._save_user_message(
+                conversation=conversation,
+                content=request.content,
+            )
+
+            # Send user message event
+            yield f"data: {json.dumps({'type': 'user_message', 'message': user_message.to_dict()})}\n\n"
+
+            # Get context for RAG
+            from src.tools.vector_search_tool import VectorSearchTool
+            from src.tools.retrieve_context_tool import RetrieveContextTool
+
+            vector_search_tool = VectorSearchTool()
+            retrieve_context_tool = RetrieveContextTool()
+
+            # Determine mode and get context
+            if request.selected_text and request.selected_text.strip():
+                # Selection mode
+                metadata = request.selected_text_metadata or {}
+                mock_search_result = [{
+                    "content": request.selected_text,
+                    "confidence": 1.0,
+                    "metadata": {
+                        "chapter": metadata.get("chapter", "selected"),
+                        "module": metadata.get("module", "selected"),
+                        "section": metadata.get("section", "selected"),
+                        "url": metadata.get("url", ""),
+                    }
+                }]
+                context_data = await retrieve_context_tool.execute(mock_search_result)
+                sources = retrieve_context_tool.format_sources_for_response(context_data["sources"])
+                confidence = 1.0
+            else:
+                # RAG mode
+                search_results = await vector_search_tool.execute(query=request.content, top_k=5)
+                context_data = await retrieve_context_tool.execute(search_results)
+
+                if not context_data["has_context"]:
+                    # No context found - send uncertainty response
+                    uncertainty_msg = (
+                        "I don't have information about this in the textbook. "
+                        "This topic may not be covered in the current chapters."
+                    )
+                    yield f"data: {json.dumps({'type': 'content', 'chunk': uncertainty_msg})}\n\n"
+                    yield f"data: {json.dumps({'type': 'done', 'confidence': 0.0, 'sources': []})}\n\n"
+                    return
+
+                sources = retrieve_context_tool.format_sources_for_response(context_data["sources"])
+                confidence = sum(s.get("confidence", 0.0) for s in context_data["sources"]) / len(context_data["sources"])
+
+            # Stream the response
+            full_response = ""
+            async for chunk in agent_service._generate_streaming_response(
+                question=request.content,
+                context=context_data["context"],
+                is_selection=bool(request.selected_text),
+            ):
+                full_response += chunk
+                yield f"data: {json.dumps({'type': 'content', 'chunk': chunk})}\n\n"
+
+            # Save assistant message
+            assistant_message = await chat_service._save_assistant_message(
+                conversation=conversation,
+                content=full_response,
+                confidence_score=confidence,
+                source_references=sources,
+            )
+
+            # Send completion event
+            yield f"data: {json.dumps({'type': 'done', 'message': assistant_message.to_dict()})}\n\n"
+
+        except Exception as e:
+            logger.error(f"Streaming error: {str(e)}", exc_info=True)
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+
+    return StreamingResponse(
+        generate_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",  # Disable nginx buffering
+        },
+    )

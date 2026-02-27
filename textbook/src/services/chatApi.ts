@@ -228,4 +228,91 @@ export async function createConversationWithMessage(
   return { conversation, response };
 }
 
+/**
+ * Send a message with streaming response.
+ */
+export async function sendMessageStream(
+  conversationId: string,
+  content: string,
+  selectedText?: string,
+  selectedTextMetadata?: Record<string, any>,
+  onChunk?: (chunk: string) => void,
+  onUserMessage?: (message: Message) => void,
+  onComplete?: (message: Message) => void,
+  onError?: (error: Error) => void
+): Promise<void> {
+  const token = getAuthToken();
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/chat/conversations/${conversationId}/messages/stream`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: JSON.stringify({
+          content,
+          selected_text: selectedText,
+          selected_text_metadata: selectedTextMetadata,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+
+    if (!reader) {
+      throw new Error('Response body is not readable');
+    }
+
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+
+      // Process complete SSE messages
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6); // Remove 'data: ' prefix
+
+          try {
+            const event = JSON.parse(data);
+
+            if (event.type === 'user_message' && onUserMessage) {
+              onUserMessage(event.message);
+            } else if (event.type === 'content' && onChunk) {
+              onChunk(event.chunk);
+            } else if (event.type === 'done' && onComplete) {
+              onComplete(event.message);
+            } else if (event.type === 'error') {
+              throw new Error(event.message);
+            }
+          } catch (parseError) {
+            console.error('Failed to parse SSE event:', parseError);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    if (onError) {
+      onError(error instanceof Error ? error : new Error('Unknown error'));
+    } else {
+      throw error;
+    }
+  }
+}
+
 export type { Conversation, Message, SendMessageResponse };

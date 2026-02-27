@@ -97,7 +97,7 @@ export function useChat() {
   );
 
   /**
-   * Send a message.
+   * Send a message with streaming response.
    */
   const sendMessage = useCallback(
     async (content: string, selectedText?: string, selectedTextMetadata?: Record<string, any>) => {
@@ -107,6 +107,7 @@ export function useChat() {
         // Create conversation if none exists
         let conversation = currentConversation;
         if (!conversation) {
+          // For first message, use non-streaming to create conversation
           const result = await chatApi.createConversationWithMessage(
             content,
             selectedText,
@@ -125,7 +126,7 @@ export function useChat() {
 
         // Add user message immediately (optimistic update)
         const tempUserMessage = {
-          id: `temp-${Date.now()}`,
+          id: `temp-user-${Date.now()}`,
           conversation_id: conversation.id,
           content,
           sender_type: 'user' as const,
@@ -133,26 +134,76 @@ export function useChat() {
         };
         addMessage(tempUserMessage);
 
+        // Create temporary assistant message for streaming
+        const tempAssistantMessage = {
+          id: `temp-assistant-${Date.now()}`,
+          conversation_id: conversation.id,
+          content: '',
+          sender_type: 'assistant' as const,
+          created_at: new Date().toISOString(),
+        };
+
         // Show typing indicator
         setIsTyping(true);
 
-        // Send message to backend
-        const response = await chatApi.sendMessage(
+        // Send message with streaming
+        await chatApi.sendMessageStream(
           conversation.id,
           content,
           selectedText,
-          selectedTextMetadata
-        );
+          selectedTextMetadata,
+          // onChunk: Update assistant message content as chunks arrive
+          (chunk: string) => {
+            setMessages((prev) => {
+              const updated = [...prev];
+              const assistantIndex = updated.findIndex((m) => m.id === tempAssistantMessage.id);
 
-        // Remove temp message and add real messages
-        setMessages((prev) => prev.filter((msg) => msg.id !== tempUserMessage.id));
-        addMessage(response.user_message);
-        addMessage(response.assistant_message);
+              if (assistantIndex === -1) {
+                // First chunk - add the temporary assistant message
+                return [...prev, { ...tempAssistantMessage, content: chunk }];
+              } else {
+                // Subsequent chunks - append to existing message
+                updated[assistantIndex] = {
+                  ...updated[assistantIndex],
+                  content: updated[assistantIndex].content + chunk,
+                };
+                return updated;
+              }
+            });
+          },
+          // onUserMessage: Replace temp user message with real one
+          (userMessage) => {
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === tempUserMessage.id ? userMessage : msg
+              )
+            );
+          },
+          // onComplete: Replace temp assistant message with final one
+          (assistantMessage) => {
+            setIsTyping(false);
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === tempAssistantMessage.id ? assistantMessage : msg
+              )
+            );
+          },
+          // onError: Handle streaming errors
+          (error) => {
+            setIsTyping(false);
+            setError(error.message);
+            // Remove temporary messages on error
+            setMessages((prev) =>
+              prev.filter((msg) =>
+                msg.id !== tempUserMessage.id && msg.id !== tempAssistantMessage.id
+              )
+            );
+          }
+        );
       } catch (err) {
+        setIsTyping(false);
         setError(err instanceof Error ? err.message : 'Failed to send message');
         throw err;
-      } finally {
-        setIsTyping(false);
       }
     },
     [

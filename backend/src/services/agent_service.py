@@ -593,6 +593,62 @@ Please answer the question based on the textbook content above. Provide a COMPLE
             # Fallback to context preview if API fails
             return f"Based on the textbook content: {context[:500]}..."
 
+    async def _generate_streaming_response(self, question: str, context: str, is_selection: bool):
+        """
+        Generate streaming response using OpenAI API.
+
+        Args:
+            question: User's question
+            context: Retrieved context
+            is_selection: Whether this is selection mode
+
+        Yields:
+            Chunks of the response as they are generated
+        """
+        import openai
+
+        # Initialize OpenAI client
+        client = openai.OpenAI(api_key=self._get_api_key())
+
+        # Build user prompt with context
+        if is_selection:
+            user_prompt = f"""Question: {question}
+
+Selected Text Context:
+{context}
+
+Please answer the question based on the selected text above."""
+        else:
+            user_prompt = f"""Question: {question}
+
+Textbook Context:
+{context}
+
+Please answer the question based on the textbook content above. Provide a COMPLETE answer."""
+
+        try:
+            # Call OpenAI API with streaming
+            stream = client.chat.completions.create(
+                model=self.model_name,
+                messages=[
+                    {"role": "system", "content": self.system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.7,
+                max_tokens=1000,
+                stream=True,  # Enable streaming
+            )
+
+            # Yield chunks as they arrive
+            for chunk in stream:
+                if chunk.choices[0].delta.content is not None:
+                    yield chunk.choices[0].delta.content
+
+        except Exception as e:
+            logger.error(f"OpenAI streaming API call failed: {str(e)}")
+            # Fallback to non-streaming
+            yield f"Based on the textbook content: {context[:500]}..."
+
     def _get_tool(self, tool_name: str) -> Any:
         """
         Get a tool by name from registered tools.

@@ -32,14 +32,14 @@ class ChatService:
 
     async def create_conversation(
         self,
-        user_id: str,
+        user_id,  # Can be str or UUID
         title: str,
     ) -> Conversation:
         """
         Create a new conversation.
 
         Args:
-            user_id: User ID
+            user_id: User ID (str or UUID)
             title: Conversation title
 
         Returns:
@@ -48,7 +48,7 @@ class ChatService:
         Raises:
             ValueError: If user_id or title is empty
         """
-        if not user_id or not user_id.strip():
+        if not user_id:
             raise ValueError("user_id cannot be empty")
 
         if not title or not title.strip():
@@ -250,6 +250,64 @@ class ChatService:
         await self.db_session.commit()
 
         return True
+
+    async def _save_user_message(
+        self,
+        conversation: Conversation,
+        content: str,
+    ) -> ChatMessage:
+        """
+        Save user message (helper for streaming).
+
+        Args:
+            conversation: Conversation to add message to
+            content: Message content
+
+        Returns:
+            Created user message
+        """
+        user_msg = ChatMessage.create_user_message(
+            conversation_id=conversation.id,
+            content=content,
+        )
+
+        self.db_session.add(user_msg)
+        await self.db_session.commit()
+        await self.db_session.refresh(user_msg)
+
+        return user_msg
+
+    async def _save_assistant_message(
+        self,
+        conversation: Conversation,
+        content: str,
+        confidence_score: float,
+        source_references: List[Dict[str, Any]],
+    ) -> ChatMessage:
+        """
+        Save assistant message (helper for streaming).
+
+        Args:
+            conversation: Conversation to add message to
+            content: Message content
+            confidence_score: Confidence score
+            source_references: Source references
+
+        Returns:
+            Created assistant message
+        """
+        assistant_msg = ChatMessage.create_assistant_message(
+            conversation_id=conversation.id,
+            content=content,
+            confidence_score=confidence_score,
+            source_references=source_references,
+        )
+
+        self.db_session.add(assistant_msg)
+        await self.db_session.commit()
+        await self.db_session.refresh(assistant_msg)
+
+        return assistant_msg
 
     async def get_conversation_count(self, user_id: str) -> int:
         """
