@@ -431,8 +431,8 @@ async def send_message_stream(
                     sources = retrieve_context_tool.format_sources_for_response(context_data["sources"])
                     confidence = 1.0
                 else:
-                    # RAG mode
-                    search_results = await vector_search_tool.execute(query=request.content, top_k=5)
+                    # RAG mode - fetch only top 3 chunks for faster retrieval
+                    search_results = await vector_search_tool.execute(query=request.content, top_k=3)
                     context_data = await retrieve_context_tool.execute(search_results)
 
                     if not context_data["has_context"]:

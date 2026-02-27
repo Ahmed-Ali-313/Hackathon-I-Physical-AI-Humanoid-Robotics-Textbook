@@ -23,7 +23,10 @@ class EmbeddingService:
         if not settings.openai_api_key:
             raise ValueError("OPENAI_API_KEY not configured")
 
-        self.client = OpenAI(api_key=settings.openai_api_key)
+        self.client = OpenAI(
+            api_key=settings.openai_api_key,
+            timeout=10.0,  # 10 second timeout for embedding calls
+        )
         self.model = "text-embedding-3-small"
 
     async def generate_embedding(self, text: str) -> List[float]:

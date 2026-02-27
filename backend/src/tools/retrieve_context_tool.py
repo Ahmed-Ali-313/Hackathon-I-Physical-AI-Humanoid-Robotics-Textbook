@@ -63,6 +63,10 @@ class RetrieveContextTool:
                 if not content:
                     continue
 
+                # Truncate very long chunks to reduce context size (max 800 chars per chunk)
+                if len(content) > 800:
+                    content = content[:800] + "..."
+
                 # Format context with source reference
                 context_parts.append(f"[Source {i}] {content}")
 
