@@ -1,12 +1,13 @@
 /**
  * Root component wrapper
  *
- * Wraps the entire app with AuthProvider, PersonalizationProvider, and ChatProvider
+ * Wraps the entire app with AuthProvider, PersonalizationProvider, LanguageProvider, and ChatProvider
  */
 
 import React, { lazy, Suspense } from 'react';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { PersonalizationProvider } from '../contexts/PersonalizationContext';
+import { LanguageProvider } from '../contexts/LanguageContext';
 import { ChatProvider } from '../contexts/ChatContext';
 import ChatButton from '../components/ChatButton';
 
@@ -36,9 +37,11 @@ export default function Root({ children }) {
   return (
     <AuthProvider>
       <PersonalizationProvider>
-        <ChatProvider>
-          <RootContent>{children}</RootContent>
-        </ChatProvider>
+        <LanguageProvider>
+          <ChatProvider>
+            <RootContent>{children}</RootContent>
+          </ChatProvider>
+        </LanguageProvider>
       </PersonalizationProvider>
     </AuthProvider>
   );

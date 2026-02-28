@@ -5,7 +5,7 @@ SQLAlchemy model for users table.
 Represents authenticated users in the system.
 """
 
-from sqlalchemy import Column, String, DateTime, TypeDecorator, CHAR
+from sqlalchemy import Column, String, DateTime, TypeDecorator, CHAR, CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -54,8 +54,14 @@ class User(Base):
     id = Column(UUID(), primary_key=True, default=uuid.uuid4)
     email = Column(String(255), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
+    preferred_language = Column(String(10), default='en', nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    # Table constraints
+    __table_args__ = (
+        CheckConstraint("preferred_language IN ('en', 'ur')", name='check_preferred_language'),
+    )
 
     # Relationship to PersonalizationProfile (one-to-one)
     personalization_profile = relationship(

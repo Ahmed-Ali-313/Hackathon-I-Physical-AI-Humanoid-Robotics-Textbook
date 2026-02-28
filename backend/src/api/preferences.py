@@ -41,6 +41,7 @@ class PreferenceInput(BaseModel):
     unity_level: Optional[str] = Field(None, description="Unity experience level")
     isaac_level: Optional[str] = Field(None, description="Isaac Sim experience level")
     vla_level: Optional[str] = Field(None, description="VLA experience level")
+    preferred_language: Optional[str] = Field(None, description="Preferred language for textbook content (en or ur)")
 
 
 class PreferenceResponse(BaseModel):
@@ -55,6 +56,7 @@ class PreferenceResponse(BaseModel):
     unity_level: Optional[str]
     isaac_level: Optional[str]
     vla_level: Optional[str]
+    preferred_language: Optional[str]
     is_personalized: bool
     created_at: datetime
     updated_at: datetime
