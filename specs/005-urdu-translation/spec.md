@@ -138,19 +138,18 @@ As a logged-in student with a specific technical background (beginner/intermedia
 
 #### Authentication & Access Control
 
-- **FR-001**: System MUST display the "Translate to Urdu" button only to authenticated (logged-in) users
-- **FR-002**: System MUST hide the translation button from unauthenticated visitors
-- **FR-003**: System MUST redirect unauthenticated users to login page if they attempt to access translated content via direct URL
-- **FR-004**: System MUST display a message "Sign up to access Urdu translations" when unauthenticated users are redirected
+- **FR-001**: System MUST display the "Translate to Urdu" button only to authenticated (logged-in) users and hide it from unauthenticated visitors
+- **FR-002**: System MUST redirect unauthenticated users to login page if they attempt to access translated content via direct URL
+- **FR-003**: System MUST display a message "Sign up to access Urdu translations" when unauthenticated users are redirected
 
 #### Translation Functionality
 
 - **FR-005**: System MUST translate chapter content from English to Urdu using OpenAI API when user clicks "Translate to Urdu" button
-- **FR-006**: System MUST preserve all technical terms in English during translation (ROS 2, VSLAM, URDF, Kinematics, SLAM, Isaac Sim, Gazebo, RViz, MoveIt, Jetson Nano, Jetson Orin, Raspberry Pi, MQTT, DDS, TCP/IP, Python, C++, JavaScript, FastAPI, React, Docusaurus)
+- **FR-006**: System MUST preserve all technical terms in English during translation. Technical terms include all domain-specific vocabulary: robotics concepts (ROS 2, VSLAM, URDF, Kinematics, SLAM, Isaac Sim, Gazebo, RViz, MoveIt), hardware (Jetson Nano, Jetson Orin, Raspberry Pi), protocols (MQTT, DDS, TCP/IP), programming languages (Python, C++, JavaScript), and frameworks/libraries (FastAPI, React, Docusaurus)
 - **FR-007**: System MUST exclude all code blocks from translation (fenced code blocks with ```python, ```cpp, ```bash, and inline code with backticks)
 - **FR-008**: System MUST preserve all LaTeX equations and mathematical symbols in their original format
 - **FR-009**: System MUST preserve all markdown syntax (headers #, ##, ###, lists *, -, 1., 2., images ![alt](path), links [text](url), bold **text**, italic *text*)
-- **FR-010**: System MUST maintain academic tone suitable for university-level technical education in Urdu translations
+- **FR-010**: System MUST maintain academic tone suitable for university-level technical education in Urdu translations. Academic tone is verified through: formal Urdu vocabulary, no colloquialisms, and native speaker review of sample translations
 
 #### User Interface & Layout
 
@@ -175,7 +174,7 @@ As a logged-in student with a specific technical background (beginner/intermedia
 
 - **FR-024**: System MUST check database cache for existing Urdu translation before calling OpenAI API
 - **FR-025**: System MUST save successfully translated chapters to database cache with chapter_id, language_code, translated_content, original_hash, created_at, updated_at
-- **FR-026**: System MUST return cached translation in under 500ms when available
+- **FR-026**: System MUST return cached translation in under 500ms (p95) when available
 - **FR-027**: System MUST compute hash of original English content and store with cached translation
 - **FR-028**: System MUST invalidate cached translation when original English content hash changes
 - **FR-029**: System MUST request fresh translation from OpenAI API when cache is invalid or missing
@@ -184,11 +183,11 @@ As a logged-in student with a specific technical background (beginner/intermedia
 
 #### Error Handling
 
-- **FR-031**: System MUST display user-friendly error message when OpenAI API is unavailable: "Translation service temporarily unavailable. Please try again in a few moments."
-- **FR-032**: System MUST provide "Retry" button when translation fails
-- **FR-033**: System MUST fall back to displaying English content when translation fails so user can continue reading
-- **FR-034**: System MUST log all translation errors with context (chapter_id, user_id, error_message, timestamp) for debugging
-- **FR-035**: System MUST validate translated markdown before caching using structural validation: verify header count/structure matches original, all code blocks preserved with unchanged content, all LaTeX equations preserved with unchanged content, and markdown parses without rendering errors
+- **FR-039**: System MUST display user-friendly error message when OpenAI API is unavailable: "Translation service temporarily unavailable. Please try again in a few moments."
+- **FR-040**: System MUST provide "Retry" button when translation fails
+- **FR-041**: System MUST fall back to displaying English content when translation fails so user can continue reading
+- **FR-042**: System MUST log all translation errors with context (chapter_id, user_id, error_message, timestamp) for debugging
+- **FR-043**: System MUST validate translated markdown before caching using structural validation: verify header count/structure matches original, all code blocks preserved with unchanged content, all LaTeX equations preserved with unchanged content, and markdown parses without rendering errors using Docusaurus markdown parser
 
 #### Optional: Background-Aware Translation
 
@@ -221,7 +220,7 @@ As a logged-in student with a specific technical background (beginner/intermedia
 ### Measurable Outcomes
 
 - **SC-001**: Authenticated users can translate any chapter to Urdu in under 5 seconds for first-time translation
-- **SC-002**: Cached translations load in under 500ms for subsequent requests
+- **SC-002**: Cached translations load in under 500ms (p95) for subsequent requests
 - **SC-003**: 100% of technical terms remain in English after translation (verified by automated tests)
 - **SC-004**: 100% of code blocks remain unchanged after translation (verified by automated tests)
 - **SC-005**: 100% of LaTeX equations remain in original format after translation (verified by automated tests)
