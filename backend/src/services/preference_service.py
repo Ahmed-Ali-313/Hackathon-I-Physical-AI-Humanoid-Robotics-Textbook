@@ -182,7 +182,19 @@ async def update_preferences(
         ValueError: If user has no preferences or invalid enum values
     """
     from src.models.preference_history import PreferenceHistory
+    from src.models.user import User
     import uuid
+
+    # Handle preferred_language separately (it's in users table, not personalization_profiles)
+    preferred_language = preferences.pop('preferred_language', None)
+    if preferred_language is not None:
+        # Update user's preferred_language
+        user_result = await db.execute(
+            select(User).where(User.id == user_id)
+        )
+        user = user_result.scalar_one_or_none()
+        if user:
+            user.preferred_language = preferred_language
 
     # Get existing profile - MUST query fresh from DB for updates, not from cache
     result = await db.execute(
