@@ -6,7 +6,8 @@
 
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8001/api/v1';
+// Use hardcoded API URL for Docusaurus (process.env not available in browser)
+const API_BASE_URL = 'http://localhost:8001/api/v1';
 
 // Get auth token from localStorage
 const getAuthToken = (): string | null => {
