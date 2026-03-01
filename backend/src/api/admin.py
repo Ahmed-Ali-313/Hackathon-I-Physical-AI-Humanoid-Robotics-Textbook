@@ -18,7 +18,7 @@ from src.models.user import User
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
+router = APIRouter(prefix="/admin", tags=["admin"])
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -79,7 +79,7 @@ def check_admin_role(current_user: User) -> bool:
 @limiter.limit("20/minute")
 async def invalidate_cache(
     chapter_id: str,
-    http_request: Request,
+    request: Request,
     language_code: str = "ur",
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)

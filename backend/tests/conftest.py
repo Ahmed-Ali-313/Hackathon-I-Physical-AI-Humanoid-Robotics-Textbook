@@ -26,6 +26,7 @@ from src.database import Base
 from src.main import app
 from src.models.user import User
 from src.models.personalization_profile import PersonalizationProfile
+from src.models.translated_chapter import TranslatedChapter
 from src.middleware.auth import create_access_token
 
 

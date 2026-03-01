@@ -24,7 +24,7 @@ from src.models.user import User
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1", tags=["translation"])
+router = APIRouter(tags=["translation"])
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -61,8 +61,8 @@ class ErrorResponse(BaseModel):
 @router.post("/translate", response_model=TranslateResponse)
 @limiter.limit("10/minute")
 async def translate_chapter(
-    request: TranslateRequest,
-    http_request: Request,
+    translate_request: TranslateRequest,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
@@ -99,36 +99,36 @@ async def translate_chapter(
     """
     try:
         # Validate inputs
-        if not validation_service.validate_chapter_id(request.chapter_id):
+        if not validation_service.validate_chapter_id(translate_request.chapter_id):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={
                     "code": "INVALID_CHAPTER_ID",
-                    "message": f"Invalid chapter identifier format: {request.chapter_id}",
+                    "message": f"Invalid chapter identifier format: {translate_request.chapter_id}",
                     "expected_format": "##-chapter-name (e.g., '01-introduction-to-ros2')"
                 }
             )
 
-        if not validation_service.validate_language_code(request.language_code):
+        if not validation_service.validate_language_code(translate_request.language_code):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail={
                     "code": "INVALID_LANGUAGE",
-                    "message": f"Unsupported language code: {request.language_code}",
+                    "message": f"Unsupported language code: {translate_request.language_code}",
                     "supported_languages": ["ur"]
                 }
             )
 
-        logger.info(f"Translation request from user {current_user.id} for {request.chapter_id}")
+        logger.info(f"Translation request from user {current_user.id} for {translate_request.chapter_id}")
 
         # Load chapter content from file
-        chapter_content = await _load_chapter_content(request.chapter_id)
+        chapter_content = await _load_chapter_content(translate_request.chapter_id)
         if not chapter_content:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail={
                     "code": "CHAPTER_NOT_FOUND",
-                    "message": f"Chapter not found: {request.chapter_id}"
+                    "message": f"Chapter not found: {translate_request.chapter_id}"
                 }
             )
 
@@ -137,17 +137,17 @@ async def translate_chapter(
 
         # Check cache (unless force_refresh)
         cached_translation = None
-        if not request.force_refresh:
+        if not translate_request.force_refresh:
             cached_translation = await cache_service.get_cached_translation(
                 db=db,
-                chapter_id=request.chapter_id,
-                language_code=request.language_code,
+                chapter_id=translate_request.chapter_id,
+                language_code=translate_request.language_code,
                 current_content_hash=content_hash
             )
 
         if cached_translation:
             # Return cached translation
-            logger.info(f"Returning cached translation for {request.chapter_id}")
+            logger.info(f"Returning cached translation for {translate_request.chapter_id}")
             return TranslateResponse(
                 chapter_id=cached_translation.chapter_id,
                 language_code=cached_translation.language_code,
@@ -157,26 +157,26 @@ async def translate_chapter(
             )
 
         # Cache miss - perform translation
-        logger.info(f"Cache miss for {request.chapter_id}, translating...")
+        logger.info(f"Cache miss for {translate_request.chapter_id}, translating...")
 
         # Check if chapter needs chunking
         if chunking_service.should_chunk(chapter_content):
             # Chunk and translate
             chunks = chunking_service.chunk_by_headers(chapter_content)
-            logger.info(f"Chunking {request.chapter_id} into {len(chunks)} sections")
+            logger.info(f"Chunking {translate_request.chapter_id} into {len(chunks)} sections")
 
             translated_content = await translation_service.translate_chunked(
-                chapter_id=request.chapter_id,
+                chapter_id=translate_request.chapter_id,
                 chunks=chunks,
-                language_code=request.language_code,
+                language_code=translate_request.language_code,
                 chapter_title=_extract_title(chapter_content)
             )
         else:
             # Translate whole chapter
             translated_content = await translation_service.translate(
-                chapter_id=request.chapter_id,
+                chapter_id=translate_request.chapter_id,
                 content=chapter_content,
-                language_code=request.language_code,
+                language_code=translate_request.language_code,
                 user_level=_get_user_level(current_user),
                 chapter_title=_extract_title(chapter_content)
             )
@@ -184,13 +184,13 @@ async def translate_chapter(
         # Save to cache
         saved_translation = await cache_service.save_translation(
             db=db,
-            chapter_id=request.chapter_id,
-            language_code=request.language_code,
+            chapter_id=translate_request.chapter_id,
+            language_code=translate_request.language_code,
             translated_content=translated_content,
             original_hash=content_hash
         )
 
-        logger.info(f"Translation completed and cached for {request.chapter_id}")
+        logger.info(f"Translation completed and cached for {translate_request.chapter_id}")
 
         return TranslateResponse(
             chapter_id=saved_translation.chapter_id,
@@ -203,7 +203,7 @@ async def translate_chapter(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Translation error for {request.chapter_id}: {str(e)}")
+        logger.error(f"Translation error for {translate_request.chapter_id}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
