@@ -1,3 +1,442 @@
+## 2026-03-02 - Phase 5: Production Deployment - Complete SDD Workflow
+
+### Session Summary
+Completed full Spec-Driven Development (SDD) workflow for Phase 5 production deployment: constitution update (v3.1.0), specification creation, clarification analysis, implementation planning, and task breakdown. Generated 107 actionable deployment tasks organized by user story with safety-first approach. Ready for implementation starting with database migration.
+
+### Branch
+`006-production-deployment` (created from `005-urdu-translation`)
+
+### Work Completed
+
+**Constitution Update (v3.0.0 → v3.1.0)** ✅
+- Added Principle XI: Deployment & Infrastructure with 4 sub-principles:
+  - A. Architectural Separation (The Hybrid Rule): Vercel (frontend) + Render (backend) + Neon (database)
+  - B. Security & Credential Integrity: Environment variables, GitHub Secrets, SSL
+  - C. Network & Communication Protocols: CORS, health checks, connection pooling
+  - D. Deployment Safety & Rollback: Backup procedures, rollback mechanisms, validation
+- Updated Tech Stack Requirements: Clarified Render as primary backend platform
+- Updated Deployment Architecture: Added Neon database migration guidance
+- File: `.specify/memory/constitution.md`
+
+**Specification Creation (006-production-deployment)** ✅
+- Created comprehensive deployment specification with safety-first approach
+- 5 prioritized user stories (P1-P5):
+  - P1: Safe Database Migration (SQLite → Neon with backup/rollback)
+  - P2: Backend Production Deployment (Render with health checks, CORS)
+  - P3: Frontend Production Deployment (Vercel with API configuration)
+  - P4: Automated CI/CD Pipeline (GitHub integration)
+  - P5: Production Verification & Monitoring (feature testing, health checks)
+- 43 functional requirements covering:
+  - Database migration safety (7 requirements)
+  - Backend deployment (8 requirements)
+  - Frontend deployment (6 requirements)
+  - CI/CD pipeline (5 requirements)
+  - Security & configuration (5 requirements)
+  - Rollback & safety (5 requirements)
+  - Verification & monitoring (7 requirements)
+- 12 measurable success criteria (100% data integrity, <2s health check, <3s frontend load, etc.)
+- 7 edge cases with mitigation strategies
+- File: `specs/006-production-deployment/spec.md`
+
+**Clarification Phase (/sp.clarify)** ✅
+- Performed comprehensive ambiguity scan across 10 taxonomy categories
+- Result: No critical ambiguities detected - specification is exceptionally complete
+- All categories marked as "Clear" (functional scope, data model, UX flow, non-functional quality, etc.)
+- Recommendation: Proceed directly to planning without clarification questions
+
+**Planning Phase (/sp.plan)** ✅
+
+*1. Implementation Plan (plan.md)*
+- Technical context: Python 3.11+, Node.js 20+, Bash deployment scripts
+- Constitution check: All 11 principles passed (no violations)
+- Project structure: Minimal changes (config files + deployment scripts only)
+- Deployment sequence: P1 (Database) → P2 (Backend) → P3 (Frontend) → P4 (CI/CD) → P5 (Verification)
+- Risk mitigation strategies for high/medium/low risks
+
+*2. Research (research.md)*
+- Neon migration strategy: Python script with SQLAlchemy for type safety
+- Connection pooling: pool_size=5, max_overflow=10 for Neon free tier
+- Render Web Service: Not serverless, supports long-running processes (streaming, translation)
+- Vercel static site: SSG for Docusaurus with global CDN
+- CORS configuration: Explicit origin whitelist for security
+- GitHub Secrets: CLI-based management for secure credential storage
+- Backup/rollback: 7-day SQLite retention, git-based code rollback
+
+*3. Data Model (data-model.md)*
+- 5 deployment entities with state machines:
+  - DeploymentEnvironment (pending → deploying → live)
+  - EnvironmentVariable (7 required variables with validation rules)
+  - MigrationRecord (tracks data integrity with before/after counts)
+  - HealthCheck (healthy/degraded/unhealthy states)
+  - RollbackPoint (7-day validity for database backups)
+- Validation matrix with error messages
+- State transition diagrams
+
+*4. Quickstart Guide (quickstart.md)*
+- 60-minute deployment timeline:
+  - Prerequisites: 5 minutes (create accounts, install CLIs)
+  - Phase 1: Database migration (10 minutes)
+  - Phase 2: Backend deployment (15 minutes)
+  - Phase 3: Frontend deployment (10 minutes)
+  - Phase 4: CI/CD setup (5 minutes)
+  - Phase 5: Verification (15 minutes)
+- Step-by-step procedures with commands
+- Rollback procedures for all components
+- Troubleshooting guide
+
+*5. Configuration Contracts (contracts/)*
+- render-config.md: Render deployment configuration with render.yaml template
+- vercel-config.md: Vercel deployment configuration (optional vercel.json)
+- environment-vars.md: Complete variable documentation (6 backend, 1 frontend)
+
+**Task Breakdown Phase (/sp.tasks)** ✅
+
+*Generated 107 actionable tasks organized in 8 phases:*
+
+1. **Phase 1: Setup** (7 tasks)
+   - Verify platform accounts (Neon, Render, Vercel)
+   - Install CLIs (vercel, gh)
+   - Verify local environment and tests pass
+   - Create deployment branch
+
+2. **Phase 2: Foundational** (10 tasks)
+   - Add psycopg2-binary and python-dotenv to requirements.txt
+   - Configure Neon connection pooling in backend/src/database.py
+   - Add environment variable validation in backend/src/config.py
+   - Update CORS for production in backend/src/main.py
+   - Create render.yaml configuration
+   - Create scripts/deployment/ directory
+   - Update .env.example files
+
+3. **Phase 3: US1 - Safe Database Migration** (16 tasks) 🎯 MVP
+   - Create Neon database and copy connection string
+   - Backup SQLite database with timestamp
+   - Run migrations on Neon
+   - Create migration script (export SQLite → import Neon)
+   - Verify 100% record count match
+   - Test authentication, chat, translation against Neon
+   - Create and test rollback procedure
+   - Document migration results
+
+4. **Phase 4: US2 - Backend Production Deployment** (18 tasks)
+   - Push to GitHub and connect Render
+   - Deploy backend to Render
+   - Configure 6 environment variables (DATABASE_URL, OPENAI_API_KEY, etc.)
+   - Test health check endpoint
+   - Verify CORS configuration
+   - Test all API endpoints
+   - Document backend URL
+   - Test rollback procedure
+
+5. **Phase 5: US3 - Frontend Production Deployment** (20 tasks)
+   - Update frontend configuration with backend URL
+   - Connect Vercel to GitHub
+   - Deploy frontend to Vercel
+   - Configure REACT_APP_API_URL
+   - Update backend FRONTEND_URL for CORS
+   - Test site loads (<3 seconds)
+   - Test all features (signup, login, chat, translation)
+   - Document frontend URL
+   - Test rollback procedure
+
+6. **Phase 6: US4 - Automated CI/CD Pipeline** (14 tasks)
+   - Verify auto-deploy enabled on Render and Vercel
+   - Merge deployment branch to main
+   - Monitor automatic deployments
+   - Test CI/CD with small change
+   - Create and test PR preview deployments
+   - Document CI/CD configuration
+
+7. **Phase 7: US5 - Production Verification** (17 tasks)
+   - Create automated verification script
+   - Verify health checks and CORS
+   - Test all features in production
+   - Verify database connection and environment variables
+   - Test cold start behavior (15-minute spin-down)
+   - Document production URLs
+   - Schedule 24-hour monitoring
+
+8. **Phase 8: Polish** (5 tasks)
+   - Update history.md with deployment completion
+   - Create deployment guide
+   - Document troubleshooting
+   - Tag release v1.0.0
+   - Archive SQLite backup
+
+**Task Organization Features:**
+- Sequential dependencies: US1 → US2 → US3 → US4 → US5 (no parallelization between stories)
+- 15 tasks marked as parallelizable within phases
+- All 107 tasks follow strict checklist format (checkbox, ID, [P]/[Story] labels, file paths)
+- MVP scope: US1 only (database migration provides immediate value)
+- Incremental delivery: 5 sprints, 8 hours total estimated time
+- Independent test criteria for each user story
+
+**Agent Context Update** ✅
+- Updated CLAUDE.md with deployment technologies
+- Added: Python 3.11+ (backend), Node.js 20+ (frontend), Bash 5.0+ (deployment scripts)
+
+### Files Created (11 files)
+
+**Planning Artifacts:**
+- `specs/006-production-deployment/spec.md` (specification)
+- `specs/006-production-deployment/plan.md` (implementation plan)
+- `specs/006-production-deployment/research.md` (platform best practices)
+- `specs/006-production-deployment/data-model.md` (deployment entities)
+- `specs/006-production-deployment/quickstart.md` (deployment guide)
+- `specs/006-production-deployment/tasks.md` (107 actionable tasks)
+- `specs/006-production-deployment/contracts/render-config.md` (backend config)
+- `specs/006-production-deployment/contracts/vercel-config.md` (frontend config)
+- `specs/006-production-deployment/contracts/environment-vars.md` (variable docs)
+- `specs/006-production-deployment/checklists/requirements.md` (spec quality checklist)
+
+**Prompt History Records:**
+- `history/prompts/constitution/0002-update-constitution-phase-5-deployment.constitution.prompt.md`
+- `history/prompts/006-production-deployment/0001-production-deployment-specification.spec.prompt.md`
+- `history/prompts/006-production-deployment/0002-production-deployment-implementation-plan.plan.prompt.md`
+- `history/prompts/006-production-deployment/0003-production-deployment-task-breakdown.tasks.prompt.md`
+
+**Updated Files:**
+- `.specify/memory/constitution.md` (v3.0.0 → v3.1.0)
+- `CLAUDE.md` (added deployment technologies)
+- `history.md` (this file)
+
+### Key Architecture Decisions
+
+**Hybrid Deployment Strategy:**
+- Frontend: Vercel (static site, global CDN, free tier)
+- Backend: Render Web Service (persistent connections, no timeout limits, free tier 750h/month)
+- Database: Neon Serverless Postgres (free tier 0.5GB, SSL required)
+
+**Safety-First Approach:**
+- Database backup before migration (7-day retention)
+- Record count verification (100% match required)
+- Rollback procedures for all components (<5 minutes)
+- Environment variable validation on startup
+- 43-item verification checklist
+
+**Minimal Code Changes:**
+- Add psycopg2-binary to requirements.txt
+- Update CORS to include production URL
+- Add connection pooling configuration
+- Create render.yaml and vercel.json (config files only)
+- No changes to application logic, API endpoints, or UI components
+
+### Deployment Sequence
+
+```
+Setup (7 tasks)
+  ↓
+Foundational (10 tasks)
+  ↓
+US1: Database Migration (16 tasks) ← MVP
+  ↓
+US2: Backend Deployment (18 tasks)
+  ↓
+US3: Frontend Deployment (20 tasks)
+  ↓
+US4: CI/CD Pipeline (14 tasks)
+  ↓
+US5: Verification (17 tasks)
+  ↓
+Polish (5 tasks)
+```
+
+**Total: 107 tasks, 8 hours estimated**
+
+### Success Criteria
+
+- ✅ Database migration: 100% data integrity (record counts match)
+- ✅ Backend deployment: Health check responds within 2 seconds
+- ✅ Frontend deployment: Site loads in under 3 seconds globally
+- ✅ Feature parity: All features work identically to local environment
+- ✅ CORS configuration: Frontend communicates with backend without errors
+- ✅ CI/CD: Automatic deployments trigger within 5 minutes
+- ✅ Rollback: Procedures restore previous version within 5 minutes
+- ✅ Zero data loss: No data lost during migration or deployment
+
+### Next Steps
+
+**Immediate:**
+1. Begin implementation with Phase 1: Setup (T001-T007)
+2. Verify platform accounts and install CLIs
+3. Proceed to Phase 2: Foundational configuration
+
+**Implementation Order:**
+1. **Sprint 1**: US1 - Database Migration (2 hours)
+2. **Sprint 2**: US2 - Backend Deployment (2 hours)
+3. **Sprint 3**: US3 - Frontend Deployment (1.5 hours)
+4. **Sprint 4**: US4 - CI/CD Pipeline (1 hour)
+5. **Sprint 5**: US5 - Verification (1.5 hours)
+
+**Post-Deployment:**
+1. Monitor health checks for 24 hours
+2. Document production URLs in history.md
+3. Test rollback procedures
+4. Collect user feedback
+
+### Session Metrics
+
+- **Duration**: ~3 hours (constitution → spec → clarify → plan → tasks)
+- **Artifacts Created**: 11 files (spec, plan, research, data-model, quickstart, tasks, 3 contracts, checklist, PHRs)
+- **Constitution Version**: 3.0.0 → 3.1.0 (MINOR bump)
+- **Specification Quality**: EXCELLENT (all validation checks passed, zero ambiguities)
+- **Planning Completeness**: 100% (research, data model, contracts, quickstart all complete)
+- **Task Breakdown**: 107 tasks across 8 phases, organized by user story
+- **Constitution Compliance**: 11/11 principles passed (no violations)
+
+---
+
+## 2026-03-02 - Phase 5: Production Deployment Planning Complete
+- Constitution check: All 11 principles passed (no violations)
+- Project structure: Minimal changes (config files + deployment scripts only)
+- Deployment sequence: P1 (Database) → P2 (Backend) → P3 (Frontend) → P4 (CI/CD) → P5 (Verification)
+- Risk mitigation strategies for high/medium/low risks
+
+*2. Research (research.md)*
+- Neon migration strategy: Python script with SQLAlchemy for type safety
+- Connection pooling: pool_size=5, max_overflow=10 for Neon free tier
+- Render Web Service: Not serverless, supports long-running processes (streaming, translation)
+- Vercel static site: SSG for Docusaurus with global CDN
+- CORS configuration: Explicit origin whitelist for security
+- GitHub Secrets: CLI-based management for secure credential storage
+- Backup/rollback: 7-day SQLite retention, git-based code rollback
+
+*3. Data Model (data-model.md)*
+- 5 deployment entities with state machines:
+  - DeploymentEnvironment (pending → deploying → live)
+  - EnvironmentVariable (7 required variables with validation rules)
+  - MigrationRecord (tracks data integrity with before/after counts)
+  - HealthCheck (healthy/degraded/unhealthy states)
+  - RollbackPoint (7-day validity for database backups)
+- Validation matrix with error messages
+- State transition diagrams
+
+*4. Quickstart Guide (quickstart.md)*
+- 60-minute deployment timeline:
+  - Prerequisites: 5 minutes (create accounts, install CLIs)
+  - Phase 1: Database migration (10 minutes)
+  - Phase 2: Backend deployment (15 minutes)
+  - Phase 3: Frontend deployment (10 minutes)
+  - Phase 4: CI/CD setup (5 minutes)
+  - Phase 5: Verification (15 minutes)
+- Step-by-step procedures with commands
+- Rollback procedures for all components
+- Troubleshooting guide
+
+*5. Configuration Contracts (contracts/)*
+- render-config.md: Render deployment configuration with render.yaml template
+- vercel-config.md: Vercel deployment configuration (optional vercel.json)
+- environment-vars.md: Complete variable documentation (6 backend, 1 frontend)
+
+**Agent Context Update** ✅
+- Updated CLAUDE.md with deployment technologies
+- Added: Python 3.11+ (backend), Node.js 20+ (frontend), Bash 5.0+ (deployment scripts)
+
+### Files Created (10 files)
+
+**Planning Artifacts:**
+- `specs/006-production-deployment/spec.md` (specification)
+- `specs/006-production-deployment/plan.md` (implementation plan)
+- `specs/006-production-deployment/research.md` (platform best practices)
+- `specs/006-production-deployment/data-model.md` (deployment entities)
+- `specs/006-production-deployment/quickstart.md` (deployment guide)
+- `specs/006-production-deployment/contracts/render-config.md` (backend config)
+- `specs/006-production-deployment/contracts/vercel-config.md` (frontend config)
+- `specs/006-production-deployment/contracts/environment-vars.md` (variable docs)
+- `specs/006-production-deployment/checklists/requirements.md` (spec quality checklist)
+
+**Prompt History Records:**
+- `history/prompts/constitution/0002-update-constitution-phase-5-deployment.constitution.prompt.md`
+- `history/prompts/006-production-deployment/0001-production-deployment-specification.spec.prompt.md`
+- `history/prompts/006-production-deployment/0002-production-deployment-implementation-plan.plan.prompt.md`
+
+**Updated Files:**
+- `.specify/memory/constitution.md` (v3.0.0 → v3.1.0)
+- `CLAUDE.md` (added deployment technologies)
+
+### Key Architecture Decisions
+
+**Hybrid Deployment Strategy:**
+- Frontend: Vercel (static site, global CDN, free tier)
+- Backend: Render Web Service (persistent connections, no timeout limits, free tier 750h/month)
+- Database: Neon Serverless Postgres (free tier 0.5GB, SSL required)
+
+**Safety-First Approach:**
+- Database backup before migration (7-day retention)
+- Record count verification (100% match required)
+- Rollback procedures for all components (<5 minutes)
+- Environment variable validation on startup
+- 43-item verification checklist
+
+**Minimal Code Changes:**
+- Add psycopg2-binary to requirements.txt
+- Update CORS to include production URL
+- Add connection pooling configuration
+- Create render.yaml and vercel.json (config files only)
+- No changes to application logic, API endpoints, or UI components
+
+### Technical Scope
+
+**Deployment Platforms:**
+- Vercel: Frontend hosting with automatic deployments from GitHub
+- Render: Backend hosting with health checks and environment variables
+- Neon: Serverless Postgres with SSL and connection pooling
+- GitHub: Source control and CI/CD trigger
+
+**Environment Variables:**
+- Backend (6): DATABASE_URL, OPENAI_API_KEY, QDRANT_URL, QDRANT_API_KEY, JWT_SECRET_KEY, FRONTEND_URL
+- Frontend (1): REACT_APP_API_URL
+
+**Performance Goals:**
+- Database migration: <5 minutes for <100MB database
+- Backend deployment: <10 minutes (build + start)
+- Frontend deployment: <5 minutes (build + CDN propagation)
+- Rollback execution: <5 minutes (any component)
+- Health check response: <2 seconds
+- Frontend global load: <3 seconds
+
+### Success Criteria
+
+- ✅ Database migration: 100% data integrity (record counts match)
+- ✅ Backend deployment: Health check responds within 2 seconds
+- ✅ Frontend deployment: Site loads in under 3 seconds globally
+- ✅ Feature parity: All features work identically to local environment
+- ✅ CORS configuration: Frontend communicates with backend without errors
+- ✅ CI/CD: Automatic deployments trigger within 5 minutes
+- ✅ Rollback: Procedures restore previous version within 5 minutes
+- ✅ Zero data loss: No data lost during migration or deployment
+
+### Next Steps
+
+**Immediate:**
+1. Run `/sp.tasks` to generate actionable deployment tasks
+2. Break down into tasks organized by user story (P1-P5)
+3. Define acceptance criteria and time estimates per task
+
+**Implementation (After Task Breakdown):**
+1. Create Neon database and migrate data
+2. Deploy backend to Render with environment variables
+3. Deploy frontend to Vercel with API configuration
+4. Enable CI/CD automation
+5. Run comprehensive verification checklist
+
+**Post-Deployment:**
+1. Monitor health checks for 24 hours
+2. Document production URLs
+3. Test rollback procedures
+4. Collect user feedback
+
+### Session Metrics
+
+- **Duration**: ~2 hours
+- **Artifacts Created**: 10 files (spec, plan, research, data-model, quickstart, 3 contracts, checklist, PHR)
+- **Constitution Version**: 3.0.0 → 3.1.0 (MINOR bump)
+- **Specification Quality**: EXCELLENT (all validation checks passed)
+- **Planning Completeness**: 100% (no ambiguities, all sections complete)
+- **Constitution Compliance**: 11/11 principles passed (no violations)
+
+---
+
 ## 2026-03-02 - Chatbot Authentication Fix: RAG Chatbot Fully Operational
 
 ### Session Summary
