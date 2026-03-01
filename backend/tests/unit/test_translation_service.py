@@ -166,8 +166,8 @@ async def test_translate_markdown_structure_preservation(translation_service):
         )
 
         # Assert
-        assert result.count('# ') == 1, "Should have 1 H1 header"
-        assert result.count('## ') == 1, "Should have 1 H2 header"
+        assert result.count('\n# ') == 1, "Should have 1 H1 header"
+        assert result.count('\n## ') == 1, "Should have 1 H2 header"
         assert result.count('- ') == 2, "Should have 2 list items"
         assert '**' in result, "Bold markdown should be preserved"
         assert '*' in result, "Italic markdown should be preserved"
