@@ -5,15 +5,27 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from '../../hooks/useTranslation';
 import styles from './styles.module.css';
 
 interface TranslationControlProps {
   chapterId: string;
   originalContent: string;
+  isUrdu: boolean;
+  isLoading: boolean;
+  error: string | null;
+  onToggle: () => Promise<void>;
+  onClearError: () => void;
 }
 
-export default function TranslationControl({ chapterId, originalContent }: TranslationControlProps) {
+export default function TranslationControl({
+  chapterId,
+  originalContent,
+  isUrdu,
+  isLoading,
+  error,
+  onToggle,
+  onClearError
+}: TranslationControlProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Check authentication status
@@ -30,15 +42,6 @@ export default function TranslationControl({ chapterId, originalContent }: Trans
     return () => window.removeEventListener('storage', checkAuth);
   }, []);
 
-  const {
-    isUrdu,
-    translatedContent,
-    isLoading,
-    error,
-    toggleLanguage,
-    clearError
-  } = useTranslation(chapterId, originalContent);
-
   const [showError, setShowError] = useState(true);
 
   const handleToggle = async () => {
@@ -49,12 +52,12 @@ export default function TranslationControl({ chapterId, originalContent }: Trans
     }
 
     setShowError(true);
-    await toggleLanguage();
+    await onToggle();
   };
 
   const handleDismissError = () => {
     setShowError(false);
-    clearError();
+    onClearError();
   };
 
   // Don't show button if not authenticated

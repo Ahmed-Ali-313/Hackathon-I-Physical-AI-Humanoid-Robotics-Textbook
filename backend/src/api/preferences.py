@@ -11,6 +11,7 @@ Endpoints:
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
@@ -92,13 +93,40 @@ async def create_user_preferences(
         409: User already has preferences
         422: Invalid enum values
     """
+    from src.models.user import User
+
     try:
         profile = await create_preferences(
             db,
             user_id=user_id,
             preferences=preferences.model_dump(exclude_unset=True)
         )
-        return PreferenceResponse.model_validate(profile)
+
+        # Get user's preferred_language from users table
+        user_result = await db.execute(
+            select(User).where(User.id == user_id)
+        )
+        user = user_result.scalar_one_or_none()
+
+        # Build response with preferred_language from user
+        response_data = {
+            "id": profile.id,
+            "user_id": profile.user_id,
+            "workstation_type": profile.workstation_type,
+            "edge_kit_available": profile.edge_kit_available,
+            "robot_tier_access": profile.robot_tier_access,
+            "ros2_level": profile.ros2_level,
+            "gazebo_level": profile.gazebo_level,
+            "unity_level": profile.unity_level,
+            "isaac_level": profile.isaac_level,
+            "vla_level": profile.vla_level,
+            "preferred_language": user.preferred_language if user else 'en',
+            "is_personalized": profile.is_personalized,
+            "created_at": profile.created_at,
+            "updated_at": profile.updated_at
+        }
+
+        return PreferenceResponse.model_validate(response_data)
 
     except ValueError as e:
         if "already has preferences" in str(e):
@@ -136,6 +164,8 @@ async def get_user_preferences(
     Raises:
         404: User has no preferences
     """
+    from src.models.user import User
+
     profile = await get_preferences(db, user_id=user_id)
 
     if not profile:
@@ -144,7 +174,31 @@ async def get_user_preferences(
             detail="Preferences not found for this user"
         )
 
-    return PreferenceResponse.model_validate(profile)
+    # Get user's preferred_language from users table
+    user_result = await db.execute(
+        select(User).where(User.id == user_id)
+    )
+    user = user_result.scalar_one_or_none()
+
+    # Build response with preferred_language from user
+    response_data = {
+        "id": profile.id,
+        "user_id": profile.user_id,
+        "workstation_type": profile.workstation_type,
+        "edge_kit_available": profile.edge_kit_available,
+        "robot_tier_access": profile.robot_tier_access,
+        "ros2_level": profile.ros2_level,
+        "gazebo_level": profile.gazebo_level,
+        "unity_level": profile.unity_level,
+        "isaac_level": profile.isaac_level,
+        "vla_level": profile.vla_level,
+        "preferred_language": user.preferred_language if user else 'en',
+        "is_personalized": profile.is_personalized,
+        "created_at": profile.created_at,
+        "updated_at": profile.updated_at
+    }
+
+    return PreferenceResponse.model_validate(response_data)
 
 
 @router.put(
@@ -173,6 +227,8 @@ async def update_user_preferences(
         404: User has no preferences to update
         422: Invalid enum values
     """
+    from src.models.user import User
+
     try:
         profile = await update_preferences(
             db,
@@ -180,7 +236,32 @@ async def update_user_preferences(
             preferences=preferences.model_dump(exclude_unset=True),
             change_source="profile_page"
         )
-        return PreferenceResponse.model_validate(profile)
+
+        # Get user's preferred_language from users table
+        user_result = await db.execute(
+            select(User).where(User.id == user_id)
+        )
+        user = user_result.scalar_one_or_none()
+
+        # Build response with preferred_language from user
+        response_data = {
+            "id": profile.id,
+            "user_id": profile.user_id,
+            "workstation_type": profile.workstation_type,
+            "edge_kit_available": profile.edge_kit_available,
+            "robot_tier_access": profile.robot_tier_access,
+            "ros2_level": profile.ros2_level,
+            "gazebo_level": profile.gazebo_level,
+            "unity_level": profile.unity_level,
+            "isaac_level": profile.isaac_level,
+            "vla_level": profile.vla_level,
+            "preferred_language": user.preferred_language if user else 'en',
+            "is_personalized": profile.is_personalized,
+            "created_at": profile.created_at,
+            "updated_at": profile.updated_at
+        }
+
+        return PreferenceResponse.model_validate(response_data)
 
     except ValueError as e:
         if "has no preferences" in str(e):

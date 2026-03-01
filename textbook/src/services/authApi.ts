@@ -31,7 +31,7 @@ export interface User {
 }
 
 export async function signup(data: SignupRequest): Promise<AuthResponse> {
-  const response = await fetch(`${API_URL}/api/auth/signup`, {
+  const response = await fetch(`${API_URL}/api/v1/auth/signup`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ export async function signup(data: SignupRequest): Promise<AuthResponse> {
 }
 
 export async function login(data: LoginRequest): Promise<AuthResponse> {
-  const response = await fetch(`${API_URL}/api/auth/login`, {
+  const response = await fetch(`${API_URL}/api/v1/auth/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ export async function login(data: LoginRequest): Promise<AuthResponse> {
 }
 
 export async function getCurrentUser(token: string): Promise<User> {
-  const response = await fetch(`${API_URL}/api/auth/me`, {
+  const response = await fetch(`${API_URL}/api/v1/auth/me`, {
     headers: {
       'Authorization': `Bearer ${token}`,
     },

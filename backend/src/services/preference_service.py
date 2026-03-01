@@ -202,8 +202,21 @@ async def update_preferences(
     )
     profile = result.scalar_one_or_none()
 
+    # If no profile exists and we're only updating preferred_language, create a default profile
     if not profile:
-        raise ValueError(f"User {user_id} has no preferences to update")
+        if not preferences:  # Only preferred_language was being updated
+            # Create a default profile
+            profile = PersonalizationProfile(
+                user_id=user_id,
+                is_personalized=False
+            )
+            db.add(profile)
+            await db.commit()
+            await db.refresh(profile)
+            _preference_cache.set(f"user:{user_id}", profile)
+            return profile
+        else:
+            raise ValueError(f"User {user_id} has no preferences to update")
 
     # Track changes for audit log
     changes = []

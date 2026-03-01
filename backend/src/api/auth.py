@@ -21,7 +21,7 @@ from src.services.auth_service import (
 )
 from src.models.user import User
 
-router = APIRouter(prefix="/api/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBearer()
 
 

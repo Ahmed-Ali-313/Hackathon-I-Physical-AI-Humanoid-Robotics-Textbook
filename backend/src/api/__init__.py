@@ -15,10 +15,12 @@ from src.api.preferences import router as preferences_router
 from src.api.content import router as content_router
 from src.api.translation import router as translation_router
 from src.api.admin import router as admin_router
+from src.api.auth import router as auth_router
 
 api_router.include_router(preferences_router, tags=["preferences"])
 api_router.include_router(content_router, tags=["content"])
 api_router.include_router(translation_router, tags=["translation"])
 api_router.include_router(admin_router, tags=["admin"])
+api_router.include_router(auth_router, tags=["auth"])
 
 __all__ = ["api_router"]

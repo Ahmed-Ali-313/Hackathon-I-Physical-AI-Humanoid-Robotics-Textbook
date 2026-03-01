@@ -214,7 +214,7 @@ async def translate_chapter(
         )
 
 
-@router.get("/translate/{chapter_id}", response_model=TranslateResponse)
+@router.get("/translate/{chapter_id:path}", response_model=TranslateResponse)
 async def get_cached_translation(
     chapter_id: str,
     language_code: str = "ur",
