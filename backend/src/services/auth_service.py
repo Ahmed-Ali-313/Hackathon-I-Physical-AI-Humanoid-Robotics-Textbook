@@ -10,6 +10,7 @@ from jose import JWTError, jwt
 import bcrypt
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 import os
 
 from src.models.user import User
@@ -89,6 +90,10 @@ async def get_user_by_email(db: AsyncSession, email: str) -> Optional[User]:
 
 
 async def get_user_by_id(db: AsyncSession, user_id: str) -> Optional[User]:
-    """Get a user by ID."""
-    result = await db.execute(select(User).where(User.id == user_id))
+    """Get a user by ID with personalization_profile eagerly loaded."""
+    result = await db.execute(
+        select(User)
+        .options(selectinload(User.personalization_profile))
+        .where(User.id == user_id)
+    )
     return result.scalar_one_or_none()
