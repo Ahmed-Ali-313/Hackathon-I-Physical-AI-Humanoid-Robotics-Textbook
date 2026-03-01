@@ -13,7 +13,7 @@ from slowapi.util import get_remote_address
 
 from src.database import get_db
 from src.services.translation_cache_service import TranslationCacheService
-from src.middleware.auth import get_current_user
+from src.api.auth import get_current_user
 from src.models.user import User
 
 logger = logging.getLogger(__name__)

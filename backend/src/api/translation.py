@@ -19,7 +19,7 @@ from src.services.translation_service import TranslationService
 from src.services.translation_cache_service import TranslationCacheService
 from src.services.validation_service import ValidationService
 from src.services.chunking_service import ChunkingService
-from src.middleware.auth import get_current_user
+from src.api.auth import get_current_user
 from src.models.user import User
 
 logger = logging.getLogger(__name__)
