@@ -69,3 +69,6 @@ Thumbs.db
 # Uncomment if using yarn or pnpm exclusively:
 # yarn.lock
 # pnpm-lock.yaml
+
+# Process ID files
+*.pid
