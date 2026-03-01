@@ -154,7 +154,7 @@ As a deployment engineer, I need to verify all features work in production and s
 - **FR-033**: System MUST provide rollback procedure for backend (redeploy previous Render version)
 - **FR-034**: System MUST provide rollback procedure for frontend (use Vercel rollback feature)
 - **FR-035**: System MUST document rollback procedures in deployment guide
-- **FR-036**: System MUST test rollback procedures in staging environment before production deployment
+- **FR-036**: System MUST test rollback procedures locally on deployment branch before production deployment
 
 #### Verification & Monitoring
 - **FR-037**: System MUST verify all features work in production before marking deployment complete

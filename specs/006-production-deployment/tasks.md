@@ -34,7 +34,7 @@
 - [ ] T006 [P] Install Vercel CLI: `npm install -g vercel`
 - [ ] T007 [P] Install GitHub CLI and authenticate: `gh auth login`
 - [ ] T008 Verify local environment: All tests pass, frontend builds successfully
-- [ ] T009 Create deployment branch: `git checkout -b 006-production-deployment`
+- [ ] T009 Verify current branch is 006-production-deployment: `git branch --show-current`
 
 ---
 
@@ -47,7 +47,7 @@
 - [ ] T010 Add psycopg2-binary>=2.9.9 to backend/requirements.txt
 - [ ] T011 [P] Add python-dotenv>=1.0.0 to backend/requirements.txt
 - [ ] T012 Update backend/src/database.py: Add Neon connection pooling (pool_size=5, max_overflow=10, pool_pre_ping=True)
-- [ ] T013 Update backend/src/config.py: Add environment variable validation on startup
+- [ ] T013 Update backend/src/config.py: Add environment variable validation on startup (including JWT_SECRET_KEY length >=32 chars) - handles edge case: missing/incorrect env vars
 - [ ] T014 Update backend/src/main.py: Add production CORS origins (Vercel URL, *.vercel.app)
 - [ ] T015 Update backend/.env.example: Document all 6 required environment variables
 - [ ] T016 [P] Update textbook/.env.example: Document REACT_APP_API_URL
@@ -68,19 +68,19 @@
 ### Implementation for User Story 1
 
 - [ ] T020 [US1] Create Neon database project via Neon console (region: US East Ohio)
-- [ ] T021 [US1] Copy Neon connection string from dashboard (format: postgresql://user:pass@ep-xxx.neon.tech/db?sslmode=require)
+- [ ] T021 [US1] Copy Neon connection string from dashboard (format: postgresql://user:pass@ep-xxx.neon.tech/db?sslmode=require) - handles edge case: Neon connection failure detection
 - [ ] T022 [US1] Create SQLite backup: `cp backend/ai_native_book.db backend/ai_native_book.db.backup.$(date +%Y%m%d)`
 - [ ] T023 [US1] Create scripts/deployment/migrate-to-neon.sh: Database migration script with record count verification
 - [ ] T024 [US1] Update backend/.env temporarily: Set DATABASE_URL to Neon connection string
 - [ ] T025 [US1] Run migrations on Neon: `cd backend && python scripts/run_migrations.py`
-- [ ] T026 [US1] Verify all 7 tables exist in Neon: `python -c "from src.database import engine; from sqlalchemy import inspect; print(inspect(engine).get_table_names())"`
+- [ ] T026 [US1] Verify all 7 tables exist in Neon: `python -c "from src.database import engine; from sqlalchemy import inspect; print(inspect(engine).get_table_names())"` - handles edge case: database schema mismatch
 - [ ] T027 [US1] Export SQLite data to JSON: Create Python script to export all tables
 - [ ] T028 [US1] Import data to Neon: Create Python script to import JSON data with transaction safety
 - [ ] T029 [US1] Verify record counts match: Compare SQLite vs Neon for all 7 tables
 - [ ] T030 [US1] Test authentication against Neon: Signup, login, verify JWT tokens work
 - [ ] T031 [US1] Test chat history against Neon: Create conversation, send message, verify retrieval
 - [ ] T032 [US1] Test translation against Neon: Request translation, verify cached translation retrieval
-- [ ] T033 [US1] Create scripts/deployment/rollback-database.sh: Rollback procedure (revert DATABASE_URL to SQLite)
+- [ ] T033 [US1] Create scripts/deployment/rollback-database.sh: Rollback procedure (revert DATABASE_URL to SQLite) - handles edge case: deployment fails midway
 - [ ] T034 [US1] Test rollback procedure: Execute rollback, verify system works with SQLite
 - [ ] T035 [US1] Document migration results: Record counts, duration, any issues in history.md
 
@@ -111,7 +111,7 @@
 - [ ] T048 [US2] Test health check endpoint: `curl https://ai-native-book-backend.onrender.com/api/health`
 - [ ] T049 [US2] Verify health check returns 200 OK with all services healthy
 - [ ] T050 [US2] Test authentication endpoint: `curl https://ai-native-book-backend.onrender.com/api/v1/auth/health`
-- [ ] T051 [US2] Test CORS configuration: Verify CORS headers allow Vercel domain (use curl with Origin header)
+- [ ] T051 [US2] Test CORS configuration: Verify CORS headers allow Vercel domain (use curl with Origin header) - handles edge case: CORS misconfiguration
 - [ ] T052 [US2] Document backend URL in specs/006-production-deployment/deployment-urls.md
 - [ ] T053 [US2] Test rollback procedure: Redeploy previous commit via Render dashboard
 
@@ -132,6 +132,7 @@
 - [ ] T056 [US3] Push to GitHub: `git push origin 006-production-deployment`
 - [ ] T057 [US3] Connect Vercel to GitHub repository via Vercel dashboard
 - [ ] T058 [US3] Configure project: Framework=Docusaurus, Root Directory=textbook, Build Command=npm run build (auto-detected)
+- [ ] T058a [US3] Verify Vercel client-side routing configuration: Docusaurus handles routing automatically, confirm no additional vercel.json rewrites needed
 - [ ] T059 [US3] Click "Deploy" and wait for deployment (~5 minutes)
 - [ ] T060 [US3] Configure REACT_APP_API_URL in Vercel Environment Variables (value: Render backend URL, environments: Production + Preview)
 - [ ] T061 [US3] Redeploy frontend: Go to Deployments → Click "..." → "Redeploy"
@@ -161,7 +162,9 @@
 ### Implementation for User Story 4
 
 - [ ] T074 [US4] Verify Render auto-deploy enabled: Check Render dashboard → Build & Deploy → Auto-Deploy=Yes, Branch=main
+- [ ] T074a [US4] Verify Render blocks failed builds: Confirm "Auto-Deploy" setting includes build failure detection (default behavior)
 - [ ] T075 [US4] Verify Vercel auto-deploy enabled: Check Vercel dashboard → Git → Production Branch=main, Auto-Deploy=Enabled
+- [ ] T075a [US4] Verify Vercel blocks failed builds: Confirm deployment settings block on build errors (default behavior)
 - [ ] T076 [US4] Merge deployment branch to main: `git checkout main && git merge 006-production-deployment`
 - [ ] T077 [US4] Push to main: `git push origin main`
 - [ ] T078 [US4] Monitor Render deployment: Watch logs in Render dashboard (expect deployment within 5 minutes)
@@ -173,6 +176,7 @@
 - [ ] T084 [US4] Verify Vercel preview deployment created with unique URL
 - [ ] T085 [US4] Test preview deployment: Verify preview site works correctly
 - [ ] T086 [US4] Close test PR and verify preview deployment is deleted
+- [ ] T086a [US4] Sync environment variables to GitHub Secrets: Use `gh secret set` for CI/CD pipeline access (if needed for future GitHub Actions)
 - [ ] T087 [US4] Document CI/CD configuration in specs/006-production-deployment/ci-cd-setup.md
 
 **Checkpoint**: CI/CD enabled - production verification can now begin
@@ -197,13 +201,14 @@
 - [ ] T095 [US5] Verify preferences: Change language → Verify persists across sessions
 - [ ] T096 [US5] Verify database connection: Check Render logs for successful Neon connections
 - [ ] T097 [US5] Verify environment variables: Check Render logs for successful variable loading
-- [ ] T098 [US5] Test cold start behavior: Wait 15 minutes, make request, verify 30-second wake-up
-- [ ] T099 [US5] Verify error logging: Trigger error, check Render logs for error capture
+- [ ] T098 [US5] Test cold start behavior: Wait 15 minutes, make request, verify 30-second wake-up - handles edge case: Render spin-down during active session
+- [ ] T099 [US5] Verify error logging: Trigger error, check Render logs for error capture - handles edge case: invalid OpenAI/Qdrant credentials
 - [ ] T100 [US5] Document production URLs in history.md (frontend, backend, database)
 - [ ] T101 [US5] Document deployment completion date and status in history.md
 - [ ] T102 [US5] Create deployment summary: Record migration results, deployment times, any issues
 - [ ] T103 [US5] Verify rollback procedures documented: Database, backend, frontend rollback steps
 - [ ] T104 [US5] Schedule 24-hour monitoring: Monitor health checks and error logs
+- [ ] T104a [US5] (Optional) Perform load testing: Test with 100 concurrent users to verify SC-011 (can be done post-deployment)
 
 **Checkpoint**: Production deployment complete and verified
 
@@ -310,13 +315,15 @@ Phase 1 (Setup) → Phase 2 (Foundational)
 
 ## Task Summary
 
-**Total Tasks**: 107
-- Phase 1 (Setup): 7 tasks
-- Phase 2 (Foundational): 10 tasks
-- Phase 3 (US1 - Database Migration): 16 tasks
-- Phase 4 (US2 - Backend Deployment): 18 tasks
-- Phase 5 (US3 - Frontend Deployment): 20 tasks
-- Phase 6 (US4 - CI/CD Pipeline): 14 tasks
+**Total Tasks**: 114 (109 original + 5 added during analysis remediation)
+- Phase 1 (Setup): 9 tasks (T001-T009)
+- Phase 2 (Foundational): 10 tasks (T010-T019)
+- Phase 3 (US1 - Database Migration): 16 tasks (T020-T035)
+- Phase 4 (US2 - Backend Deployment): 18 tasks (T036-T053)
+- Phase 5 (US3 - Frontend Deployment): 21 tasks (T054-T073, +T058a)
+- Phase 6 (US4 - CI/CD Pipeline): 17 tasks (T074-T087, +T074a, T075a, T086a)
+- Phase 7 (US5 - Verification): 18 tasks (T088-T104, +T104a)
+- Phase 8 (Polish): 5 tasks (T105-T109)
 - Phase 7 (US5 - Verification): 17 tasks
 - Phase 8 (Polish): 5 tasks
 
