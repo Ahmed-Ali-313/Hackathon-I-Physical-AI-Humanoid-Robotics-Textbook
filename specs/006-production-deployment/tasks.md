@@ -26,13 +26,15 @@
 
 **Purpose**: Verify prerequisites and prepare for deployment
 
-- [ ] T001 Verify Neon account created and database provisioned
-- [ ] T002 Verify Render account created and connected to GitHub
-- [ ] T003 Verify Vercel account created and connected to GitHub
-- [ ] T004 [P] Install Vercel CLI: `npm install -g vercel`
-- [ ] T005 [P] Install GitHub CLI and authenticate: `gh auth login`
-- [ ] T006 Verify local environment: All tests pass, frontend builds successfully
-- [ ] T007 Create deployment branch: `git checkout -b 006-production-deployment`
+- [ ] T001 Update GitHub repository name to "Hackathon I: Physical AI & Humanoid Robotics Textbook"
+- [ ] T002 Update GitHub repository description: "AI-Native technical textbook on Physical AI and Humanoid Robotics featuring an integrated RAG chatbot with OpenAI, Urdu translation support, and user authentication. Built with Docusaurus (frontend), FastAPI (backend), Qdrant (vector search), and Neon Postgres. Deployed on Vercel and Render."
+- [ ] T003 Verify Neon account created and database provisioned
+- [ ] T004 Verify Render account created and connected to GitHub
+- [ ] T005 Verify Vercel account created and connected to GitHub
+- [ ] T006 [P] Install Vercel CLI: `npm install -g vercel`
+- [ ] T007 [P] Install GitHub CLI and authenticate: `gh auth login`
+- [ ] T008 Verify local environment: All tests pass, frontend builds successfully
+- [ ] T009 Create deployment branch: `git checkout -b 006-production-deployment`
 
 ---
 
@@ -42,16 +44,16 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T008 Add psycopg2-binary>=2.9.9 to backend/requirements.txt
-- [ ] T009 [P] Add python-dotenv>=1.0.0 to backend/requirements.txt
-- [ ] T010 Update backend/src/database.py: Add Neon connection pooling (pool_size=5, max_overflow=10, pool_pre_ping=True)
-- [ ] T011 Update backend/src/config.py: Add environment variable validation on startup
-- [ ] T012 Update backend/src/main.py: Add production CORS origins (Vercel URL, *.vercel.app)
-- [ ] T013 Update backend/.env.example: Document all 6 required environment variables
-- [ ] T014 [P] Update textbook/.env.example: Document REACT_APP_API_URL
-- [ ] T015 Create render.yaml in repository root with Web Service configuration
-- [ ] T016 [P] Create scripts/deployment/ directory for deployment automation
-- [ ] T017 Commit foundational changes: `git add . && git commit -m "Add production deployment configuration"`
+- [ ] T010 Add psycopg2-binary>=2.9.9 to backend/requirements.txt
+- [ ] T011 [P] Add python-dotenv>=1.0.0 to backend/requirements.txt
+- [ ] T012 Update backend/src/database.py: Add Neon connection pooling (pool_size=5, max_overflow=10, pool_pre_ping=True)
+- [ ] T013 Update backend/src/config.py: Add environment variable validation on startup
+- [ ] T014 Update backend/src/main.py: Add production CORS origins (Vercel URL, *.vercel.app)
+- [ ] T015 Update backend/.env.example: Document all 6 required environment variables
+- [ ] T016 [P] Update textbook/.env.example: Document REACT_APP_API_URL
+- [ ] T017 Create render.yaml in repository root with Web Service configuration
+- [ ] T018 [P] Create scripts/deployment/ directory for deployment automation
+- [ ] T019 Commit foundational changes: `git add . && git commit -m "Add production deployment configuration"`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -65,22 +67,22 @@
 
 ### Implementation for User Story 1
 
-- [ ] T018 [US1] Create Neon database project via Neon console (region: US East Ohio)
-- [ ] T019 [US1] Copy Neon connection string from dashboard (format: postgresql://user:pass@ep-xxx.neon.tech/db?sslmode=require)
-- [ ] T020 [US1] Create SQLite backup: `cp backend/ai_native_book.db backend/ai_native_book.db.backup.$(date +%Y%m%d)`
-- [ ] T021 [US1] Create scripts/deployment/migrate-to-neon.sh: Database migration script with record count verification
-- [ ] T022 [US1] Update backend/.env temporarily: Set DATABASE_URL to Neon connection string
-- [ ] T023 [US1] Run migrations on Neon: `cd backend && python scripts/run_migrations.py`
-- [ ] T024 [US1] Verify all 7 tables exist in Neon: `python -c "from src.database import engine; from sqlalchemy import inspect; print(inspect(engine).get_table_names())"`
-- [ ] T025 [US1] Export SQLite data to JSON: Create Python script to export all tables
-- [ ] T026 [US1] Import data to Neon: Create Python script to import JSON data with transaction safety
-- [ ] T027 [US1] Verify record counts match: Compare SQLite vs Neon for all 7 tables
-- [ ] T028 [US1] Test authentication against Neon: Signup, login, verify JWT tokens work
-- [ ] T029 [US1] Test chat history against Neon: Create conversation, send message, verify retrieval
-- [ ] T030 [US1] Test translation against Neon: Request translation, verify cached translation retrieval
-- [ ] T031 [US1] Create scripts/deployment/rollback-database.sh: Rollback procedure (revert DATABASE_URL to SQLite)
-- [ ] T032 [US1] Test rollback procedure: Execute rollback, verify system works with SQLite
-- [ ] T033 [US1] Document migration results: Record counts, duration, any issues in history.md
+- [ ] T020 [US1] Create Neon database project via Neon console (region: US East Ohio)
+- [ ] T021 [US1] Copy Neon connection string from dashboard (format: postgresql://user:pass@ep-xxx.neon.tech/db?sslmode=require)
+- [ ] T022 [US1] Create SQLite backup: `cp backend/ai_native_book.db backend/ai_native_book.db.backup.$(date +%Y%m%d)`
+- [ ] T023 [US1] Create scripts/deployment/migrate-to-neon.sh: Database migration script with record count verification
+- [ ] T024 [US1] Update backend/.env temporarily: Set DATABASE_URL to Neon connection string
+- [ ] T025 [US1] Run migrations on Neon: `cd backend && python scripts/run_migrations.py`
+- [ ] T026 [US1] Verify all 7 tables exist in Neon: `python -c "from src.database import engine; from sqlalchemy import inspect; print(inspect(engine).get_table_names())"`
+- [ ] T027 [US1] Export SQLite data to JSON: Create Python script to export all tables
+- [ ] T028 [US1] Import data to Neon: Create Python script to import JSON data with transaction safety
+- [ ] T029 [US1] Verify record counts match: Compare SQLite vs Neon for all 7 tables
+- [ ] T030 [US1] Test authentication against Neon: Signup, login, verify JWT tokens work
+- [ ] T031 [US1] Test chat history against Neon: Create conversation, send message, verify retrieval
+- [ ] T032 [US1] Test translation against Neon: Request translation, verify cached translation retrieval
+- [ ] T033 [US1] Create scripts/deployment/rollback-database.sh: Rollback procedure (revert DATABASE_URL to SQLite)
+- [ ] T034 [US1] Test rollback procedure: Execute rollback, verify system works with SQLite
+- [ ] T035 [US1] Document migration results: Record counts, duration, any issues in history.md
 
 **Checkpoint**: Database migration complete - backend can now be deployed to Render
 
@@ -94,24 +96,24 @@
 
 ### Implementation for User Story 2
 
-- [ ] T034 [US2] Push deployment branch to GitHub: `git push origin 006-production-deployment`
-- [ ] T035 [US2] Connect Render to GitHub repository via Render dashboard
-- [ ] T036 [US2] Select branch 006-production-deployment in Render (render.yaml auto-detected)
-- [ ] T037 [US2] Click "Create Web Service" and wait for initial deployment (~5 minutes)
-- [ ] T038 [US2] Configure DATABASE_URL in Render dashboard Environment tab (Neon connection string)
-- [ ] T039 [P] [US2] Configure OPENAI_API_KEY in Render dashboard Environment tab
-- [ ] T040 [P] [US2] Configure QDRANT_URL in Render dashboard Environment tab
-- [ ] T041 [P] [US2] Configure QDRANT_API_KEY in Render dashboard Environment tab
-- [ ] T042 [US2] Generate JWT_SECRET_KEY: `openssl rand -hex 32` and configure in Render
-- [ ] T043 [US2] Configure FRONTEND_URL in Render (placeholder: https://ai-native-book.vercel.app, update after Vercel deployment)
-- [ ] T044 [US2] Save environment variables (service will redeploy automatically)
-- [ ] T045 [US2] Copy backend URL from Render dashboard (e.g., https://ai-native-book-backend.onrender.com)
-- [ ] T046 [US2] Test health check endpoint: `curl https://ai-native-book-backend.onrender.com/api/health`
-- [ ] T047 [US2] Verify health check returns 200 OK with all services healthy
-- [ ] T048 [US2] Test authentication endpoint: `curl https://ai-native-book-backend.onrender.com/api/v1/auth/health`
-- [ ] T049 [US2] Test CORS configuration: Verify CORS headers allow Vercel domain (use curl with Origin header)
-- [ ] T050 [US2] Document backend URL in specs/006-production-deployment/deployment-urls.md
-- [ ] T051 [US2] Test rollback procedure: Redeploy previous commit via Render dashboard
+- [ ] T036 [US2] Push deployment branch to GitHub: `git push origin 006-production-deployment`
+- [ ] T037 [US2] Connect Render to GitHub repository via Render dashboard
+- [ ] T038 [US2] Select branch 006-production-deployment in Render (render.yaml auto-detected)
+- [ ] T039 [US2] Click "Create Web Service" and wait for initial deployment (~5 minutes)
+- [ ] T040 [US2] Configure DATABASE_URL in Render dashboard Environment tab (Neon connection string)
+- [ ] T041 [P] [US2] Configure OPENAI_API_KEY in Render dashboard Environment tab
+- [ ] T042 [P] [US2] Configure QDRANT_URL in Render dashboard Environment tab
+- [ ] T043 [P] [US2] Configure QDRANT_API_KEY in Render dashboard Environment tab
+- [ ] T044 [US2] Generate JWT_SECRET_KEY: `openssl rand -hex 32` and configure in Render
+- [ ] T045 [US2] Configure FRONTEND_URL in Render (placeholder: https://ai-native-book.vercel.app, update after Vercel deployment)
+- [ ] T046 [US2] Save environment variables (service will redeploy automatically)
+- [ ] T047 [US2] Copy backend URL from Render dashboard (e.g., https://ai-native-book-backend.onrender.com)
+- [ ] T048 [US2] Test health check endpoint: `curl https://ai-native-book-backend.onrender.com/api/health`
+- [ ] T049 [US2] Verify health check returns 200 OK with all services healthy
+- [ ] T050 [US2] Test authentication endpoint: `curl https://ai-native-book-backend.onrender.com/api/v1/auth/health`
+- [ ] T051 [US2] Test CORS configuration: Verify CORS headers allow Vercel domain (use curl with Origin header)
+- [ ] T052 [US2] Document backend URL in specs/006-production-deployment/deployment-urls.md
+- [ ] T053 [US2] Test rollback procedure: Redeploy previous commit via Render dashboard
 
 **Checkpoint**: Backend deployed and verified - frontend can now be deployed
 
@@ -125,26 +127,26 @@
 
 ### Implementation for User Story 3
 
-- [ ] T052 [US3] Update textbook/.env.example: Set REACT_APP_API_URL to Render backend URL
-- [ ] T053 [US3] Commit frontend configuration: `git add textbook/.env.example && git commit -m "Update frontend API URL for production"`
-- [ ] T054 [US3] Push to GitHub: `git push origin 006-production-deployment`
-- [ ] T055 [US3] Connect Vercel to GitHub repository via Vercel dashboard
-- [ ] T056 [US3] Configure project: Framework=Docusaurus, Root Directory=textbook, Build Command=npm run build (auto-detected)
-- [ ] T057 [US3] Click "Deploy" and wait for deployment (~5 minutes)
-- [ ] T058 [US3] Configure REACT_APP_API_URL in Vercel Environment Variables (value: Render backend URL, environments: Production + Preview)
-- [ ] T059 [US3] Redeploy frontend: Go to Deployments → Click "..." → "Redeploy"
-- [ ] T060 [US3] Copy frontend URL from Vercel dashboard (e.g., https://ai-native-book.vercel.app)
-- [ ] T061 [US3] Update FRONTEND_URL in Render dashboard to Vercel production URL
-- [ ] T062 [US3] Wait for Render backend to redeploy with updated CORS configuration
-- [ ] T063 [US3] Test frontend loads: `curl -I https://ai-native-book.vercel.app` (expect 200 OK)
-- [ ] T064 [US3] Test frontend in browser: Verify site loads in <3 seconds
-- [ ] T065 [US3] Test signup flow: Create new account, verify JWT token stored
-- [ ] T066 [US3] Test login flow: Login with credentials, verify authentication works
-- [ ] T067 [US3] Test chatbot: Create conversation, send message, verify response
-- [ ] T068 [US3] Test translation: Click translation button, verify Urdu text displays
-- [ ] T069 [US3] Test preferences: Change language, verify persists across sessions
-- [ ] T070 [US3] Document frontend URL in specs/006-production-deployment/deployment-urls.md
-- [ ] T071 [US3] Test rollback procedure: Execute `vercel rollback` via CLI or dashboard
+- [ ] T054 [US3] Update textbook/.env.example: Set REACT_APP_API_URL to Render backend URL
+- [ ] T055 [US3] Commit frontend configuration: `git add textbook/.env.example && git commit -m "Update frontend API URL for production"`
+- [ ] T056 [US3] Push to GitHub: `git push origin 006-production-deployment`
+- [ ] T057 [US3] Connect Vercel to GitHub repository via Vercel dashboard
+- [ ] T058 [US3] Configure project: Framework=Docusaurus, Root Directory=textbook, Build Command=npm run build (auto-detected)
+- [ ] T059 [US3] Click "Deploy" and wait for deployment (~5 minutes)
+- [ ] T060 [US3] Configure REACT_APP_API_URL in Vercel Environment Variables (value: Render backend URL, environments: Production + Preview)
+- [ ] T061 [US3] Redeploy frontend: Go to Deployments → Click "..." → "Redeploy"
+- [ ] T062 [US3] Copy frontend URL from Vercel dashboard (e.g., https://ai-native-book.vercel.app)
+- [ ] T063 [US3] Update FRONTEND_URL in Render dashboard to Vercel production URL
+- [ ] T064 [US3] Wait for Render backend to redeploy with updated CORS configuration
+- [ ] T065 [US3] Test frontend loads: `curl -I https://ai-native-book.vercel.app` (expect 200 OK)
+- [ ] T066 [US3] Test frontend in browser: Verify site loads in <3 seconds
+- [ ] T067 [US3] Test signup flow: Create new account, verify JWT token stored
+- [ ] T068 [US3] Test login flow: Login with credentials, verify authentication works
+- [ ] T069 [US3] Test chatbot: Create conversation, send message, verify response
+- [ ] T070 [US3] Test translation: Click translation button, verify Urdu text displays
+- [ ] T071 [US3] Test preferences: Change language, verify persists across sessions
+- [ ] T072 [US3] Document frontend URL in specs/006-production-deployment/deployment-urls.md
+- [ ] T073 [US3] Test rollback procedure: Execute `vercel rollback` via CLI or dashboard
 
 **Checkpoint**: Frontend deployed and verified - CI/CD can now be enabled
 
@@ -158,20 +160,20 @@
 
 ### Implementation for User Story 4
 
-- [ ] T072 [US4] Verify Render auto-deploy enabled: Check Render dashboard → Build & Deploy → Auto-Deploy=Yes, Branch=main
-- [ ] T073 [US4] Verify Vercel auto-deploy enabled: Check Vercel dashboard → Git → Production Branch=main, Auto-Deploy=Enabled
-- [ ] T074 [US4] Merge deployment branch to main: `git checkout main && git merge 006-production-deployment`
-- [ ] T075 [US4] Push to main: `git push origin main`
-- [ ] T076 [US4] Monitor Render deployment: Watch logs in Render dashboard (expect deployment within 5 minutes)
-- [ ] T077 [US4] Monitor Vercel deployment: Watch deployments in Vercel dashboard (expect deployment within 5 minutes)
-- [ ] T078 [US4] Verify both deployments complete successfully
-- [ ] T079 [US4] Test CI/CD: Make small change (e.g., update README), commit, push to main
-- [ ] T080 [US4] Verify automatic deployments trigger for both frontend and backend
-- [ ] T081 [US4] Create test PR: Create feature branch, make change, open PR
-- [ ] T082 [US4] Verify Vercel preview deployment created with unique URL
-- [ ] T083 [US4] Test preview deployment: Verify preview site works correctly
-- [ ] T084 [US4] Close test PR and verify preview deployment is deleted
-- [ ] T085 [US4] Document CI/CD configuration in specs/006-production-deployment/ci-cd-setup.md
+- [ ] T074 [US4] Verify Render auto-deploy enabled: Check Render dashboard → Build & Deploy → Auto-Deploy=Yes, Branch=main
+- [ ] T075 [US4] Verify Vercel auto-deploy enabled: Check Vercel dashboard → Git → Production Branch=main, Auto-Deploy=Enabled
+- [ ] T076 [US4] Merge deployment branch to main: `git checkout main && git merge 006-production-deployment`
+- [ ] T077 [US4] Push to main: `git push origin main`
+- [ ] T078 [US4] Monitor Render deployment: Watch logs in Render dashboard (expect deployment within 5 minutes)
+- [ ] T079 [US4] Monitor Vercel deployment: Watch deployments in Vercel dashboard (expect deployment within 5 minutes)
+- [ ] T080 [US4] Verify both deployments complete successfully
+- [ ] T081 [US4] Test CI/CD: Make small change (e.g., update README), commit, push to main
+- [ ] T082 [US4] Verify automatic deployments trigger for both frontend and backend
+- [ ] T083 [US4] Create test PR: Create feature branch, make change, open PR
+- [ ] T084 [US4] Verify Vercel preview deployment created with unique URL
+- [ ] T085 [US4] Test preview deployment: Verify preview site works correctly
+- [ ] T086 [US4] Close test PR and verify preview deployment is deleted
+- [ ] T087 [US4] Document CI/CD configuration in specs/006-production-deployment/ci-cd-setup.md
 
 **Checkpoint**: CI/CD enabled - production verification can now begin
 
@@ -185,23 +187,23 @@
 
 ### Implementation for User Story 5
 
-- [ ] T086 [US5] Create scripts/deployment/verify-deployment.sh: Automated verification script
-- [ ] T087 [US5] Verify health check endpoint: `curl https://ai-native-book-backend.onrender.com/api/health` (expect 200 OK)
-- [ ] T088 [US5] Verify frontend loads: `curl -I https://ai-native-book.vercel.app` (expect 200 OK, <3s)
-- [ ] T089 [US5] Verify CORS works: Check browser console for CORS errors (expect none)
-- [ ] T090 [US5] Verify authentication: Signup → Login → Logout (expect all work)
-- [ ] T091 [US5] Verify chatbot: Create conversation → Send message → Verify streaming response
-- [ ] T092 [US5] Verify translation: Request translation → Verify Urdu text displays → Verify caching works
-- [ ] T093 [US5] Verify preferences: Change language → Verify persists across sessions
-- [ ] T094 [US5] Verify database connection: Check Render logs for successful Neon connections
-- [ ] T095 [US5] Verify environment variables: Check Render logs for successful variable loading
-- [ ] T096 [US5] Test cold start behavior: Wait 15 minutes, make request, verify 30-second wake-up
-- [ ] T097 [US5] Verify error logging: Trigger error, check Render logs for error capture
-- [ ] T098 [US5] Document production URLs in history.md (frontend, backend, database)
-- [ ] T099 [US5] Document deployment completion date and status in history.md
-- [ ] T100 [US5] Create deployment summary: Record migration results, deployment times, any issues
-- [ ] T101 [US5] Verify rollback procedures documented: Database, backend, frontend rollback steps
-- [ ] T102 [US5] Schedule 24-hour monitoring: Monitor health checks and error logs
+- [ ] T088 [US5] Create scripts/deployment/verify-deployment.sh: Automated verification script
+- [ ] T089 [US5] Verify health check endpoint: `curl https://ai-native-book-backend.onrender.com/api/health` (expect 200 OK)
+- [ ] T090 [US5] Verify frontend loads: `curl -I https://ai-native-book.vercel.app` (expect 200 OK, <3s)
+- [ ] T091 [US5] Verify CORS works: Check browser console for CORS errors (expect none)
+- [ ] T092 [US5] Verify authentication: Signup → Login → Logout (expect all work)
+- [ ] T093 [US5] Verify chatbot: Create conversation → Send message → Verify streaming response
+- [ ] T094 [US5] Verify translation: Request translation → Verify Urdu text displays → Verify caching works
+- [ ] T095 [US5] Verify preferences: Change language → Verify persists across sessions
+- [ ] T096 [US5] Verify database connection: Check Render logs for successful Neon connections
+- [ ] T097 [US5] Verify environment variables: Check Render logs for successful variable loading
+- [ ] T098 [US5] Test cold start behavior: Wait 15 minutes, make request, verify 30-second wake-up
+- [ ] T099 [US5] Verify error logging: Trigger error, check Render logs for error capture
+- [ ] T100 [US5] Document production URLs in history.md (frontend, backend, database)
+- [ ] T101 [US5] Document deployment completion date and status in history.md
+- [ ] T102 [US5] Create deployment summary: Record migration results, deployment times, any issues
+- [ ] T103 [US5] Verify rollback procedures documented: Database, backend, frontend rollback steps
+- [ ] T104 [US5] Schedule 24-hour monitoring: Monitor health checks and error logs
 
 **Checkpoint**: Production deployment complete and verified
 
@@ -211,11 +213,11 @@
 
 **Purpose**: Final documentation and cleanup
 
-- [ ] T103 Update history.md: Add Phase 5 deployment completion entry with production URLs
-- [ ] T104 [P] Create deployment guide: Document step-by-step deployment procedure for future reference
-- [ ] T105 [P] Document troubleshooting: Common issues and solutions in specs/006-production-deployment/troubleshooting.md
-- [ ] T106 Tag release: `git tag v1.0.0 && git push origin v1.0.0`
-- [ ] T107 Archive SQLite backup: Move backup to safe location, retain for 7 days
+- [ ] T105 Update history.md: Add Phase 5 deployment completion entry with production URLs
+- [ ] T106 [P] Create deployment guide: Document step-by-step deployment procedure for future reference
+- [ ] T107 [P] Document troubleshooting: Common issues and solutions in specs/006-production-deployment/troubleshooting.md
+- [ ] T108 Tag release: `git tag v1.0.0 && git push origin v1.0.0`
+- [ ] T109 Archive SQLite backup: Move backup to safe location, retain for 7 days
 
 ---
 
@@ -242,10 +244,10 @@ Phase 1 (Setup) → Phase 2 (Foundational)
 **Critical Path**: US1 → US2 → US3 → US4 → US5 (sequential, no parallelization between stories)
 
 **Within-Story Parallelization**:
-- US1: Tasks T025-T026 (export/import) can be prepared in parallel
-- US2: Tasks T039-T041 (environment variables) can be configured in parallel
-- US3: Tasks T064-T069 (feature testing) can be tested in parallel
-- US5: Tasks T090-T093 (feature verification) can be verified in parallel
+- US1: Tasks T027-T028 (export/import) can be prepared in parallel
+- US2: Tasks T041-T043 (environment variables) can be configured in parallel
+- US3: Tasks T066-T071 (feature testing) can be tested in parallel
+- US5: Tasks T092-T095 (feature verification) can be verified in parallel
 
 ---
 
@@ -261,19 +263,19 @@ Phase 1 (Setup) → Phase 2 (Foundational)
 
 ### Phase 4 (US2: Backend Deployment)
 ```bash
-# Can run in parallel after T038:
-- T039: Configure OPENAI_API_KEY
-- T040: Configure QDRANT_URL
-- T041: Configure QDRANT_API_KEY
+# Can run in parallel after T040:
+- T041: Configure OPENAI_API_KEY
+- T042: Configure QDRANT_URL
+- T043: Configure QDRANT_API_KEY
 ```
 
 ### Phase 7 (US5: Verification)
 ```bash
-# Can run in parallel after T089:
-- T090: Test authentication
-- T091: Test chatbot
-- T092: Test translation
-- T093: Test preferences
+# Can run in parallel after T091:
+- T092: Test authentication
+- T093: Test chatbot
+- T094: Test translation
+- T095: Test preferences
 ```
 
 ---
