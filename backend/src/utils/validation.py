@@ -29,12 +29,14 @@ class ValidationUtils:
         Validate chapter ID format.
 
         Args:
-            chapter_id: Chapter identifier (e.g., "01-introduction-to-ros2")
+            chapter_id: Chapter identifier (e.g., "intro", "module-1-ros2/urdf-humanoids")
 
         Returns:
             True if valid, False otherwise
         """
-        pattern = r'^\d{2}-[a-z0-9-]+$'
+        # Accept alphanumeric, hyphens, underscores, and forward slashes
+        # Examples: "intro", "module-1-ros2/urdf-humanoids", "hardware/edge-kits"
+        pattern = r'^[a-z0-9/_-]+$'
         return bool(re.match(pattern, chapter_id))
 
     @staticmethod

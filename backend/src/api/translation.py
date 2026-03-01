@@ -105,7 +105,7 @@ async def translate_chapter(
                 detail={
                     "code": "INVALID_CHAPTER_ID",
                     "message": f"Invalid chapter identifier format: {translate_request.chapter_id}",
-                    "expected_format": "##-chapter-name (e.g., '01-introduction-to-ros2')"
+                    "expected_format": "alphanumeric with hyphens and slashes (e.g., 'intro', 'module-1-ros2/urdf-humanoids')"
                 }
             )
 
@@ -296,24 +296,34 @@ async def _load_chapter_content(chapter_id: str) -> Optional[str]:
     Load chapter content from markdown file.
 
     Args:
-        chapter_id: Chapter identifier (e.g., "01-introduction-to-ros2")
+        chapter_id: Chapter identifier (e.g., "intro", "module-1-ros2/urdf-humanoids")
 
     Returns:
         Chapter markdown content or None if not found
     """
     try:
-        # Construct file path
+        # Construct file path - chapter_id may include subdirectories
         textbook_dir = os.path.join(os.path.dirname(__file__), "../../../textbook/docs")
         file_path = os.path.join(textbook_dir, f"{chapter_id}.md")
+
+        # Normalize path to prevent directory traversal attacks
+        file_path = os.path.normpath(file_path)
+        textbook_dir = os.path.normpath(textbook_dir)
+
+        # Security check: ensure file is within textbook/docs directory
+        if not file_path.startswith(textbook_dir):
+            logger.warning(f"Invalid chapter path (security): {chapter_id}")
+            return None
 
         # Read file
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
+        logger.info(f"Successfully loaded chapter: {chapter_id}")
         return content
 
     except FileNotFoundError:
-        logger.warning(f"Chapter file not found: {chapter_id}")
+        logger.warning(f"Chapter file not found: {file_path}")
         return None
     except Exception as e:
         logger.error(f"Error loading chapter {chapter_id}: {str(e)}")
