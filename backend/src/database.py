@@ -12,7 +12,7 @@ engine_kwargs = {
 if not settings.database_url.startswith("sqlite"):
     engine_kwargs.update({
         "pool_size": 5,
-        "max_overflow": 15,
+        "max_overflow": 10,
         "pool_pre_ping": True,  # Verify connections before use (prevents stale connections)
         "pool_recycle": 3600,  # Recycle connections after 1 hour
     })

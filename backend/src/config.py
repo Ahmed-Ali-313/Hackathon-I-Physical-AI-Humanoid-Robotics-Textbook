@@ -64,6 +64,48 @@ class Settings(BaseSettings):
         """Check if running in production environment"""
         return self.environment.lower() == "production"
 
+    def validate_required_vars(self):
+        """
+        Validate required environment variables on startup.
+        Raises ValueError if any required variable is missing or invalid.
+        """
+        errors = []
+
+        # Validate JWT_SECRET_KEY length (must be at least 32 characters for security)
+        if len(self.jwt_secret_key) < 32:
+            errors.append(
+                f"JWT_SECRET_KEY must be at least 32 characters (current: {len(self.jwt_secret_key)} chars). "
+                f"Generate a secure key with: openssl rand -hex 32"
+            )
+
+        # In production, validate all required environment variables
+        if self.is_production:
+            required_vars = {
+                "DATABASE_URL": self.database_url,
+                "OPENAI_API_KEY": self.openai_api_key,
+                "QDRANT_URL": self.qdrant_url,
+                "QDRANT_API_KEY": self.qdrant_api_key,
+            }
+
+            for var_name, var_value in required_vars.items():
+                if not var_value or var_value == "":
+                    errors.append(f"Missing required environment variable: {var_name}")
+
+            # Validate DATABASE_URL format for production (must be PostgreSQL)
+            if self.database_url.startswith("sqlite"):
+                errors.append(
+                    "Production environment must use PostgreSQL (DATABASE_URL should start with 'postgresql://')"
+                )
+
+        if errors:
+            error_message = "\n".join([f"  - {error}" for error in errors])
+            raise ValueError(
+                f"Environment variable validation failed:\n{error_message}"
+            )
+
 
 # Global settings instance
 settings = Settings()
+
+# Validate settings on module import (fail fast if misconfigured)
+settings.validate_required_vars()

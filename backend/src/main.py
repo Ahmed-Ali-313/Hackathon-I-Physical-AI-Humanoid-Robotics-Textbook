@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import os
 from dotenv import load_dotenv
+from src.config import settings
 
 # Load environment variables
 load_dotenv()
@@ -25,15 +26,25 @@ app = FastAPI(
 )
 
 # Configure CORS - MUST be first middleware
-# Allow both port 3000 and 3001 for local development
+# Support both local development and production Vercel URLs
+cors_origins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001"
+]
+
+# Add production frontend URL if configured (for Vercel deployment)
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    cors_origins.append(frontend_url)
+    # Also allow Vercel preview deployments (*.vercel.app)
+    if "vercel.app" in frontend_url:
+        cors_origins.append("https://*.vercel.app")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001"
-    ],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
