@@ -15,6 +15,7 @@ from src.services.chat_service import ChatService
 from src.services.agent_service import agent_service
 from src.tools.tool_registry import tool_registry
 from src.middleware.error_handler import handle_validation_error
+from src.middleware.auth import get_current_user
 import logging
 import json
 
@@ -65,23 +66,6 @@ class SendMessageResponse(BaseModel):
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
 
-# Dependency to get current user (placeholder - will be implemented with Better-Auth)
-async def get_current_user():
-    """
-    Get current authenticated user.
-
-    TODO: Implement with Better-Auth JWT validation
-    For now, returns mock user for testing.
-    """
-    # This will be replaced with actual JWT validation
-    # Using a fixed UUID for testing purposes
-    import uuid
-    return {
-        "id": uuid.UUID("00000000-0000-0000-0000-000000000001"),
-        "email": "test@example.com",
-    }
-
-
 # Dependency to get chat service
 async def get_chat_service(db: AsyncSession = Depends(get_db)) -> ChatService:
     """Get chat service instance."""
@@ -94,7 +78,7 @@ async def get_chat_service(db: AsyncSession = Depends(get_db)) -> ChatService:
 @router.post("/conversations", response_model=ConversationResponse, status_code=status.HTTP_201_CREATED)
 async def create_conversation(
     request: CreateConversationRequest,
-    current_user: dict = Depends(get_current_user),
+    user_id: str = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ):
     """
@@ -102,7 +86,7 @@ async def create_conversation(
 
     Args:
         request: Conversation creation request
-        current_user: Authenticated user
+        user_id: Authenticated user ID
         chat_service: Chat service instance
 
     Returns:
@@ -110,7 +94,7 @@ async def create_conversation(
     """
     try:
         conversation = await chat_service.create_conversation(
-            user_id=current_user["id"],
+            user_id=user_id,
             title=request.title,
         )
 
@@ -132,7 +116,7 @@ async def create_conversation(
 async def get_conversations(
     limit: int = 50,
     offset: int = 0,
-    current_user: dict = Depends(get_current_user),
+    user_id: str = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ):
     """
@@ -141,7 +125,7 @@ async def get_conversations(
     Args:
         limit: Maximum number of conversations to return
         offset: Number of conversations to skip
-        current_user: Authenticated user
+        user_id: Authenticated user ID
         chat_service: Chat service instance
 
     Returns:
@@ -149,7 +133,7 @@ async def get_conversations(
     """
     try:
         conversations = await chat_service.get_user_conversations(
-            user_id=current_user["id"],
+            user_id=user_id,
             limit=limit,
             offset=offset,
         )
@@ -166,7 +150,7 @@ async def get_conversations(
 @router.get("/conversations/{conversation_id}", response_model=ConversationResponse)
 async def get_conversation(
     conversation_id: str,
-    current_user: dict = Depends(get_current_user),
+    user_id: str = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ):
     """
@@ -174,7 +158,7 @@ async def get_conversation(
 
     Args:
         conversation_id: Conversation ID
-        current_user: Authenticated user
+        user_id: Authenticated user ID
         chat_service: Chat service instance
 
     Returns:
@@ -185,7 +169,7 @@ async def get_conversation(
     """
     conversation = await chat_service.get_conversation(
         conversation_id=conversation_id,
-        user_id=current_user["id"],
+        user_id=user_id,
     )
 
     if not conversation:
@@ -200,7 +184,7 @@ async def get_conversation(
 @router.delete("/conversations/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_conversation(
     conversation_id: str,
-    current_user: dict = Depends(get_current_user),
+    user_id: str = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ):
     """
@@ -208,7 +192,7 @@ async def delete_conversation(
 
     Args:
         conversation_id: Conversation ID
-        current_user: Authenticated user
+        user_id: Authenticated user ID
         chat_service: Chat service instance
 
     Raises:
@@ -216,7 +200,7 @@ async def delete_conversation(
     """
     deleted = await chat_service.delete_conversation(
         conversation_id=conversation_id,
-        user_id=current_user["id"],
+        user_id=user_id,
     )
 
     if not deleted:
@@ -231,7 +215,7 @@ async def get_messages(
     conversation_id: str,
     limit: int = 500,
     offset: int = 0,
-    current_user: dict = Depends(get_current_user),
+    user_id: str = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ):
     """
@@ -241,7 +225,7 @@ async def get_messages(
         conversation_id: Conversation ID
         limit: Maximum number of messages to return
         offset: Number of messages to skip
-        current_user: Authenticated user
+        user_id: Authenticated user ID
         chat_service: Chat service instance
 
     Returns:
@@ -253,7 +237,7 @@ async def get_messages(
     # Verify conversation exists and user has access
     conversation = await chat_service.get_conversation(
         conversation_id=conversation_id,
-        user_id=current_user["id"],
+        user_id=user_id,
     )
 
     if not conversation:
@@ -275,7 +259,7 @@ async def get_messages(
 async def send_message(
     conversation_id: str,
     request: SendMessageRequest,
-    current_user: dict = Depends(get_current_user),
+    user_id: str = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ):
     """
@@ -284,7 +268,7 @@ async def send_message(
     Args:
         conversation_id: Conversation ID
         request: Message request
-        current_user: Authenticated user
+        user_id: Authenticated user ID
         chat_service: Chat service instance
 
     Returns:
@@ -298,7 +282,7 @@ async def send_message(
     # Verify conversation exists and user has access
     conversation = await chat_service.get_conversation(
         conversation_id=conversation_id,
-        user_id=current_user["id"],
+        user_id=user_id,
     )
 
     if not conversation:
@@ -308,7 +292,7 @@ async def send_message(
         )
 
     # Verify user owns the conversation
-    if conversation.user_id != current_user["id"]:
+    if str(conversation.user_id) != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Unauthorized access to conversation",
@@ -343,7 +327,7 @@ async def send_message(
 async def send_message_stream(
     conversation_id: str,
     request: SendMessageRequest,
-    current_user: dict = Depends(get_current_user),
+    user_id: str = Depends(get_current_user),
 ):
     """
     Send a message to a conversation with streaming response.
@@ -351,7 +335,7 @@ async def send_message_stream(
     Args:
         conversation_id: Conversation ID
         request: Message request
-        current_user: Authenticated user
+        user_id: Authenticated user ID
 
     Returns:
         Server-Sent Events stream of the AI response
@@ -368,7 +352,7 @@ async def send_message_stream(
         verify_service = ChatService(verify_db)
         conversation = await verify_service.get_conversation(
             conversation_id=conversation_id,
-            user_id=current_user["id"],
+            user_id=user_id,
         )
 
         if not conversation:
@@ -378,7 +362,7 @@ async def send_message_stream(
             )
 
         # Verify user owns the conversation
-        if conversation.user_id != current_user["id"]:
+        if str(conversation.user_id) != user_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Unauthorized access to conversation",
@@ -394,7 +378,7 @@ async def send_message_stream(
                 # Get conversation again in this session
                 conversation = await chat_service.get_conversation(
                     conversation_id=conversation_id,
-                    user_id=current_user["id"],
+                    user_id=user_id,
                 )
 
                 # Save user message first
