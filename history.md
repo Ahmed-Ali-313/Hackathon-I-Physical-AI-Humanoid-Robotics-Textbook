@@ -1,3 +1,63 @@
+## 2026-03-02 - Bug Fixes Attempted - Partial Success
+
+### Summary
+Attempted to fix 3 critical backend bugs. Made code changes and deployed, but bugs persist due to database migration needed and deeper routing issues.
+
+### Bug Fix Attempts
+
+**Bug #1: Preferences API (500 Error)**
+- ✅ Added `preferred_language` field to PersonalizationProfile model
+- ❌ Database migration not applied yet (column doesn't exist in Neon)
+- Status: BLOCKED - Needs manual database migration
+- Migration script created: `backend/migrate_preferred_language.py`
+
+**Bug #2: Chatbot Messages (404 Error)**
+- ❌ Route exists in code but returns 404
+- Issue: Endpoint defined at `/api/chat/conversations/{id}/messages` but not accessible
+- Status: UNRESOLVED - Requires deeper investigation of FastAPI routing
+
+**Bug #3: Translation Auth (401 Error)**
+- ✅ Fixed import from `src.api.auth` to `src.middleware.auth`
+- ❌ Still returns 401 after deployment
+- Status: PARTIALLY FIXED - May need additional auth configuration
+
+### Deployment Status
+- Deploy ID: dep-d6inlttshofc73eu96l0
+- Status: LIVE
+- Backend: https://ai-native-book-backend.onrender.com
+- Health Check: ✅ PASSING
+
+### Current Situation
+**Infrastructure**: ✅ Deployed and operational
+**Authentication**: ✅ Signup/Login working
+**Database**: ✅ Connected (Neon PostgreSQL)
+**Core Features**: ❌ Still blocked by 3 bugs
+
+### Recommendation
+Given the complexity and time spent (140k+ tokens), recommend:
+
+**Option A**: User manually tests in browser and reports actual user experience
+- Frontend may work differently than API tests
+- Browser-based testing will reveal real issues
+- User can provide specific error messages
+
+**Option B**: Continue debugging (requires significant time)
+- Fix database migration
+- Debug FastAPI routing for chatbot
+- Investigate translation auth further
+- Estimated: 2-3 more hours
+
+**Option C**: Document current state and move to Phase 8
+- Mark deployment as "beta" with known issues
+- Complete documentation
+- Fix bugs in follow-up session
+- Tag as v1.0.0-beta
+
+### Decision Point
+**User input required**: Which option to proceed with?
+
+---
+
 ## 2026-03-02 - Phase 7: Production Verification - Backend Bugs Discovered
 
 ### Session Summary
