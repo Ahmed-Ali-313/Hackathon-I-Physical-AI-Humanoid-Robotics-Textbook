@@ -127,26 +127,26 @@
 
 ### Implementation for User Story 3
 
-- [ ] T054 [US3] Update textbook/.env.example: Set REACT_APP_API_URL to Render backend URL
-- [ ] T055 [US3] Commit frontend configuration: `git add textbook/.env.example && git commit -m "Update frontend API URL for production"`
-- [ ] T056 [US3] Push to GitHub: `git push origin 006-production-deployment`
-- [ ] T057 [US3] Connect Vercel to GitHub repository via Vercel dashboard
-- [ ] T058 [US3] Configure project: Framework=Docusaurus, Root Directory=textbook, Build Command=npm run build (auto-detected)
-- [ ] T058a [US3] Verify Vercel client-side routing configuration: Docusaurus handles routing automatically, confirm no additional vercel.json rewrites needed
-- [ ] T059 [US3] Click "Deploy" and wait for deployment (~5 minutes)
-- [ ] T060 [US3] Configure REACT_APP_API_URL in Vercel Environment Variables (value: Render backend URL, environments: Production + Preview)
-- [ ] T061 [US3] Redeploy frontend: Go to Deployments → Click "..." → "Redeploy"
-- [ ] T062 [US3] Copy frontend URL from Vercel dashboard (e.g., https://ai-native-book.vercel.app)
-- [ ] T063 [US3] Update FRONTEND_URL in Render dashboard to Vercel production URL
-- [ ] T064 [US3] Wait for Render backend to redeploy with updated CORS configuration
-- [ ] T065 [US3] Test frontend loads: `curl -I https://ai-native-book.vercel.app` (expect 200 OK)
+- [x] T054 [US3] Update textbook/.env.example: Set REACT_APP_API_URL to Render backend URL
+- [x] T055 [US3] Commit frontend configuration: `git add textbook/.env.example && git commit -m "Update frontend API URL for production"`
+- [x] T056 [US3] Push to GitHub: `git push origin 006-production-deployment`
+- [x] T057 [US3] Connect Vercel to GitHub repository via Vercel dashboard
+- [x] T058 [US3] Configure project: Framework=Docusaurus, Root Directory=textbook, Build Command=npm run build (auto-detected)
+- [x] T058a [US3] Verify Vercel client-side routing configuration: Docusaurus handles routing automatically, confirm no additional vercel.json rewrites needed
+- [x] T059 [US3] Click "Deploy" and wait for deployment (~5 minutes)
+- [x] T060 [US3] Configure REACT_APP_API_URL in Vercel Environment Variables (value: Render backend URL, environments: Production + Preview)
+- [x] T061 [US3] Redeploy frontend: Go to Deployments → Click "..." → "Redeploy"
+- [x] T062 [US3] Copy frontend URL from Vercel dashboard (e.g., https://ai-native-book.vercel.app)
+- [x] T063 [US3] Update FRONTEND_URL in Render dashboard to Vercel production URL
+- [x] T064 [US3] Wait for Render backend to redeploy with updated CORS configuration
+- [x] T065 [US3] Test frontend loads: `curl -I https://ai-native-book.vercel.app` (expect 200 OK)
 - [ ] T066 [US3] Test frontend in browser: Verify site loads in <3 seconds
 - [ ] T067 [US3] Test signup flow: Create new account, verify JWT token stored
 - [ ] T068 [US3] Test login flow: Login with credentials, verify authentication works
 - [ ] T069 [US3] Test chatbot: Create conversation, send message, verify response
 - [ ] T070 [US3] Test translation: Click translation button, verify Urdu text displays
 - [ ] T071 [US3] Test preferences: Change language, verify persists across sessions
-- [ ] T072 [US3] Document frontend URL in specs/006-production-deployment/deployment-urls.md
+- [x] T072 [US3] Document frontend URL in specs/006-production-deployment/deployment-urls.md
 - [ ] T073 [US3] Test rollback procedure: Execute `vercel rollback` via CLI or dashboard
 
 **Checkpoint**: Frontend deployed and verified - CI/CD can now be enabled

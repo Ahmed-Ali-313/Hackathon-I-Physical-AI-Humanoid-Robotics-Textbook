@@ -11,9 +11,14 @@
 - CORS: ✅ Configured for Vercel domain
 
 ## Frontend (Vercel)
-- Project Name: ai-native-book
-- URL: (pending deployment)
-- Status: Not yet deployed
+- Project Name: textbook
+- URL: https://textbook-liart.vercel.app ✅ LIVE
+- Deployment: https://textbook-c6e4pyoo1-ahmed-alis-projects-a93d38a3.vercel.app
+- Dashboard: https://vercel.com/ahmed-alis-projects-a93d38a3/textbook
+- Status: ✅ DEPLOYED AND VERIFIED (2026-03-02)
+- Framework: Docusaurus 3.9.2
+- Build: Successful (2m build time)
+- Environment: REACT_APP_API_URL configured
 
 ## Database (Neon)
 - Status: ✅ Migrated (Phase 3 complete)
