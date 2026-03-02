@@ -59,6 +59,9 @@ class PersonalizationProfile(Base):
     isaac_level = Column(String(50), nullable=True)
     vla_level = Column(String(50), nullable=True)
 
+    # Language preference
+    preferred_language = Column(String(10), nullable=True, default='en')
+
     # Personalization state
     is_personalized = Column(Boolean, default=False, nullable=False)
 
