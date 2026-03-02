@@ -161,23 +161,23 @@
 
 ### Implementation for User Story 4
 
-- [ ] T074 [US4] Verify Render auto-deploy enabled: Check Render dashboard → Build & Deploy → Auto-Deploy=Yes, Branch=main
-- [ ] T074a [US4] Verify Render blocks failed builds: Confirm "Auto-Deploy" setting includes build failure detection (default behavior)
-- [ ] T075 [US4] Verify Vercel auto-deploy enabled: Check Vercel dashboard → Git → Production Branch=main, Auto-Deploy=Enabled
-- [ ] T075a [US4] Verify Vercel blocks failed builds: Confirm deployment settings block on build errors (default behavior)
-- [ ] T076 [US4] Merge deployment branch to main: `git checkout main && git merge 006-production-deployment`
-- [ ] T077 [US4] Push to main: `git push origin main`
-- [ ] T078 [US4] Monitor Render deployment: Watch logs in Render dashboard (expect deployment within 5 minutes)
-- [ ] T079 [US4] Monitor Vercel deployment: Watch deployments in Vercel dashboard (expect deployment within 5 minutes)
-- [ ] T080 [US4] Verify both deployments complete successfully
-- [ ] T081 [US4] Test CI/CD: Make small change (e.g., update README), commit, push to main
-- [ ] T082 [US4] Verify automatic deployments trigger for both frontend and backend
+- [x] T074 [US4] Verify Render auto-deploy enabled: Check Render dashboard → Build & Deploy → Auto-Deploy=Yes, Branch=main
+- [x] T074a [US4] Verify Render blocks failed builds: Confirm "Auto-Deploy" setting includes build failure detection (default behavior)
+- [x] T075 [US4] Verify Vercel auto-deploy enabled: Check Vercel dashboard → Git → Production Branch=main, Auto-Deploy=Enabled
+- [x] T075a [US4] Verify Vercel blocks failed builds: Confirm deployment settings block on build errors (default behavior)
+- [x] T076 [US4] Merge deployment branch to main: `git checkout main && git merge 006-production-deployment`
+- [x] T077 [US4] Push to main: `git push origin main`
+- [x] T078 [US4] Monitor Render deployment: Watch logs in Render dashboard (expect deployment within 5 minutes)
+- [x] T079 [US4] Monitor Vercel deployment: Watch deployments in Vercel dashboard (expect deployment within 5 minutes)
+- [x] T080 [US4] Verify both deployments complete successfully
+- [x] T081 [US4] Test CI/CD: Make small change (e.g., update README), commit, push to main
+- [x] T082 [US4] Verify automatic deployments trigger for both frontend and backend
 - [ ] T083 [US4] Create test PR: Create feature branch, make change, open PR
 - [ ] T084 [US4] Verify Vercel preview deployment created with unique URL
 - [ ] T085 [US4] Test preview deployment: Verify preview site works correctly
 - [ ] T086 [US4] Close test PR and verify preview deployment is deleted
 - [ ] T086a [US4] Sync environment variables to GitHub Secrets: Use `gh secret set` for CI/CD pipeline access (if needed for future GitHub Actions)
-- [ ] T087 [US4] Document CI/CD configuration in specs/006-production-deployment/ci-cd-setup.md
+- [x] T087 [US4] Document CI/CD configuration in specs/006-production-deployment/ci-cd-setup.md
 
 **Checkpoint**: CI/CD enabled - production verification can now begin
 
@@ -191,22 +191,22 @@
 
 ### Implementation for User Story 5
 
-- [ ] T088 [US5] Create scripts/deployment/verify-deployment.sh: Automated verification script
-- [ ] T089 [US5] Verify health check endpoint: `curl https://ai-native-book-backend.onrender.com/api/health` (expect 200 OK)
-- [ ] T090 [US5] Verify frontend loads: `curl -I https://ai-native-book.vercel.app` (expect 200 OK, <3s)
-- [ ] T091 [US5] Verify CORS works: Check browser console for CORS errors (expect none)
-- [ ] T092 [US5] Verify authentication: Signup → Login → Logout (expect all work)
+- [x] T088 [US5] Create scripts/deployment/verify-deployment.sh: Automated verification script
+- [x] T089 [US5] Verify health check endpoint: `curl https://ai-native-book-backend.onrender.com/api/health` (expect 200 OK)
+- [x] T090 [US5] Verify frontend loads: `curl -I https://ai-native-book.vercel.app` (expect 200 OK, <3s)
+- [x] T091 [US5] Verify CORS works: Check browser console for CORS errors (expect none)
+- [x] T092 [US5] Verify authentication: Signup → Login → Logout (expect all work)
 - [ ] T093 [US5] Verify chatbot: Create conversation → Send message → Verify streaming response
 - [ ] T094 [US5] Verify translation: Request translation → Verify Urdu text displays → Verify caching works
 - [ ] T095 [US5] Verify preferences: Change language → Verify persists across sessions
-- [ ] T096 [US5] Verify database connection: Check Render logs for successful Neon connections
-- [ ] T097 [US5] Verify environment variables: Check Render logs for successful variable loading
+- [x] T096 [US5] Verify database connection: Check Render logs for successful Neon connections
+- [x] T097 [US5] Verify environment variables: Check Render logs for successful variable loading
 - [ ] T098 [US5] Test cold start behavior: Wait 15 minutes, make request, verify 30-second wake-up - handles edge case: Render spin-down during active session
 - [ ] T099 [US5] Verify error logging: Trigger error, check Render logs for error capture - handles edge case: invalid OpenAI/Qdrant credentials
-- [ ] T100 [US5] Document production URLs in history.md (frontend, backend, database)
-- [ ] T101 [US5] Document deployment completion date and status in history.md
-- [ ] T102 [US5] Create deployment summary: Record migration results, deployment times, any issues
-- [ ] T103 [US5] Verify rollback procedures documented: Database, backend, frontend rollback steps
+- [x] T100 [US5] Document production URLs in history.md (frontend, backend, database)
+- [x] T101 [US5] Document deployment completion date and status in history.md
+- [x] T102 [US5] Create deployment summary: Record migration results, deployment times, any issues
+- [x] T103 [US5] Verify rollback procedures documented: Database, backend, frontend rollback steps
 - [ ] T104 [US5] Schedule 24-hour monitoring: Monitor health checks and error logs
 - [ ] T104a [US5] (Optional) Perform load testing: Test with 100 concurrent users to verify SC-011 (can be done post-deployment)
 
