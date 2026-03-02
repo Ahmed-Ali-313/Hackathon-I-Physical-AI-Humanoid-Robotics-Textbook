@@ -96,23 +96,23 @@
 
 ### Implementation for User Story 2
 
-- [ ] T036 [US2] Push deployment branch to GitHub: `git push origin 006-production-deployment`
-- [ ] T037 [US2] Connect Render to GitHub repository via Render dashboard
-- [ ] T038 [US2] Select branch 006-production-deployment in Render (render.yaml auto-detected)
-- [ ] T039 [US2] Click "Create Web Service" and wait for initial deployment (~5 minutes)
-- [ ] T040 [US2] Configure DATABASE_URL in Render dashboard Environment tab (Neon connection string)
-- [ ] T041 [P] [US2] Configure OPENAI_API_KEY in Render dashboard Environment tab
-- [ ] T042 [P] [US2] Configure QDRANT_URL in Render dashboard Environment tab
-- [ ] T043 [P] [US2] Configure QDRANT_API_KEY in Render dashboard Environment tab
-- [ ] T044 [US2] Generate JWT_SECRET_KEY: `openssl rand -hex 32` and configure in Render
-- [ ] T045 [US2] Configure FRONTEND_URL in Render (placeholder: https://ai-native-book.vercel.app, update after Vercel deployment)
-- [ ] T046 [US2] Save environment variables (service will redeploy automatically)
-- [ ] T047 [US2] Copy backend URL from Render dashboard (e.g., https://ai-native-book-backend.onrender.com)
-- [ ] T048 [US2] Test health check endpoint: `curl https://ai-native-book-backend.onrender.com/api/health`
-- [ ] T049 [US2] Verify health check returns 200 OK with all services healthy
-- [ ] T050 [US2] Test authentication endpoint: `curl https://ai-native-book-backend.onrender.com/api/v1/auth/health`
-- [ ] T051 [US2] Test CORS configuration: Verify CORS headers allow Vercel domain (use curl with Origin header) - handles edge case: CORS misconfiguration
-- [ ] T052 [US2] Document backend URL in specs/006-production-deployment/deployment-urls.md
+- [x] T036 [US2] Push deployment branch to GitHub: `git push origin 006-production-deployment`
+- [x] T037 [US2] Connect Render to GitHub repository via Render dashboard
+- [x] T038 [US2] Select branch 006-production-deployment in Render (render.yaml auto-detected)
+- [x] T039 [US2] Click "Create Web Service" and wait for initial deployment (~5 minutes)
+- [x] T040 [US2] Configure DATABASE_URL in Render dashboard Environment tab (Neon connection string)
+- [x] T041 [P] [US2] Configure OPENAI_API_KEY in Render dashboard Environment tab
+- [x] T042 [P] [US2] Configure QDRANT_URL in Render dashboard Environment tab
+- [x] T043 [P] [US2] Configure QDRANT_API_KEY in Render dashboard Environment tab
+- [x] T044 [US2] Generate JWT_SECRET_KEY: `openssl rand -hex 32` and configure in Render
+- [x] T045 [US2] Configure FRONTEND_URL in Render (placeholder: https://ai-native-book.vercel.app, update after Vercel deployment)
+- [x] T046 [US2] Save environment variables (service will redeploy automatically)
+- [x] T047 [US2] Copy backend URL from Render dashboard (e.g., https://ai-native-book-backend.onrender.com)
+- [x] T048 [US2] Test health check endpoint: `curl https://ai-native-book-backend.onrender.com/api/health`
+- [x] T049 [US2] Verify health check returns 200 OK with all services healthy
+- [x] T050 [US2] Test authentication endpoint: `curl https://ai-native-book-backend.onrender.com/api/v1/auth/health`
+- [x] T051 [US2] Test CORS configuration: Verify CORS headers allow Vercel domain (use curl with Origin header) - handles edge case: CORS misconfiguration
+- [x] T052 [US2] Document backend URL in specs/006-production-deployment/deployment-urls.md
 - [ ] T053 [US2] Test rollback procedure: Redeploy previous commit via Render dashboard
 
 **Checkpoint**: Backend deployed and verified - frontend can now be deployed
