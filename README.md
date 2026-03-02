@@ -598,3 +598,7 @@ For issues, questions, or feature requests:
 ---
 
 **Built with ❤️ for the Physical AI & Humanoid Robotics community**
+
+## CI/CD Testing
+
+Testing automatic deployment pipeline - 2026-03-02
