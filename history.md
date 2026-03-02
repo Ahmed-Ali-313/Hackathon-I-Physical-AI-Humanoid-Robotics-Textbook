@@ -2273,7 +2273,7 @@ This brings completion to 105/115 (91%) with all enhancements.
 ```bash
 # Backend .env
 DATABASE_URL=postgresql://user:pass@host/db  # Neon Postgres
-QDRANT_URL=https://your-cluster.qdrant.io
+QDRANT_URL=<your-qdrant-url>
 QDRANT_API_KEY=your-qdrant-key
 GEMINI_API_KEY=your-gemini-key  # For embeddings
 OPENAI_API_KEY=your-openai-key  # For chat completions
@@ -4848,4 +4848,133 @@ Successfully migrated database from SQLite to Neon Postgres with 100% accuracy f
 **Session Status**: Ready for Phase 4 (Backend Deployment)  
 **Waiting For**: User to connect Render to GitHub repository (T037)  
 **Next Agent Action**: Configure Render environment variables after user completes T037
+
+
+---
+
+## 2026-03-02 - Session Pause: Preparing for Render MCP Server Integration
+
+### Session Status
+**Time**: 06:30 (approximately 4.5 hours into deployment)  
+**Current Phase**: Phase 4 - Backend Deployment to Render  
+**Current Task**: T037 (Connect Render to GitHub)  
+**Reason for Pause**: User adding Render MCP server configuration, requires Claude Code restart
+
+### Work Completed This Session
+- ✅ Phases 1-3 fully complete (36/114 tasks)
+- ✅ Comprehensive session summary documented
+- ✅ All changes committed and pushed to GitHub
+- ✅ Branch: 006-production-deployment (up to date)
+- ✅ Latest commit: d8a1fce
+
+### Current Situation
+**User Action**: Added Render MCP server configuration to project  
+**Next Step**: Restart Claude Code to load Render MCP tools  
+**Expected Outcome**: Render tools will be available for automated deployment
+
+### Resume Instructions for Next Session
+
+**IMPORTANT**: When resuming this session, follow these steps:
+
+1. **Read this history.md file** to understand project state
+2. **Check for Render MCP tools** by attempting to use Render-specific tools
+3. **If Render tools are available**:
+   - Proceed with automated Phase 4 deployment (T037-T053)
+   - Create Render web service programmatically
+   - Configure all 6 environment variables via MCP
+   - Test health check and CORS
+   - Continue to Phase 5 (Frontend deployment via Vercel CLI)
+
+4. **If Render tools are NOT available**:
+   - Guide user through manual Render dashboard setup (T037)
+   - User will need to manually configure environment variables (T040-T045)
+   - Continue with testing and verification (T046-T053)
+
+### Environment Variables Needed for Render (T040-T045)
+
+When configuring Render (either via MCP or manually), set these 6 variables:
+
+```bash
+DATABASE_URL=<your-neon-database-url>
+
+OPENAI_API_KEY=<your-openai-api-key>
+
+QDRANT_URL=<your-qdrant-url>
+
+QDRANT_API_KEY=<your-qdrant-api-key>
+
+JWT_SECRET_KEY=(generate with: openssl rand -hex 32)
+
+FRONTEND_URL=(will be set after Vercel deployment in Phase 5)
+```
+
+### Project State Summary
+
+**Repository**:
+- GitHub: https://github.com/Ahmed-Ali-313/Hackathon-I-Physical-AI-Humanoid-Robotics-Textbook.git
+- Branch: 006-production-deployment
+- Status: All changes committed and pushed
+
+**Database**:
+- Neon Postgres: MIGRATED ✅
+- 2 users, 1 profile (100% accuracy)
+- Connection string: In DATABASE_URL above
+
+**Configuration Files**:
+- ✅ render.yaml (created)
+- ✅ backend/.env.example (updated)
+- ✅ textbook/.env.example (created)
+- ✅ scripts/deployment/migrate-to-neon.sh (tested)
+- ✅ scripts/deployment/rollback-database.sh (ready)
+
+**Remaining Work**:
+- Phase 4: Backend Deployment (17 tasks remaining)
+- Phase 5: Frontend Deployment (21 tasks)
+- Phase 6: CI/CD Pipeline (17 tasks)
+- Phase 7: Production Verification (18 tasks)
+- Phase 8: Polish & Documentation (5 tasks)
+- **Total Remaining**: 78 tasks (68% of deployment)
+
+### Quick Start Commands for Next Session
+
+```bash
+# Check current branch
+git branch --show-current
+
+# Check git status
+git status
+
+# Check Neon connection
+echo $DATABASE_URL
+
+# Check if Render MCP tools are available
+# (Agent will attempt to use Render tools)
+
+# If manual setup needed, guide user to:
+# https://dashboard.render.com
+```
+
+### Critical Information for Next Session
+
+**DO NOT**:
+- Re-run database migration (already complete)
+- Modify constitution or specs (already finalized)
+- Create new branches (stay on 006-production-deployment)
+
+**DO**:
+- Check for Render MCP tools first
+- Use automated deployment if tools available
+- Continue with Phase 4 (Backend Deployment)
+- Test thoroughly before moving to Phase 5
+
+### Token Budget
+- This session used: ~167k / 200k tokens (84%)
+- Next session: Fresh 200k token budget
+- Estimated remaining work: 50-80k tokens (should complete in next session)
+
+---
+
+**SESSION PAUSED - READY FOR RESTART WITH RENDER MCP SERVER**
+
+**Next Agent Action**: Check for Render MCP tools, then proceed with Phase 4 deployment
 
