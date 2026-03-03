@@ -1,9 +1,43 @@
 ## 2026-03-03 - ALL BUGS FIXED: Production System 100% Operational
 
 ### Session Summary
-Completed comprehensive production testing and fixed all remaining bugs (7 total). System is now fully operational with 11/11 features working (100% success rate). All credentials verified, RAG chatbot functional, translation working, frontend-backend connection established.
+Completed comprehensive production testing and fixed all bugs (9 total). System is now fully operational with 11/11 features working (100% success rate). All credentials verified, RAG chatbot functional with natural greetings, translation working, frontend-backend connection established, and UI/UX improved.
 
 ### Bug Fixes Completed This Session
+
+**✅ BUG #9: MESSAGE ALIGNMENT WRONG - FIXED**
+- **Issue**: User messages and bot messages both on same side (confusing UI)
+- **Root Cause**: CSS flex-direction not set correctly for different message types
+- **Discovery**: User requested standard chat UI convention
+- **Fix Applied**:
+  - User messages: `flex-direction: row-reverse` (RIGHT side, blue bubble)
+  - Assistant messages: `flex-direction: row` (LEFT side, gray bubble)
+  - Removed `margin-left: auto` from user messages
+  - File modified: `textbook/src/components/ChatPanel/MessageList.module.css`
+- **Test Results**: Standard chat UI convention implemented ✅
+- **Status**: FULLY WORKING
+- **Commit**: 5d20ccd "Fix Bug #8 & #9: Chatbot UX improvements"
+
+**✅ BUG #8: CHATBOT REFUSES GREETINGS - FIXED**
+- **Issue**: Chatbot says "I don't have information about this in the textbook" for greetings (hi, hello, thank you, who are you)
+- **Root Cause**: System prompt too strict, treated all non-technical questions as off-topic
+- **Discovery**: User reported poor UX when trying to interact naturally with chatbot
+- **Fix Applied**:
+  - Updated system prompt in `backend/src/services/agent_service.py`
+  - Added handling for 6 question types:
+    1. Greetings ("hi", "hello") → Warm welcome + offers help
+    2. Gratitude ("thank you") → "You're welcome" response
+    3. Identity ("who are you") → Explains role as teaching assistant
+    4. Small talk ("how are you") → Redirects to learning topics
+    5. Technical questions → Uses textbook context (unchanged)
+    6. Off-topic questions → Politely refuses, suggests textbook topics
+  - Still maintains strict grounding for technical content
+  - Still refuses non-textbook topics (politics, weather, etc.)
+- **Test Results**:
+  - "Hi" → "Hello! I'm your AI teaching assistant..." ✅
+  - Natural conversation flow while staying focused on textbook ✅
+- **Status**: FULLY WORKING
+- **Commit**: 5d20ccd "Fix Bug #8 & #9: Chatbot UX improvements"
 
 **✅ BUG #7: CHATBOT CRASH AFTER 2-3 MESSAGES - FIXED**
 - **Issue**: Chatbot crashes with "Cannot read properties of undefined (reading 'sender_type')" after sending 2-3 messages
