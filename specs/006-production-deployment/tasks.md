@@ -140,12 +140,12 @@
 - [x] T063 [US3] Update FRONTEND_URL in Render dashboard to Vercel production URL
 - [x] T064 [US3] Wait for Render backend to redeploy with updated CORS configuration
 - [x] T065 [US3] Test frontend loads: `curl -I https://ai-native-book.vercel.app` (expect 200 OK)
-- [ ] T066 [US3] Test frontend in browser: Verify site loads in <3 seconds
-- [ ] T067 [US3] Test signup flow: Create new account, verify JWT token stored
-- [ ] T068 [US3] Test login flow: Login with credentials, verify authentication works
-- [ ] T069 [US3] Test chatbot: Create conversation, send message, verify response
-- [ ] T070 [US3] Test translation: Click translation button, verify Urdu text displays
-- [ ] T071 [US3] Test preferences: Change language, verify persists across sessions
+- [x] T066 [US3] Test frontend in browser: Verify site loads in <3 seconds
+- [x] T067 [US3] Test signup flow: Create new account, verify JWT token stored
+- [x] T068 [US3] Test login flow: Login with credentials, verify authentication works
+- [x] T069 [US3] Test chatbot: Create conversation, send message, verify response
+- [x] T070 [US3] Test translation: Click translation button, verify Urdu text displays
+- [x] T071 [US3] Test preferences: Change language, verify persists across sessions
 - [x] T072 [US3] Document frontend URL in specs/006-production-deployment/deployment-urls.md
 - [ ] T073 [US3] Test rollback procedure: Execute `vercel rollback` via CLI or dashboard
 
@@ -196,9 +196,9 @@
 - [x] T090 [US5] Verify frontend loads: `curl -I https://ai-native-book.vercel.app` (expect 200 OK, <3s)
 - [x] T091 [US5] Verify CORS works: Check browser console for CORS errors (expect none)
 - [x] T092 [US5] Verify authentication: Signup → Login → Logout (expect all work)
-- [ ] T093 [US5] Verify chatbot: Create conversation → Send message → Verify streaming response
-- [ ] T094 [US5] Verify translation: Request translation → Verify Urdu text displays → Verify caching works
-- [ ] T095 [US5] Verify preferences: Change language → Verify persists across sessions
+- [x] T093 [US5] Verify chatbot: Create conversation → Send message → Verify streaming response
+- [x] T094 [US5] Verify translation: Request translation → Verify Urdu text displays → Verify caching works
+- [x] T095 [US5] Verify preferences: Change language → Verify persists across sessions
 - [x] T096 [US5] Verify database connection: Check Render logs for successful Neon connections
 - [x] T097 [US5] Verify environment variables: Check Render logs for successful variable loading
 - [ ] T098 [US5] Test cold start behavior: Wait 15 minutes, make request, verify 30-second wake-up - handles edge case: Render spin-down during active session
