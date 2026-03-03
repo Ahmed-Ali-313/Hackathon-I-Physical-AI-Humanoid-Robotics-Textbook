@@ -297,12 +297,16 @@ export async function sendMessageStream(
               onUserMessage(event.message);
             } else if (event.type === 'content' && onChunk) {
               onChunk(event.chunk);
-            } else if (event.type === 'done' && onComplete && event.message) {
+            } else if (event.type === 'done' && onComplete) {
               // Validate message has required fields before passing to callback
-              if (event.message.sender_type && event.message.content !== undefined) {
+              if (event.message && event.message.sender_type && event.message.content !== undefined) {
                 onComplete(event.message);
               } else {
                 console.error('Invalid message structure in done event:', event.message);
+                // Still call onComplete with a fallback to clear typing indicator
+                if (onComplete) {
+                  onComplete(event.message || { sender_type: 'assistant', content: '' });
+                }
               }
             } else if (event.type === 'error') {
               throw new Error(event.message || 'Unknown streaming error');

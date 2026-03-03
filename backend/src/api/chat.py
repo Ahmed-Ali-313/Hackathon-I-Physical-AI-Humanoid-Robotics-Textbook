@@ -419,8 +419,16 @@ async def send_message_stream(
                     search_results = await vector_search_tool.execute(query=request.content, top_k=3)
                     context_data = await retrieve_context_tool.execute(search_results)
 
-                    if not context_data["has_context"]:
-                        # No context found - send uncertainty response
+                    # Check if query is a greeting or social interaction
+                    query_lower = request.content.lower().strip()
+                    is_greeting = any(word in query_lower for word in [
+                        'hi', 'hello', 'hey', 'greetings', 'good morning', 'good afternoon',
+                        'good evening', 'thank', 'thanks', 'who are you', 'what are you',
+                        'how are you', "what's up", 'whats up'
+                    ])
+
+                    if not context_data["has_context"] and not is_greeting:
+                        # No context found and not a greeting - send uncertainty response
                         uncertainty_msg = (
                             "I don't have information about this in the textbook. "
                             "This topic may not be covered in the current chapters."
@@ -429,8 +437,12 @@ async def send_message_stream(
                         yield f"data: {json.dumps({'type': 'done', 'confidence': 0.0, 'sources': []})}\n\n"
                         return
 
+                    # For greetings, use empty context and let agent handle it
+                    if is_greeting and not context_data["has_context"]:
+                        context_data["context"] = ""
+
                     sources = retrieve_context_tool.format_sources_for_response(context_data["sources"])
-                    confidence = sum(s.get("confidence", 0.0) for s in context_data["sources"]) / len(context_data["sources"])
+                    confidence = sum(s.get("confidence", 0.0) for s in context_data["sources"]) / len(context_data["sources"]) if context_data["sources"] else 0.5
 
                 # Stream the response
                 full_response = ""
