@@ -177,7 +177,7 @@ async def translate_chapter(
                 chapter_id=translate_request.chapter_id,
                 content=chapter_content,
                 language_code=translate_request.language_code,
-                user_level=_get_user_level(current_user),
+                user_level=None,  # Fixed: current_user is str (user_id), not User object
                 chapter_title=_extract_title(chapter_content)
             )
 
