@@ -63,7 +63,7 @@ class ErrorResponse(BaseModel):
 async def translate_chapter(
     translate_request: TranslateRequest,
     request: Request,
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),  # Fixed: returns str, not User
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -119,7 +119,7 @@ async def translate_chapter(
                 }
             )
 
-        logger.info(f"Translation request from user {current_user.id} for {translate_request.chapter_id}")
+        logger.info(f"Translation request from user {current_user} for {translate_request.chapter_id}")
 
         # Load chapter content from file
         chapter_content = await _load_chapter_content(translate_request.chapter_id)
@@ -218,7 +218,7 @@ async def translate_chapter(
 async def get_cached_translation(
     chapter_id: str,
     language_code: str = "ur",
-    current_user: User = Depends(get_current_user),
+    current_user: str = Depends(get_current_user),  # Fixed: returns str, not User
     db: AsyncSession = Depends(get_db)
 ):
     """
