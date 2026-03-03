@@ -224,6 +224,11 @@
     flex-direction: column;
   }
 
+  /* Hide conversation sidebar on mobile - show only main chat */
+  .content > :first-child {
+    display: none;
+  }
+
   .header,
   .messageArea,
   .inputArea {
