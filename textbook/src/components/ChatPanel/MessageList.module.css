@@ -44,6 +44,17 @@
   align-items: flex-start;
 }
 
+/* User message - align to right */
+.userMessage {
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+}
+
+/* Assistant message - align to left (default) */
+.assistantMessage {
+  flex-direction: row;
+}
+
 .messageIcon {
   flex-shrink: 0;
   width: 2rem;
@@ -73,7 +84,6 @@
 .userMessage .messageText {
   background-color: var(--ifm-color-primary);
   color: var(--ifm-color-primary-contrast-foreground, #fff);
-  margin-left: auto;
 }
 
 /* Assistant message */
