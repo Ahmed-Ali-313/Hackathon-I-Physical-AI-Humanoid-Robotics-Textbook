@@ -5,8 +5,10 @@
  */
 
 const API_BASE_URL = typeof window !== 'undefined'
-  ? (window.location.hostname === 'localhost' ? 'http://localhost:8001' : '')
-  : '';
+  ? (window.location.hostname === 'localhost'
+      ? 'http://localhost:8001'
+      : 'https://ai-native-book-backend.onrender.com')
+  : 'http://localhost:8001';
 
 interface Conversation {
   id: string;

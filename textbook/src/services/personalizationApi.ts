@@ -4,8 +4,10 @@
  * Handles all API calls related to user personalization preferences
  */
 
-const API_BASE_URL = typeof window !== 'undefined' && (window as any).API_BASE_URL
-  ? (window as any).API_BASE_URL
+const API_BASE_URL = typeof window !== 'undefined'
+  ? (window.location.hostname === 'localhost'
+      ? 'http://localhost:8001/api/v1'
+      : 'https://ai-native-book-backend.onrender.com/api/v1')
   : 'http://localhost:8001/api/v1';
 
 export interface PersonalizationProfile {

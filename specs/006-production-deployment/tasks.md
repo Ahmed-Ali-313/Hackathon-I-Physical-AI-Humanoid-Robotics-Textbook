@@ -221,8 +221,8 @@
 - [x] T105 Update history.md: Add Phase 5 deployment completion entry with production URLs
 - [x] T106 [P] Create deployment guide: Document step-by-step deployment procedure for future reference
 - [x] T107 [P] Document troubleshooting: Common issues and solutions in specs/006-production-deployment/troubleshooting.md
-- [ ] T108 Tag release: `git tag v1.0.0 && git push origin v1.0.0`
-- [ ] T109 Archive SQLite backup: Move backup to safe location, retain for 7 days
+- [x] T108 Tag release: `git tag v1.0.0 && git push origin v1.0.0`
+- [x] T109 Archive SQLite backup: Move backup to safe location, retain for 7 days
 
 ---
 

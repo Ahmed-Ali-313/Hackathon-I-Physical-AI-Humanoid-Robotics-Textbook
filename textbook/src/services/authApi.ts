@@ -4,8 +4,10 @@
  * Handles all authentication-related API calls.
  */
 
-const API_URL = typeof window !== 'undefined' && (window as any).API_URL
-  ? (window as any).API_URL
+const API_URL = typeof window !== 'undefined'
+  ? (window.location.hostname === 'localhost'
+      ? 'http://localhost:8001'
+      : 'https://ai-native-book-backend.onrender.com')
   : 'http://localhost:8001';
 
 export interface SignupRequest {
