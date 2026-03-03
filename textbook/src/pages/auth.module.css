@@ -87,6 +87,44 @@
   cursor: not-allowed;
 }
 
+/* Password input wrapper for toggle button */
+.passwordInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordInputWrapper .formInput {
+  padding-right: 3rem;
+  width: 100%;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ifm-color-emphasis-600);
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.passwordToggle:hover {
+  color: var(--ifm-color-primary);
+}
+
+.passwordToggle:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .submitButton {
   padding: 0.875rem;
   font-size: 1rem;
