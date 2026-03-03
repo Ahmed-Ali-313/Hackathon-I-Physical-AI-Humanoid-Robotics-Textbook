@@ -1,210 +1,565 @@
-# Claude Code Rules
+# Claude Code Rules - AI-Native Textbook Project
 
-This file is generated during init for the selected agent.
+This file contains project-specific instructions for Claude Code when working on the AI-Native Physical AI & Humanoid Robotics Textbook.
 
-You are an expert AI assistant specializing in Spec-Driven Development (SDD). Your primary goal is to work with the architext to build products.
+---
 
-## Task context
+## 🎯 Project Overview
 
-**Your Surface:** You operate on a project level, providing guidance to users and executing development tasks via a defined set of tools.
+**Project Name**: AI-Native Textbook: Physical AI & Humanoid Robotics
+**Type**: Educational Platform with AI-Powered Features
+**Status**: ✅ Production (Live at https://textbook-liart.vercel.app)
 
-**Your Success is Measured By:**
-- All outputs strictly follow the user intent.
-- Prompt History Records (PHRs) are created automatically and accurately for every user prompt.
-- Architectural Decision Record (ADR) suggestions are made intelligently for significant decisions.
-- All changes are small, testable, and reference code precisely.
+**Core Features**:
+- Interactive Docusaurus textbook (17 chapters)
+- RAG chatbot with OpenAI GPT-4o-mini
+- Urdu translation with RTL layout
+- User authentication and preferences
+- Real-time streaming responses
+- Mobile responsive design
 
-## Core Guarantees (Product Promise)
+---
 
-- Record every user input verbatim in a Prompt History Record (PHR) after every user message. Do not truncate; preserve full multiline input.
-- PHR routing (all under `history/prompts/`):
-  - Constitution → `history/prompts/constitution/`
-  - Feature-specific → `history/prompts/<feature-name>/`
-  - General → `history/prompts/general/`
-- ADR suggestions: when an architecturally significant decision is detected, suggest: "📋 Architectural decision detected: <brief>. Document? Run `/sp.adr <title>`." Never auto‑create ADRs; require user consent.
+## 🛠️ Tech Stack
 
-## Development Guidelines
+### Frontend
+- **Framework**: Docusaurus 3.x (Static Site Generator)
+- **UI Library**: React 18
+- **Language**: TypeScript 5.x
+- **Styling**: CSS Modules
+- **Deployment**: Vercel (Global CDN)
+- **Port**: 3000 (local), 3001 (alternative)
 
-### 1. Authoritative Source Mandate:
-Agents MUST prioritize and use MCP tools and CLI commands for all information gathering and task execution. NEVER assume a solution from internal knowledge; all methods require external verification.
+### Backend
+- **Framework**: FastAPI 0.115+
+- **Language**: Python 3.12
+- **Server**: Uvicorn (ASGI)
+- **Validation**: Pydantic 2.x
+- **Deployment**: Render (Oregon)
+- **Port**: 8001
 
-### 2. Execution Flow:
-Treat MCP servers as first-class tools for discovery, verification, execution, and state capture. PREFER CLI interactions (running commands and capturing outputs) over manual file creation or reliance on internal knowledge.
+### Databases
+- **Primary**: Neon Serverless Postgres (Production)
+- **Local**: SQLite (Development)
+- **Vector DB**: Qdrant Cloud (768-dim embeddings)
 
-### 3. Knowledge capture (PHR) for Every User Input.
-After completing requests, you **MUST** create a PHR (Prompt History Record).
+### AI/LLM
+- **Chat Model**: OpenAI GPT-4o-mini
+- **Embeddings**: text-embedding-3-small (768 dimensions)
+- **RAG**: Retrieval-Augmented Generation with Qdrant
 
-**When to create PHRs:**
-- Implementation work (code changes, new features)
-- Planning/architecture discussions
-- Debugging sessions
-- Spec/task/plan creation
-- Multi-step workflows
+### Authentication
+- **Method**: JWT-based authentication
+- **Hashing**: bcrypt (8 rounds)
+- **Token Expiry**: 7 days
 
-**PHR Creation Process:**
+---
 
-1) Detect stage
-   - One of: constitution | spec | plan | tasks | red | green | refactor | explainer | misc | general
+## 📁 Project Structure
 
-2) Generate title
-   - 3–7 words; create a slug for the filename.
+```
+ai-native-book/
+├── backend/                          # FastAPI backend
+│   ├── src/
+│   │   ├── api/                      # API endpoints
+│   │   │   ├── auth.py               # Authentication (signup, login)
+│   │   │   ├── chat.py               # Chatbot endpoints (streaming)
+│   │   │   ├── translation.py        # Urdu translation
+│   │   │   ├── preferences.py        # User preferences
+│   │   │   └── admin.py              # Admin endpoints
+│   │   ├── models/                   # SQLAlchemy models
+│   │   │   ├── user.py
+│   │   │   ├── conversation.py
+│   │   │   ├── chat_message.py
+│   │   │   ├── translated_chapter.py
+│   │   │   └── personalization_profile.py
+│   │   ├── services/                 # Business logic
+│   │   │   ├── auth_service.py
+│   │   │   ├── chat_service.py
+│   │   │   ├── agent_service.py      # OpenAI integration
+│   │   │   ├── embedding_service.py
+│   │   │   ├── vector_service.py     # Qdrant integration
+│   │   │   ├── translation_service.py
+│   │   │   └── preference_service.py
+│   │   ├── tools/                    # Agent tools
+│   │   │   ├── retrieve_context_tool.py
+│   │   │   └── vector_search_tool.py
+│   │   ├── middleware/               # Middleware
+│   │   │   ├── auth.py               # JWT verification
+│   │   │   └── error_handler.py
+│   │   ├── database.py               # Database configuration
+│   │   ├── config.py                 # Settings management
+│   │   └── main.py                   # FastAPI application
+│   ├── tests/                        # Backend tests
+│   │   ├── unit/
+│   │   ├── integration/
+│   │   └── conftest.py
+│   ├── migrations/                   # SQL migrations
+│   ├── scripts/                      # Utility scripts
+│   │   ├── run_migrations.py
+│   │   ├── index_textbook.py
+│   │   └── deployment/
+│   │       ├── migrate-to-neon.sh
+│   │       └── rollback-database.sh
+│   ├── requirements.txt
+│   ├── .env.example
+│   └── app.db                        # SQLite (local dev)
+│
+├── textbook/                         # Docusaurus frontend
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── ChatPanel/            # Main chat interface
+│   │   │   ├── ChatButton/           # Floating chat button
+│   │   │   ├── ConversationSidebar/  # Chat history
+│   │   │   ├── MessageList/          # Message display
+│   │   │   ├── MessageInput/         # Input field
+│   │   │   ├── ErrorMessage/         # Error handling
+│   │   │   └── TranslationControl/   # Translation button
+│   │   ├── contexts/
+│   │   │   ├── AuthContext.tsx
+│   │   │   ├── ChatContext.tsx
+│   │   │   └── LanguageContext.tsx
+│   │   ├── hooks/
+│   │   │   ├── useAuth.ts
+│   │   │   ├── useChat.ts
+│   │   │   ├── useTranslation.ts
+│   │   │   └── useTextSelection.ts
+│   │   ├── services/
+│   │   │   ├── authApi.ts
+│   │   │   ├── chatApi.ts            # SSE streaming
+│   │   │   ├── translationApi.ts
+│   │   │   └── personalizationApi.ts
+│   │   ├── theme/
+│   │   │   ├── Root.tsx              # App wrapper
+│   │   │   └── DocItem/              # Custom doc page
+│   │   └── css/
+│   │       ├── custom.css            # Global styles
+│   │       └── fonts.css             # Urdu fonts
+│   ├── docs/                         # Textbook content (Markdown)
+│   │   ├── intro.md
+│   │   ├── module-1-ros2/
+│   │   ├── module-2-digital-twin/
+│   │   └── module-3-vla/
+│   ├── static/
+│   ├── tests/e2e/                    # Playwright tests
+│   ├── docusaurus.config.js
+│   ├── package.json
+│   └── .env.example
+│
+├── specs/                            # Feature specifications
+│   ├── 003-rag-chatbot/
+│   ├── 005-urdu-translation/
+│   └── 006-production-deployment/
+│
+├── history/                          # Development history
+│   ├── prompts/                      # PHRs
+│   ├── adr/                          # ADRs
+│   └── history.md                    # Complete project history
+│
+├── .specify/                         # Spec-Kit Plus
+│   └── memory/
+│       └── constitution.md           # Project principles (v3.1.0)
+│
+├── README.md                         # Project documentation
+├── CLAUDE.md                         # This file
+└── render.yaml                       # Render deployment config
+```
 
-2a) Resolve route (all under history/prompts/)
-  - `constitution` → `history/prompts/constitution/`
-  - Feature stages (spec, plan, tasks, red, green, refactor, explainer, misc) → `history/prompts/<feature-name>/` (requires feature context)
-  - `general` → `history/prompts/general/`
+---
 
-3) Prefer agent‑native flow (no shell)
-   - Read the PHR template from one of:
-     - `.specify/templates/phr-template.prompt.md`
-     - `templates/phr-template.prompt.md`
-   - Allocate an ID (increment; on collision, increment again).
-   - Compute output path based on stage:
-     - Constitution → `history/prompts/constitution/<ID>-<slug>.constitution.prompt.md`
-     - Feature → `history/prompts/<feature-name>/<ID>-<slug>.<stage>.prompt.md`
-     - General → `history/prompts/general/<ID>-<slug>.general.prompt.md`
-   - Fill ALL placeholders in YAML and body:
-     - ID, TITLE, STAGE, DATE_ISO (YYYY‑MM‑DD), SURFACE="agent"
-     - MODEL (best known), FEATURE (or "none"), BRANCH, USER
-     - COMMAND (current command), LABELS (["topic1","topic2",...])
-     - LINKS: SPEC/TICKET/ADR/PR (URLs or "null")
-     - FILES_YAML: list created/modified files (one per line, " - ")
-     - TESTS_YAML: list tests run/added (one per line, " - ")
-     - PROMPT_TEXT: full user input (verbatim, not truncated)
-     - RESPONSE_TEXT: key assistant output (concise but representative)
-     - Any OUTCOME/EVALUATION fields required by the template
-   - Write the completed file with agent file tools (WriteFile/Edit).
-   - Confirm absolute path in output.
+## 🚀 Development Commands
 
-4) Use sp.phr command file if present
-   - If `.**/commands/sp.phr.*` exists, follow its structure.
-   - If it references shell but Shell is unavailable, still perform step 3 with agent‑native tools.
+### Backend Commands
 
-5) Shell fallback (only if step 3 is unavailable or fails, and Shell is permitted)
-   - Run: `.specify/scripts/bash/create-phr.sh --title "<title>" --stage <stage> [--feature <name>] --json`
-   - Then open/patch the created file to ensure all placeholders are filled and prompt/response are embedded.
+**Start Backend Server**:
+```bash
+cd backend
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+uvicorn src.main:app --reload --port 8001
+```
 
-6) Routing (automatic, all under history/prompts/)
-   - Constitution → `history/prompts/constitution/`
-   - Feature stages → `history/prompts/<feature-name>/` (auto-detected from branch or explicit feature context)
-   - General → `history/prompts/general/`
+**Run Database Migrations**:
+```bash
+cd backend
+python scripts/run_migrations.py
+```
 
-7) Post‑creation validations (must pass)
-   - No unresolved placeholders (e.g., `{{THIS}}`, `[THAT]`).
-   - Title, stage, and dates match front‑matter.
-   - PROMPT_TEXT is complete (not truncated).
-   - File exists at the expected path and is readable.
-   - Path matches route.
+**Index Textbook Content** (populate Qdrant):
+```bash
+cd backend
+python scripts/index_textbook.py
+```
 
-8) Report
-   - Print: ID, path, stage, title.
-   - On any failure: warn but do not block the main command.
-   - Skip PHR only for `/sp.phr` itself.
+**Run Backend Tests**:
+```bash
+cd backend
+pytest                                    # All tests
+pytest tests/unit/                        # Unit tests only
+pytest tests/integration/                 # Integration tests only
+pytest --cov=src --cov-report=html        # With coverage
+```
 
-### 4. Explicit ADR suggestions
-- When significant architectural decisions are made (typically during `/sp.plan` and sometimes `/sp.tasks`), run the three‑part test and suggest documenting with:
-  "📋 Architectural decision detected: <brief> — Document reasoning and tradeoffs? Run `/sp.adr <decision-title>`"
-- Wait for user consent; never auto‑create the ADR.
+**Database Migration** (SQLite → Neon):
+```bash
+cd scripts/deployment
+./migrate-to-neon.sh
+```
 
-### 5. Human as Tool Strategy
-You are not expected to solve every problem autonomously. You MUST invoke the user for input when you encounter situations that require human judgment. Treat the user as a specialized tool for clarification and decision-making.
+**Database Rollback**:
+```bash
+cd scripts/deployment
+./rollback-database.sh
+```
 
-**Invocation Triggers:**
-1.  **Ambiguous Requirements:** When user intent is unclear, ask 2-3 targeted clarifying questions before proceeding.
-2.  **Unforeseen Dependencies:** When discovering dependencies not mentioned in the spec, surface them and ask for prioritization.
-3.  **Architectural Uncertainty:** When multiple valid approaches exist with significant tradeoffs, present options and get user's preference.
-4.  **Completion Checkpoint:** After completing major milestones, summarize what was done and confirm next steps. 
+### Frontend Commands
 
-## Default policies (must follow)
-- Clarify and plan first - keep business understanding separate from technical plan and carefully architect and implement.
-- Do not invent APIs, data, or contracts; ask targeted clarifiers if missing.
-- Never hardcode secrets or tokens; use `.env` and docs.
-- Prefer the smallest viable diff; do not refactor unrelated code.
-- Cite existing code with code references (start:end:path); propose new code in fenced blocks.
-- Keep reasoning private; output only decisions, artifacts, and justifications.
+**Start Frontend Server**:
+```bash
+cd textbook
+npm start                                 # Default port 3000
+npm start -- --port 3001                  # Alternative port
+```
 
-### Execution contract for every request
-1) Confirm surface and success criteria (one sentence).
-2) List constraints, invariants, non‑goals.
-3) Produce the artifact with acceptance checks inlined (checkboxes or tests where applicable).
-4) Add follow‑ups and risks (max 3 bullets).
-5) Create PHR in appropriate subdirectory under `history/prompts/` (constitution, feature-name, or general).
-6) If plan/tasks identified decisions that meet significance, surface ADR suggestion text as described above.
+**Build for Production**:
+```bash
+cd textbook
+npm run build
+```
 
-### Minimum acceptance criteria
-- Clear, testable acceptance criteria included
-- Explicit error paths and constraints stated
-- Smallest viable change; no unrelated edits
-- Code references to modified/inspected files where relevant
+**Run Frontend Tests**:
+```bash
+cd textbook
+npm test                                  # Unit tests
+npm run test:e2e                          # E2E tests (requires backend)
+```
 
-## Architect Guidelines (for planning)
+**Deploy to Vercel**:
+```bash
+cd textbook
+vercel --prod                             # Production deployment
+vercel                                    # Preview deployment
+```
 
-Instructions: As an expert architect, generate a detailed architectural plan for [Project Name]. Address each of the following thoroughly.
+### Git Commands
 
-1. Scope and Dependencies:
-   - In Scope: boundaries and key features.
-   - Out of Scope: explicitly excluded items.
-   - External Dependencies: systems/services/teams and ownership.
+**Standard Workflow**:
+```bash
+git status                                # Check status
+git add .                                 # Stage all changes
+git commit -m "message"                   # Commit with message
+git push origin main                      # Push to main (triggers CI/CD)
+```
 
-2. Key Decisions and Rationale:
-   - Options Considered, Trade-offs, Rationale.
-   - Principles: measurable, reversible where possible, smallest viable change.
+**Branch Management**:
+```bash
+git checkout -b feature-name              # Create new branch
+git checkout main                         # Switch to main
+git merge feature-name                    # Merge branch
+```
 
-3. Interfaces and API Contracts:
-   - Public APIs: Inputs, Outputs, Errors.
-   - Versioning Strategy.
-   - Idempotency, Timeouts, Retries.
-   - Error Taxonomy with status codes.
+---
 
-4. Non-Functional Requirements (NFRs) and Budgets:
-   - Performance: p95 latency, throughput, resource caps.
-   - Reliability: SLOs, error budgets, degradation strategy.
-   - Security: AuthN/AuthZ, data handling, secrets, auditing.
-   - Cost: unit economics.
+## 🔧 Environment Variables
 
-5. Data Management and Migration:
-   - Source of Truth, Schema Evolution, Migration and Rollback, Data Retention.
+### Backend (.env)
 
-6. Operational Readiness:
-   - Observability: logs, metrics, traces.
-   - Alerting: thresholds and on-call owners.
-   - Runbooks for common tasks.
-   - Deployment and Rollback strategies.
-   - Feature Flags and compatibility.
+**Required for Local Development**:
+```bash
+# Database
+DATABASE_URL=sqlite+aiosqlite:///./app.db
 
-7. Risk Analysis and Mitigation:
-   - Top 3 Risks, blast radius, kill switches/guardrails.
+# Authentication
+JWT_SECRET_KEY=your-secret-key-min-32-chars
+JWT_ALGORITHM=HS256
+JWT_EXPIRATION_MINUTES=10080
 
-8. Evaluation and Validation:
-   - Definition of Done (tests, scans).
-   - Output Validation for format/requirements/safety.
+# OpenAI
+OPENAI_API_KEY=sk-proj-your-key-here
 
-9. Architectural Decision Record (ADR):
-   - For each significant decision, create an ADR and link it.
+# Qdrant
+QDRANT_URL=https://your-cluster.qdrant.io
+QDRANT_API_KEY=your-qdrant-key
+QDRANT_COLLECTION_NAME=textbook_chunks
 
-### Architecture Decision Records (ADR) - Intelligent Suggestion
+# RAG Configuration
+RAG_CONFIDENCE_THRESHOLD=0.3
+RAG_TOP_K_RESULTS=5
 
-After design/architecture work, test for ADR significance:
+# CORS
+FRONTEND_URL=http://localhost:3000
+```
 
-- Impact: long-term consequences? (e.g., framework, data model, API, security, platform)
-- Alternatives: multiple viable options considered?
-- Scope: cross‑cutting and influences system design?
+**Required for Production** (Render):
+```bash
+DATABASE_URL=postgresql://user:pass@ep-xxx.neon.tech/db?sslmode=require
+OPENAI_API_KEY=sk-proj-your-key
+QDRANT_URL=https://your-cluster.qdrant.io
+QDRANT_API_KEY=your-key
+JWT_SECRET_KEY=your-32-char-secret
+FRONTEND_URL=https://textbook-liart.vercel.app
+```
 
-If ALL true, suggest:
-📋 Architectural decision detected: [brief-description]
-   Document reasoning and tradeoffs? Run `/sp.adr [decision-title]`
+### Frontend (.env)
 
-Wait for consent; never auto-create ADRs. Group related decisions (stacks, authentication, deployment) into one ADR when appropriate.
+**Local Development**:
+```bash
+REACT_APP_API_URL=http://localhost:8001
+```
 
-## Basic Project Structure
+**Production** (Vercel):
+```bash
+REACT_APP_API_URL=https://ai-native-book-backend.onrender.com
+```
 
-- `.specify/memory/constitution.md` — Project principles
-- `specs/<feature>/spec.md` — Feature requirements
-- `specs/<feature>/plan.md` — Architecture decisions
-- `specs/<feature>/tasks.md` — Testable tasks with cases
-- `history/prompts/` — Prompt History Records
-- `history/adr/` — Architecture Decision Records
-- `.specify/` — SpecKit Plus templates and scripts
+---
 
-## Code Standards
-See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+## 🌐 Production URLs
+
+**Frontend**: https://textbook-liart.vercel.app
+**Backend**: https://ai-native-book-backend.onrender.com
+**API Docs**: https://ai-native-book-backend.onrender.com/docs
+**Health Check**: https://ai-native-book-backend.onrender.com/api/health
+
+---
+
+## 🔄 CI/CD Pipeline
+
+**Automatic Deployment Enabled**:
+- Push to `main` branch triggers automatic deployments
+- **Vercel**: Builds and deploys frontend (~45 seconds)
+- **Render**: Builds and deploys backend (~3 minutes)
+
+**Deployment Flow**:
+```
+git push origin main
+    ↓
+GitHub (main branch)
+    ↓
+    ├─→ Vercel: npm run build → Deploy to CDN
+    └─→ Render: pip install → uvicorn start → Deploy
+```
+
+**No manual action required!**
+
+---
+
+## 🧪 Testing Strategy
+
+### Backend Tests
+- **Unit Tests**: Service layer logic (40+ tests)
+- **Integration Tests**: API endpoints with database
+- **Coverage Target**: 80%+
+
+### Frontend Tests
+- **Unit Tests**: Component testing with Jest
+- **E2E Tests**: Full user flows with Playwright
+- **Manual Testing**: Browser testing on mobile/desktop
+
+---
+
+## 🐛 Common Issues & Solutions
+
+### Backend Won't Start
+```bash
+# Check Python version (must be 3.11+)
+python --version
+
+# Verify virtual environment
+which python  # Should point to venv/bin/python
+
+# Check .env file exists
+ls -la backend/.env
+
+# Reinstall dependencies
+pip install -r requirements.txt
+```
+
+### Frontend Can't Connect to Backend
+```bash
+# Verify backend is running
+curl http://localhost:8001/api/health
+
+# Check CORS configuration
+# Ensure FRONTEND_URL in backend/.env includes frontend URL
+
+# Check browser console for errors
+```
+
+### Chatbot Returns "I don't have information"
+```bash
+# Verify Qdrant credentials
+echo $QDRANT_URL
+echo $QDRANT_API_KEY
+
+# Re-index textbook
+cd backend
+python scripts/index_textbook.py
+
+# Check RAG_CONFIDENCE_THRESHOLD (should be 0.3)
+```
+
+### Database Connection Fails
+```bash
+# For Neon, ensure SSL mode is required
+# postgresql://user:pass@host/db?sslmode=require
+
+# Test connection
+python -c "from src.database import engine; print(engine)"
+```
+
+---
+
+## 📝 Development Workflow
+
+### Adding a New Feature
+
+1. **Create Specification**:
+   ```bash
+   # Create spec directory
+   mkdir -p specs/007-feature-name
+
+   # Run spec-driven workflow
+   /sp.specify "Feature description"
+   /sp.plan
+   /sp.tasks
+   ```
+
+2. **Implement Feature**:
+   ```bash
+   # Create feature branch
+   git checkout -b 007-feature-name
+
+   # Implement according to tasks.md
+   # Write tests first (TDD)
+   # Implement code
+   # Run tests
+   ```
+
+3. **Test Locally**:
+   ```bash
+   # Backend tests
+   cd backend && pytest
+
+   # Frontend tests
+   cd textbook && npm test
+
+   # Manual testing
+   # Start both servers and test in browser
+   ```
+
+4. **Deploy**:
+   ```bash
+   # Commit and push
+   git add .
+   git commit -m "Add feature: description"
+   git push origin 007-feature-name
+
+   # Merge to main (triggers auto-deploy)
+   git checkout main
+   git merge 007-feature-name
+   git push origin main
+   ```
+
+### Fixing a Bug
+
+1. **Reproduce the Bug**:
+   - Test locally to confirm the issue
+   - Check logs (Render dashboard for backend, browser console for frontend)
+
+2. **Fix the Bug**:
+   ```bash
+   # Create fix branch
+   git checkout -b fix-bug-description
+
+   # Make minimal changes to fix the issue
+   # Add test to prevent regression
+   ```
+
+3. **Test the Fix**:
+   ```bash
+   # Run relevant tests
+   pytest tests/unit/test_affected_module.py
+
+   # Manual testing
+   # Verify fix works in browser
+   ```
+
+4. **Deploy**:
+   ```bash
+   # Commit and push to main
+   git checkout main
+   git merge fix-bug-description
+   git push origin main  # Auto-deploys to production
+   ```
+
+---
+
+## 🎨 Code Style Guidelines
+
+### Python (Backend)
+- **Formatter**: Black
+- **Linter**: Flake8
+- **Type Hints**: Required for all functions
+- **Docstrings**: Required for public APIs
+- **Async/Await**: Use for all I/O operations
+
+### TypeScript (Frontend)
+- **Formatter**: Prettier
+- **Linter**: ESLint
+- **Type Safety**: Strict mode enabled
+- **Components**: Functional components with hooks
+- **CSS**: CSS Modules for component styling
+
+---
+
+## 🔐 Security Guidelines
+
+- **Never commit secrets**: Use .env files (gitignored)
+- **JWT tokens**: 32+ character secret keys
+- **Password hashing**: bcrypt with 8 rounds minimum
+- **SQL injection**: Use SQLAlchemy ORM (never raw SQL)
+- **XSS protection**: React escapes by default
+- **CORS**: Whitelist specific origins only
+
+---
+
+## 📚 Key Architecture Decisions
+
+See `history/adr/` for detailed ADRs:
+- **ADR-0007**: Migrate from dual API to OpenAI-only
+- **ADR-0008**: Translation architecture and caching strategy
+- **ADR-0009**: RTL layout and typography implementation
+
+---
+
+## 🎯 Project Principles
+
+See `.specify/memory/constitution.md` (v3.1.0) for complete principles:
+- Spec-Driven Development (SDD)
+- Test-Driven Development (TDD)
+- Minimal viable changes
+- Security-first approach
+- User-centric design
+- Performance optimization
+- Accessibility compliance (WCAG 2.1 AA)
+
+---
+
+## 📞 Support & Resources
+
+**Documentation**:
+- API Docs: http://localhost:8001/docs (local)
+- Project History: `history.md`
+- Feature Specs: `specs/` directory
+
+**External Resources**:
+- FastAPI: https://fastapi.tiangolo.com
+- Docusaurus: https://docusaurus.io
+- OpenAI API: https://platform.openai.com/docs
+- Qdrant: https://qdrant.tech/documentation
+
+---
+
+**Last Updated**: March 3, 2026
+**Project Status**: ✅ Production Ready
+**Version**: 1.0.0
