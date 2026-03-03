@@ -74,6 +74,35 @@
   white-space: nowrap;
 }
 
+/* Menu button (three dots) - hidden on desktop, visible on mobile */
+.menuButton {
+  display: none;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 0.25rem;
+  color: var(--ifm-color-emphasis-600);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: bold;
+}
+
+.menuButton:hover {
+  background-color: var(--ifm-color-emphasis-100);
+  color: var(--ifm-font-color-base);
+}
+
+.menuButton:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
 .closeButton {
   flex-shrink: 0;
   width: 2rem;
@@ -191,6 +220,12 @@
   display: flex;
   flex-direction: row;
   overflow: hidden;
+  position: relative;
+}
+
+/* Sidebar wrapper for mobile toggle */
+.sidebarWrapper {
+  display: contents;
 }
 
 .mainArea {
@@ -224,9 +259,30 @@
     flex-direction: column;
   }
 
-  /* Hide conversation sidebar on mobile - show only main chat */
-  .content > :first-child {
-    display: none;
+  /* Show menu button on mobile */
+  .menuButton {
+    display: flex;
+  }
+
+  /* Hide conversation sidebar by default on mobile */
+  .sidebarWrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 10;
+    background-color: #ffffff;
+    border-right: 1px solid var(--ifm-color-emphasis-200);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    display: block;
+  }
+
+  /* Show sidebar when visible */
+  .sidebarWrapper.sidebarVisible {
+    transform: translateX(0);
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
   }
 
   .header,
@@ -263,6 +319,14 @@
 
 [data-theme='dark'] .backdrop {
   background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Dark mode for mobile sidebar */
+@media (max-width: 768px) {
+  [data-theme='dark'] .sidebarWrapper {
+    background-color: #1b1b1d;
+    border-right-color: var(--ifm-color-emphasis-300);
+  }
 }
 
 /* Scrollbar styling */

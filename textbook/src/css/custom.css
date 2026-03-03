@@ -70,3 +70,11 @@ html {
   transition: background-color 0.3s ease;
 }
 
+/* Hide search component on all pages */
+.navbar__search,
+.navbar__search-input,
+.DocSearch,
+.DocSearch-Button,
+[class*="searchBox"] {
+  display: none !important;
+}

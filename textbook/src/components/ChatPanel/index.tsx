@@ -20,6 +20,7 @@ export default function ChatPanel(): JSX.Element | null {
   const { selectedText, metadata, clearSelection } = useTextSelection();
   const { loadConversations, sendMessage } = useChat();
   const panelRef = useRef<HTMLDivElement>(null);
+  const [isSidebarVisible, setIsSidebarVisible] = React.useState(false);
 
   // Extract error type from error message if present
   const getErrorType = (errorMsg: string | null): string | undefined => {
@@ -109,6 +110,14 @@ export default function ChatPanel(): JSX.Element | null {
         {/* Header */}
         <div className={styles.header}>
           <div className={styles.headerContent}>
+            <button
+              className={styles.menuButton}
+              onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+              aria-label="Toggle chat history"
+              type="button"
+            >
+              ⋮
+            </button>
             <h2 className={styles.title}>
               {currentConversation ? currentConversation.title : 'Chat Assistant'}
             </h2>
@@ -159,8 +168,10 @@ export default function ChatPanel(): JSX.Element | null {
 
         {/* Content */}
         <div className={styles.content}>
-          {/* Conversation sidebar */}
-          <ConversationSidebar />
+          {/* Conversation sidebar - toggleable on mobile */}
+          <div className={`${styles.sidebarWrapper} ${isSidebarVisible ? styles.sidebarVisible : ''}`}>
+            <ConversationSidebar />
+          </div>
 
           {/* Main chat area */}
           <div className={styles.mainArea}>
