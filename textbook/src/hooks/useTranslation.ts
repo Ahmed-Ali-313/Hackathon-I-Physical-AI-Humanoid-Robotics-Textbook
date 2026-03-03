@@ -37,13 +37,12 @@ export function useTranslation(
     const loadCachedTranslation = async () => {
       if (preferredLanguage === 'ur') {
         try {
-          const cached = await getCachedTranslation(chapterId);
-          if (cached) {
-            setTranslatedContent(cached.translated_content);
-          }
+          // Use POST endpoint instead of GET to avoid 404 issues
+          const response = await translateChapter(chapterId, 'ur');
+          setTranslatedContent(response.translated_content);
         } catch (err) {
-          // Silently fail - cache miss is expected
-          console.debug('No cached translation found');
+          // Silently fail - will fetch on toggle
+          console.debug('Could not load translation on mount');
         }
       }
     };

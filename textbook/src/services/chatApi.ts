@@ -293,14 +293,19 @@ export async function sendMessageStream(
           try {
             const event = JSON.parse(data);
 
-            if (event.type === 'user_message' && onUserMessage) {
+            if (event.type === 'user_message' && onUserMessage && event.message) {
               onUserMessage(event.message);
             } else if (event.type === 'content' && onChunk) {
               onChunk(event.chunk);
-            } else if (event.type === 'done' && onComplete) {
-              onComplete(event.message);
+            } else if (event.type === 'done' && onComplete && event.message) {
+              // Validate message has required fields before passing to callback
+              if (event.message.sender_type && event.message.content !== undefined) {
+                onComplete(event.message);
+              } else {
+                console.error('Invalid message structure in done event:', event.message);
+              }
             } else if (event.type === 'error') {
-              throw new Error(event.message);
+              throw new Error(event.message || 'Unknown streaming error');
             }
           } catch (parseError) {
             console.error('Failed to parse SSE event:', parseError);

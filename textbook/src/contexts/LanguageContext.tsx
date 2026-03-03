@@ -7,8 +7,12 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
 
-// Use hardcoded API URL for Docusaurus (process.env not available in browser)
-const API_BASE_URL = 'http://localhost:8001/api/v1';
+// Detect environment: localhost vs production
+const API_BASE_URL = typeof window !== 'undefined'
+  ? (window.location.hostname === 'localhost'
+      ? 'http://localhost:8001/api/v1'
+      : 'https://ai-native-book-backend.onrender.com/api/v1')
+  : 'http://localhost:8001/api/v1';
 
 interface LanguageContextType {
   preferredLanguage: string;
