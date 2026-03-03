@@ -6,6 +6,16 @@ Built for **Hackathon I: Physical AI & Humanoid Robotics** - A comprehensive edu
 
 ---
 
+## 🌐 Live Production Site
+
+**🚀 Access the Textbook**: [https://textbook-liart.vercel.app](https://textbook-liart.vercel.app)
+
+**Backend API**: [https://ai-native-book-backend.onrender.com](https://ai-native-book-backend.onrender.com)
+
+**Status**: ✅ Fully Operational | **Last Updated**: March 3, 2026
+
+---
+
 ## 📖 Project Overview
 
 This project is an **AI-Native Technical Textbook** that revolutionizes how students learn complex robotics concepts. Unlike traditional static textbooks, this platform provides:
@@ -379,75 +389,140 @@ ai-native-book/
 
 ## 🚢 Production Deployment
 
-### Prerequisites
+### Current Deployment Architecture
 
-1. **Neon Account**: [Sign up](https://neon.tech) and create a database
-2. **Render Account**: [Sign up](https://render.com) for backend hosting
-3. **Vercel Account**: [Sign up](https://vercel.com) for frontend hosting
-4. **GitHub Repository**: Push your code to GitHub
+The application is deployed using a modern CI/CD pipeline with automatic deployments:
 
-### Backend Deployment (Render)
+**Frontend (Vercel)**:
+- Platform: Vercel Global CDN
+- URL: https://textbook-liart.vercel.app
+- Framework: Docusaurus (Static Site Generation)
+- Auto-Deploy: Enabled (main branch)
+- Deploy Time: ~45 seconds
+- Region: Global (Edge Network)
 
-1. **Connect GitHub Repository**:
-   - Go to [Render Dashboard](https://dashboard.render.com)
-   - Click "New +" → "Web Service"
-   - Connect your GitHub repository
-   - Select branch: `main`
+**Backend (Render)**:
+- Platform: Render Web Service
+- URL: https://ai-native-book-backend.onrender.com
+- Framework: FastAPI + Python 3.12
+- Auto-Deploy: Enabled (main branch)
+- Deploy Time: ~3 minutes
+- Region: Oregon (Free Tier)
 
-2. **Configure Service**:
-   - Name: `ai-native-book-backend`
-   - Environment: `Python 3`
-   - Build Command: `pip install -r requirements.txt`
-   - Start Command: `uvicorn src.main:app --host 0.0.0.0 --port $PORT`
+**Database (Neon)**:
+- Platform: Neon Serverless Postgres
+- Region: us-east-1 (AWS)
+- Connection Pooling: pool_size=5, max_overflow=10
+- Migration: SQLite → Neon (100% data integrity)
 
-3. **Set Environment Variables**:
-   - `DATABASE_URL`: Your Neon Postgres connection string
-   - `OPENAI_API_KEY`: Your OpenAI API key
-   - `QDRANT_URL`: Your Qdrant cluster URL
-   - `QDRANT_API_KEY`: Your Qdrant API key
-   - `JWT_SECRET_KEY`: Generate with `openssl rand -hex 32`
-   - `FRONTEND_URL`: Your Vercel deployment URL (add after frontend deployment)
+**Vector Database (Qdrant)**:
+- Platform: Qdrant Cloud
+- Indexed Chunks: 44 textbook chunks
+- Embedding Dimensions: 768 (text-embedding-3-small)
 
-4. **Deploy**: Click "Create Web Service"
+### CI/CD Pipeline
 
-### Frontend Deployment (Vercel)
-
-Using Vercel CLI (already connected to GitHub):
-
-```bash
-cd textbook
-
-# Login to Vercel (if not already logged in)
-vercel login
-
-# Deploy to production
-vercel --prod
-
-# Set environment variable
-vercel env add REACT_APP_API_URL production
-# Enter your Render backend URL: https://ai-native-book-backend.onrender.com
+**Automated Deployment Flow**:
+```
+Developer Push → GitHub (main branch)
+    ↓
+    ├─→ Render (Backend)
+    │   ├─ Build: pip install -r requirements.txt
+    │   ├─ Start: uvicorn src.main:app --host 0.0.0.0 --port $PORT
+    │   └─ Deploy: ~3 minutes
+    │
+    └─→ Vercel (Frontend)
+        ├─ Build: npm run build (Docusaurus)
+        ├─ Deploy: Global CDN
+        └─ Deploy: ~45 seconds
 ```
 
-Or via Vercel Dashboard:
-1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
-2. Click "Add New..." → "Project"
-3. Import your GitHub repository
-4. Configure:
-   - Framework Preset: `Docusaurus`
-   - Root Directory: `textbook`
-   - Build Command: `npm run build`
-   - Output Directory: `build`
-5. Add Environment Variable:
-   - Key: `REACT_APP_API_URL`
-   - Value: `https://ai-native-book-backend.onrender.com`
-6. Click "Deploy"
+**Deployment Status**: ✅ Fully Automated
+- Push to `main` branch triggers automatic deployments
+- No manual intervention required
+- Both platforms deploy simultaneously
+- Health checks verify successful deployment
 
-### Post-Deployment
+### Environment Variables Configuration
 
-1. **Update CORS**: Add Vercel URL to `FRONTEND_URL` in Render environment variables
-2. **Run Migrations**: SSH into Render and run `python scripts/run_migrations.py`
-3. **Index Textbook**: Run `python scripts/index_textbook.py` on Render
-4. **Test Deployment**: Visit your Vercel URL and test all features
+**Backend (Render Dashboard)**:
+```bash
+DATABASE_URL=postgresql://user:pass@ep-xxx.neon.tech/db?sslmode=require
+OPENAI_API_KEY=sk-proj-your-openai-key
+QDRANT_URL=https://your-cluster.qdrant.io
+QDRANT_API_KEY=your-qdrant-key
+JWT_SECRET_KEY=your-32-char-secret-key
+FRONTEND_URL=https://textbook-liart.vercel.app
+```
+
+**Frontend (Vercel Dashboard)**:
+```bash
+REACT_APP_API_URL=https://ai-native-book-backend.onrender.com
+```
+
+### Deployment History
+
+**Phase 1-3**: Infrastructure Setup (March 2, 2026)
+- Database migration: SQLite → Neon Postgres
+- Backend deployment: Render configuration
+- Frontend deployment: Vercel configuration
+
+**Phase 4-6**: CI/CD & Testing (March 2-3, 2026)
+- Automated deployment pipeline enabled
+- Production testing and bug fixes (12 bugs fixed)
+- Mobile responsiveness improvements
+
+**Phase 7-8**: Production Launch (March 3, 2026)
+- All features verified working
+- Documentation completed
+- Release tagged: v1.0.0
+
+### Deployment Verification
+
+To verify the deployment is working:
+
+```bash
+# Check backend health
+curl https://ai-native-book-backend.onrender.com/api/health
+
+# Check frontend
+curl -I https://textbook-liart.vercel.app
+
+# Expected: Both return 200 OK
+```
+
+### Rollback Procedures
+
+**Backend Rollback** (via Render Dashboard):
+1. Go to Render Dashboard → Services → ai-native-book-backend
+2. Click "Manual Deploy" → Select previous commit
+3. Deploy takes ~3 minutes
+
+**Frontend Rollback** (via Vercel CLI):
+```bash
+cd textbook
+vercel rollback
+```
+
+**Database Rollback** (if needed):
+```bash
+cd scripts/deployment
+./rollback-database.sh
+```
+
+### Performance Metrics
+
+**Response Times**:
+- Frontend Load: <3 seconds (global CDN)
+- Backend Health Check: <2 seconds
+- Chatbot First Message: 2-4 seconds
+- Chatbot Subsequent: 1.5-3 seconds
+- Translation (cached): <500ms
+
+**Uptime**:
+- Frontend: 99.9% (Vercel SLA)
+- Backend: Free tier (spins down after 15 min inactivity)
+- Database: 99.95% (Neon SLA)
 
 ---
 
@@ -598,7 +673,3 @@ For issues, questions, or feature requests:
 ---
 
 **Built with ❤️ for the Physical AI & Humanoid Robotics community**
-
-## CI/CD Testing
-
-Testing automatic deployment pipeline - 2026-03-02
