@@ -82,7 +82,7 @@ class Settings(BaseSettings):
         if self.is_production:
             required_vars = {
                 "DATABASE_URL": self.database_url,
-                "OPENAI_API_KEY": self.openai_api_key,
+                # "OPENAI_API_KEY": self.openai_api_key,
                 "QDRANT_URL": self.qdrant_url,
                 "QDRANT_API_KEY": self.qdrant_api_key,
             }
