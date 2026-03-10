@@ -15,19 +15,42 @@ class EmbeddingService:
 
     def __init__(self):
         """
-        Initialize embedding service with OpenAI.
+        Initialize embedding service with lazy OpenAI client initialization.
+
+        The OpenAI client is only created when actually needed, allowing
+        the server to start even without an API key configured.
+        """
+        self.client = None
+        self._client_initialized = False
+        self.model = "text-embedding-3-small"
+
+        # Check if API key is available but don't fail if missing
+        if not settings.openai_api_key:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning("OPENAI_API_KEY not configured - embedding features will be unavailable")
+
+    def _ensure_client_initialized(self):
+        """
+        Ensure OpenAI client is initialized (lazy initialization).
 
         Raises:
             ValueError: If OPENAI_API_KEY is not configured
         """
+        if self._client_initialized:
+            return
+
         if not settings.openai_api_key:
-            raise ValueError("OPENAI_API_KEY not configured")
+            raise ValueError("Embedding features are currently unavailable. OpenAI API key is not configured.")
 
         self.client = OpenAI(
             api_key=settings.openai_api_key,
             timeout=10.0,  # 10 second timeout for embedding calls
         )
-        self.model = "text-embedding-3-small"
+        self._client_initialized = True
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info("OpenAI embedding client initialized successfully")
 
     async def generate_embedding(self, text: str) -> List[float]:
         """
@@ -45,6 +68,9 @@ class EmbeddingService:
         """
         if not text or not text.strip():
             raise ValueError("Text cannot be empty")
+
+        # Ensure OpenAI client is initialized (lazy initialization)
+        self._ensure_client_initialized()
 
         try:
             response = self.client.embeddings.create(

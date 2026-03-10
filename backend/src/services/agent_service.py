@@ -22,29 +22,26 @@ class AgentService:
 
     def __init__(self):
         """
-        Initialize agent service with OpenAI.
+        Initialize agent service with lazy OpenAI client initialization.
 
-        Raises:
-            ValueError: If OPENAI_API_KEY is not configured
+        The OpenAI client is only created when actually needed, allowing
+        the server to start even without an API key configured.
         """
-        if not settings.openai_api_key:
-            raise ValueError("OPENAI_API_KEY not configured")
-
         # Agent configuration
         self.model_name = "gpt-4o-mini"
         self.agent = None
         self.tools = []
+        self.openai_client = None
+        self._client_initialized = False
 
         # System prompt for tone and pedagogy (FR-027 to FR-030)
         self.system_prompt = self._build_system_prompt()
 
-        # Initialize OpenAI client immediately (warm-up for faster first response)
-        import openai
-        self.openai_client = openai.OpenAI(
-            api_key=settings.openai_api_key,
-            timeout=15.0,  # 15 second timeout
-        )
-        logger.info("OpenAI client initialized and ready")
+        # Check if API key is available but don't fail if missing
+        if not settings.openai_api_key:
+            logger.warning("OPENAI_API_KEY not configured - AI features will be unavailable")
+        else:
+            logger.info("OpenAI API key detected - AI features available")
 
     def _build_system_prompt(self) -> str:
         """
@@ -172,6 +169,28 @@ class AgentService:
         except Exception as e:
             raise Exception(f"Failed to initialize agent: {e}")
 
+    def _ensure_client_initialized(self):
+        """
+        Ensure OpenAI client is initialized (lazy initialization).
+
+        Raises:
+            ValueError: If OPENAI_API_KEY is not configured
+        """
+        if self._client_initialized:
+            return
+
+        if not settings.openai_api_key:
+            raise ValueError("AI features are currently unavailable. OpenAI API key is not configured.")
+
+        # Initialize OpenAI client
+        import openai
+        self.openai_client = openai.OpenAI(
+            api_key=settings.openai_api_key,
+            timeout=15.0,  # 15 second timeout
+        )
+        self._client_initialized = True
+        logger.info("OpenAI client initialized successfully")
+
     def _get_api_key(self) -> str:
         """
         Get OpenAI API key.
@@ -210,6 +229,9 @@ class AgentService:
         """
         if not question or not question.strip():
             raise ValueError("Question cannot be empty")
+
+        # Ensure OpenAI client is initialized (lazy initialization)
+        self._ensure_client_initialized()
 
         # Log request
         logger.info(f"Generating response for question: {question[:100]}...")

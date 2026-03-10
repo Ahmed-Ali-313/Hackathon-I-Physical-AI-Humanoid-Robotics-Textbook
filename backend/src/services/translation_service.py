@@ -28,15 +28,37 @@ class TranslationService:
     """
 
     def __init__(self):
-        """Initialize translation service with OpenAI client."""
-        api_key = os.getenv('OPENAI_API_KEY')
-        if not api_key:
-            raise ValueError("OPENAI_API_KEY environment variable not set")
-
-        self.client = AsyncOpenAI(api_key=api_key)
+        """Initialize translation service with lazy OpenAI client initialization."""
+        self.client = None
+        self._client_initialized = False
         self.model = "gpt-4o-mini"
         self.temperature = 0.3  # Low creativity for consistency
         self.max_tokens = 4000  # Handle long chapters
+
+        # Check if API key is available but don't fail if missing
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            logger.warning("OPENAI_API_KEY not configured - translation features will be unavailable")
+        else:
+            logger.info("OpenAI API key detected - translation features available")
+
+    def _ensure_client_initialized(self):
+        """
+        Ensure OpenAI client is initialized (lazy initialization).
+
+        Raises:
+            ValueError: If OPENAI_API_KEY is not configured
+        """
+        if self._client_initialized:
+            return
+
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            raise ValueError("Translation features are currently unavailable. OpenAI API key is not configured.")
+
+        self.client = AsyncOpenAI(api_key=api_key)
+        self._client_initialized = True
+        logger.info("OpenAI translation client initialized successfully")
 
     async def translate(
         self,
@@ -72,6 +94,9 @@ class TranslationService:
 
         if ValidationUtils.is_content_empty(content):
             raise ValueError("Content cannot be empty")
+
+        # Ensure OpenAI client is initialized (lazy initialization)
+        self._ensure_client_initialized()
 
         # Extract chapter title if not provided
         if not chapter_title:
