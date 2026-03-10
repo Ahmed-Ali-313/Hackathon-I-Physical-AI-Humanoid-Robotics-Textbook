@@ -440,6 +440,126 @@ All core features are working, all critical bugs are fixed, and the system is re
 
 ---
 
+## 2026-03-10 - Graceful Degradation: OpenAI API Key Made Optional for Production Resilience
+
+### Session Summary
+Implemented lazy initialization for all OpenAI-dependent services to enable graceful degradation when API credits are exhausted or the key is removed. The backend now starts successfully without OPENAI_API_KEY configured, allowing non-AI features (authentication, preferences, health checks) to remain operational while AI features (chatbot, translation) return user-friendly error messages when accessed.
+
+### Problem Statement
+**Issue**: Backend services crashed during startup when OPENAI_API_KEY was missing from environment variables.
+
+**Root Cause**: Three services were checking for the API key in their `__init__` constructors and raising `ValueError` immediately:
+- `agent_service.py` (line 31): RAG chatbot service
+- `translation_service.py` (line 34): Urdu translation service
+- `embedding_service.py` (line 24): Vector embedding service
+
+**Impact**:
+- Server failed to start completely
+- All features unavailable (including non-AI features like auth)
+- No graceful degradation path
+- Poor user experience when credits exhausted
+
+### Solution Implemented
+
+**Lazy Initialization Pattern**: Refactored all three services to defer OpenAI client initialization until actually needed.
+
+**Changes Made**:
+
+1. **agent_service.py** (AgentService):
+   - Modified `__init__` to allow initialization without API key
+   - Added `_ensure_client_initialized()` method for lazy client creation
+   - Added check in `generate_response()` to initialize client on first use
+   - Logs warning if key missing, but doesn't crash
+   - Returns clear error: "AI features are currently unavailable. OpenAI API key is not configured."
+
+2. **translation_service.py** (TranslationService):
+   - Modified `__init__` to allow initialization without API key
+   - Added `_ensure_client_initialized()` method for lazy client creation
+   - Added check in `translate()` method before API calls
+   - Returns clear error: "Translation features are currently unavailable. OpenAI API key is not configured."
+
+3. **embedding_service.py** (EmbeddingService):
+   - Modified `__init__` to allow initialization without API key
+   - Added `_ensure_client_initialized()` method for lazy client creation
+   - Added check in `generate_embedding()` method before API calls
+   - Returns clear error: "Embedding features are currently unavailable. OpenAI API key is not configured."
+
+**Error Handling**: Existing try-catch blocks in API endpoints catch the ValueError and return HTTP 500 with user-friendly error messages.
+
+### Files Modified
+
+**Backend Services (3 files)**:
+- `backend/src/services/agent_service.py` - 40 lines changed (lazy init + error handling)
+- `backend/src/services/translation_service.py` - 30 lines changed (lazy init + error handling)
+- `backend/src/services/embedding_service.py` - 24 lines changed (lazy init + error handling)
+
+**Total Changes**: 94 insertions, 21 deletions across 3 files
+
+### Deployment Details
+
+**Commit**: `edd3264` - "Fix: Make OpenAI API key optional for production startup"
+
+**Branch**: `006-production-deployment`
+
+**Deployment Timeline**:
+- Committed: 2026-03-10 10:31:09 UTC
+- Pushed to GitHub: 10:33:12 UTC
+- Render auto-deploy triggered: 10:33:12 UTC
+- Build completed: 10:36:50 UTC
+- Status: ✅ **LIVE** (deploy ID: dep-d6nv6q63jp1c73be9oj0)
+
+**Verification**:
+```bash
+$ curl https://ai-native-book-backend.onrender.com/health
+{"status":"healthy","service":"personalization-api"}
+```
+
+### Technical Benefits
+
+**Graceful Degradation**:
+- ✅ Server starts successfully without OpenAI API key
+- ✅ Non-AI features remain operational (auth, preferences, health checks)
+- ✅ AI features return clear error messages when accessed without key
+- ✅ No silent failures or cryptic error messages
+
+**Production Resilience**:
+- ✅ System survives OpenAI credit exhaustion
+- ✅ Temporary API key removal doesn't crash entire service
+- ✅ Easier debugging (server logs show warnings, not crashes)
+- ✅ Better user experience (partial functionality vs total failure)
+
+**Cost Management**:
+- ✅ Can disable AI features to control costs
+- ✅ Can test non-AI features without API key
+- ✅ Development environments don't require API key for basic testing
+
+### Current Production Status
+
+**Backend**: https://ai-native-book-backend.onrender.com
+- Status: ✅ Healthy and responding
+- OpenAI Key: Not configured (intentionally removed)
+- Non-AI Features: ✅ Operational (auth, preferences, health)
+- AI Features: ⚠️ Gracefully degraded (returns error messages)
+
+**Frontend**: https://textbook-liart.vercel.app
+- Status: ✅ Operational
+- Non-AI Features: ✅ Working (login, signup, navigation)
+- AI Features: ⚠️ Will show error when users attempt to use chatbot/translation
+
+### Next Steps
+
+**Immediate**:
+- Monitor production logs for user attempts to use AI features
+- Verify error messages are user-friendly in frontend UI
+- Consider adding banner notification when AI features unavailable
+
+**Future Enhancements**:
+- Add feature flags to disable AI features in UI when key missing
+- Implement retry logic with exponential backoff for transient API errors
+- Add metrics tracking for AI feature availability
+
+---
+
 ## 2026-03-03 - Auto-Deploy Configuration Fixed: CI/CD Pipeline Fully Operational
 
 ### Session Summary
